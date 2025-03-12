@@ -15,9 +15,11 @@ export async function registerRoutes(app) {
   // Get user stats and achievements
   app.get("/api/stats", requireAuth, async (req, res) => {
     const achievements = await storage.getUserAchievements(req.user.id);
+    const { nextLevelXP } = storage.calculateLevel(req.user.xpPoints);
     res.json({
       user: req.user,
-      achievements
+      achievements,
+      nextLevelXP
     });
   });
 
@@ -37,7 +39,7 @@ export async function registerRoutes(app) {
     }
 
     // Check if streak should continue or reset
-    if (!lastDate || 
+    if (!lastDate ||
         (today.getTime() - lastDate.getTime()) > 24 * 60 * 60 * 1000) {
       currentStreak = 1;
     } else if (lastDate.getDate() !== today.getDate()) {

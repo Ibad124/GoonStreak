@@ -3,8 +3,12 @@ import { Progress } from "@/components/ui/progress";
 import { Star, Trophy, Sparkles } from "lucide-react";
 
 export default function XPProgress({ user, nextLevelXP }) {
-  const xpProgress = ((user.xpPoints - (nextLevelXP - 100)) / 100) * 100;
-  
+  // Calculate XP progress percentage
+  const currentLevelXP = nextLevelXP - 100; // Previous level threshold
+  const progressInCurrentLevel = user.xpPoints - currentLevelXP;
+  const xpNeededForNextLevel = nextLevelXP - currentLevelXP;
+  const xpProgress = (progressInCurrentLevel / xpNeededForNextLevel) * 100;
+
   return (
     <Card className="p-4 backdrop-blur bg-white/80 border-zinc-200/50">
       <div className="flex items-center justify-between mb-2">
@@ -14,7 +18,7 @@ export default function XPProgress({ user, nextLevelXP }) {
         </div>
         <span className="text-sm text-zinc-500">Level {user.level}</span>
       </div>
-      
+
       <div className="mt-4">
         <div className="flex justify-between mb-2">
           <span className="text-sm text-zinc-500">XP Progress</span>
