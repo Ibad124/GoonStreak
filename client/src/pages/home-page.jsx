@@ -92,6 +92,11 @@ export default function HomePage() {
                     Leaderboard
                   </Button>
                 </Link>
+                <Link href="/adult">
+                  <Button variant="outline" className="w-full rounded-full">
+                    Adult Content
+                  </Button>
+                </Link>
                 <Button 
                   variant="destructive" 
                   className="w-full rounded-full"
