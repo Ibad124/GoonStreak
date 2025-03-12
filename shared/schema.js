@@ -12,6 +12,10 @@ export const users = pgTable("users", {
   lastSessionDate: date("last_session_date"),
   totalSessions: integer("total_sessions").notNull().default(0),
   todaySessions: integer("today_sessions").notNull().default(0),
+  // Add XP system fields
+  xpPoints: integer("xp_points").notNull().default(0),
+  level: integer("level").notNull().default(1),
+  title: text("title").notNull().default("Goon Apprentice"),
 });
 
 export const achievements = pgTable("achievements", {
@@ -28,3 +32,19 @@ export const insertUserSchema = createInsertSchema(users).pick({
   isAnonymous: true,
   showOnLeaderboard: true,
 });
+
+// Level configuration
+export const LEVEL_THRESHOLDS = {
+  1: { xp: 0, title: "Goon Apprentice" },
+  2: { xp: 100, title: "Goon Enthusiast" },
+  3: { xp: 250, title: "Goon Expert" },
+  4: { xp: 500, title: "Master Stroker" },
+  5: { xp: 1000, title: "Legendary Gooner" },
+};
+
+// XP rewards configuration
+export const XP_REWARDS = {
+  SESSION_COMPLETE: 10,
+  STREAK_MILESTONE: 50,
+  ACHIEVEMENT_EARNED: 25,
+};

@@ -1,6 +1,7 @@
 import { createServer } from "http";
 import { setupAuth } from "./auth.js";
 import { storage } from "./storage.js";
+import { XP_REWARDS } from "../shared/schema.js";
 
 export async function registerRoutes(app) {
   setupAuth(app);
@@ -25,9 +26,10 @@ export async function registerRoutes(app) {
     const user = req.user;
     const today = new Date();
     const lastDate = user.lastSessionDate ? new Date(user.lastSessionDate) : null;
-    
+
     let currentStreak = user.currentStreak;
     let todaySessions = user.todaySessions;
+    let xpToAward = XP_REWARDS.SESSION_COMPLETE;
 
     // Reset today's sessions if it's a new day
     if (!lastDate || lastDate.getDate() !== today.getDate()) {
@@ -40,6 +42,10 @@ export async function registerRoutes(app) {
       currentStreak = 1;
     } else if (lastDate.getDate() !== today.getDate()) {
       currentStreak += 1;
+      // Award XP for streak milestones
+      if (currentStreak % 3 === 0) {
+        xpToAward += XP_REWARDS.STREAK_MILESTONE;
+      }
     }
 
     const updatedUser = await storage.updateUser(user.id, {
@@ -50,24 +56,38 @@ export async function registerRoutes(app) {
       todaySessions: todaySessions + 1,
     });
 
+    // Award XP and check for level up
+    const xpResult = await storage.updateUserXP(user.id, xpToAward);
+
     // Check and award achievements
+    const newAchievements = [];
+
     if (currentStreak === 3) {
-      await storage.addAchievement(
+      const achievement = await storage.addAchievement(
         user.id,
         "STREAK_3",
         "Achieved a 3-day streak!"
       );
+      newAchievements.push(achievement);
+      await storage.updateUserXP(user.id, XP_REWARDS.ACHIEVEMENT_EARNED);
     }
 
     if (updatedUser.totalSessions === 10) {
-      await storage.addAchievement(
+      const achievement = await storage.addAchievement(
         user.id,
         "SESSIONS_10",
         "Logged 10 total sessions!"
       );
+      newAchievements.push(achievement);
+      await storage.updateUserXP(user.id, XP_REWARDS.ACHIEVEMENT_EARNED);
     }
 
-    res.json(updatedUser);
+    res.json({
+      user: xpResult.user,
+      leveledUp: xpResult.leveledUp,
+      nextLevelXP: xpResult.nextLevelXP,
+      newAchievements,
+    });
   });
 
   // Get leaderboard

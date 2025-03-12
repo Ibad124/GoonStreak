@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import StreakStats from "@/components/StreakStats";
 import Achievements from "@/components/Achievements";
+import XPProgress from "@/components/XPProgress";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Menu } from "lucide-react";
+import { Loader2, Menu, Sparkles, Trophy } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export default function HomePage() {
@@ -23,11 +24,31 @@ export default function HomePage() {
       const res = await apiRequest("POST", "/api/session");
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+
+      // Show basic session completion toast
       toast({
         title: "Session Logged",
         description: "Your streak has been updated!",
+      });
+
+      // If user leveled up, show special toast
+      if (data.leveledUp) {
+        toast({
+          title: "Level Up!",
+          description: `Congratulations! You're now ${data.user.title}!`,
+          icon: <Sparkles className="h-5 w-5 text-yellow-500" />,
+        });
+      }
+
+      // If new achievements were earned, show them
+      data.newAchievements?.forEach(achievement => {
+        toast({
+          title: "Achievement Unlocked!",
+          description: achievement.description,
+          icon: <Trophy className="h-5 w-5 text-purple-500" />,
+        });
       });
     },
   });
@@ -75,6 +96,13 @@ export default function HomePage() {
       {/* Main Content */}
       <main className="container mx-auto px-4 pt-20">
         <div className="space-y-6">
+          {/* XP Progress */}
+          <XPProgress 
+            user={stats.user} 
+            nextLevelXP={stats.nextLevelXP} 
+          />
+
+          {/* Streak Stats */}
           <Card className="backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-zinc-100/50">
             <CardHeader>
               <CardTitle className="text-2xl font-semibold tracking-tight">Your Streak</CardTitle>
@@ -84,6 +112,7 @@ export default function HomePage() {
             </CardContent>
           </Card>
 
+          {/* Achievements */}
           <Card className="backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-zinc-100/50">
             <CardHeader>
               <CardTitle className="text-2xl font-semibold tracking-tight">Achievements</CardTitle>

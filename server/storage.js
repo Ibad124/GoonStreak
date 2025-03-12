@@ -1,5 +1,6 @@
 import session from "express-session";
 import createMemoryStore from "memorystore";
+import { LEVEL_THRESHOLDS } from "../shared/schema.js";
 
 const MemoryStore = createMemoryStore(session);
 
@@ -34,15 +35,54 @@ export class MemStorage {
       lastSessionDate: null,
       totalSessions: 0,
       todaySessions: 0,
+      xpPoints: 0,
+      level: 1,
+      title: LEVEL_THRESHOLDS[1].title,
     };
     this.users.set(id, user);
     return user;
   }
 
+  calculateLevel(xpPoints) {
+    let level = 1;
+    for (const [lvl, data] of Object.entries(LEVEL_THRESHOLDS)) {
+      if (xpPoints >= data.xp) {
+        level = parseInt(lvl);
+      } else {
+        break;
+      }
+    }
+    return {
+      level,
+      title: LEVEL_THRESHOLDS[level].title,
+      nextLevelXP: LEVEL_THRESHOLDS[level + 1]?.xp || LEVEL_THRESHOLDS[level].xp,
+    };
+  }
+
+  async updateUserXP(userId, xpToAdd) {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error("User not found");
+
+    const newXP = user.xpPoints + xpToAdd;
+    const { level, title, nextLevelXP } = this.calculateLevel(newXP);
+
+    const updatedUser = await this.updateUser(userId, {
+      xpPoints: newXP,
+      level,
+      title,
+    });
+
+    return {
+      user: updatedUser,
+      leveledUp: level > user.level,
+      nextLevelXP,
+    };
+  }
+
   async updateUser(id, data) {
     const user = await this.getUser(id);
     if (!user) throw new Error("User not found");
-    
+
     const updatedUser = { ...user, ...data };
     this.users.set(id, updatedUser);
     return updatedUser;
