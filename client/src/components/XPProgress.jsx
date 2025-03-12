@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Star, Trophy, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function XPProgress({ user, nextLevelXP, currentLevelXP }) {
   // Calculate XP progress percentage
@@ -15,18 +16,47 @@ export default function XPProgress({ user, nextLevelXP, currentLevelXP }) {
           <Star className="h-5 w-5 text-yellow-500/90" />
           <span className="font-semibold tracking-tight">{user.title}</span>
         </div>
-        <span className="text-sm text-zinc-500">Level {user.level}</span>
+        <motion.span 
+          key={user.level}
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="text-sm text-zinc-500"
+        >
+          Level {user.level}
+        </motion.span>
       </div>
 
       <div className="mt-4">
         <div className="flex justify-between mb-2">
           <span className="text-sm text-zinc-500">XP Progress</span>
-          <span className="text-sm font-medium">{user.xpPoints} / {nextLevelXP}</span>
+          <motion.span 
+            key={user.xpPoints}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="text-sm font-medium"
+          >
+            {user.xpPoints} / {nextLevelXP}
+          </motion.span>
         </div>
-        <Progress 
-          value={xpProgress} 
-          className="h-2 bg-zinc-100"
-        />
+        <div className="relative">
+          <Progress 
+            value={xpProgress} 
+            className="h-2 bg-zinc-100"
+          />
+          <AnimatePresence>
+            {xpProgress > 0 && (
+              <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                className="absolute top-1/2 -translate-y-1/2"
+                style={{ left: `${xpProgress}%` }}
+              >
+                <div className="w-1 h-1 bg-blue-500 rounded-full" />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
       <div className="mt-4 text-sm text-zinc-500">

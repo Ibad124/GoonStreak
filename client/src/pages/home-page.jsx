@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
@@ -15,7 +16,6 @@ import SessionInsights from "@/components/SessionInsights";
 import { motion } from "framer-motion";
 import FriendsList from "@/components/FriendsList";
 import LogSessionModal from '@/components/LogSessionModal';
-import { useState } from "react";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -38,13 +38,16 @@ export default function HomePage() {
       return res.json();
     },
     onSuccess: (data) => {
+      // Invalidate stats query to trigger a refresh
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
 
+      // Show session logged toast
       toast({
         title: "Session Logged",
         description: "Your streak has been updated!",
       });
 
+      // Calculate and show XP gained
       const xpGained = data.user.xpPoints - (stats?.user.xpPoints || 0);
       toast({
         title: "XP Gained!",
@@ -52,6 +55,7 @@ export default function HomePage() {
         variant: "default",
       });
 
+      // Show level up toast if applicable
       if (data.leveledUp) {
         toast({
           title: "Level Up!",
@@ -60,6 +64,7 @@ export default function HomePage() {
         });
       }
 
+      // Show achievement toasts
       data.newAchievements?.forEach((achievement) => {
         toast({
           title: "Achievement Unlocked!",
