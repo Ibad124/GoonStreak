@@ -123,9 +123,9 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 pt-24">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Progress Column */}
-          <div className="lg:col-span-2 space-y-6">
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Main Content Column */}
+          <div className="flex-1 space-y-6">
             {/* XP Progress */}
             <motion.div {...fadeInUp}>
               {stats && (
@@ -194,13 +194,15 @@ export default function HomePage() {
             </motion.div>
           </div>
 
-          {/* Friends Column */}
+          {/* Friends Column - Fixed width */}
           <motion.div 
             {...fadeInUp} 
             transition={{ delay: 0.5 }}
-            className="lg:col-span-1 space-y-6"
+            className="w-full lg:w-96"
           >
-            <FriendsList />
+            <div className="lg:sticky lg:top-24">
+              <FriendsList />
+            </div>
           </motion.div>
         </div>
       </main>

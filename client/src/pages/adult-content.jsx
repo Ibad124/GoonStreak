@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, RefreshCw } from "lucide-react";
@@ -32,14 +32,6 @@ export default function AdultContent() {
   const handleIframeLoad = () => {
     setIsLoading(false);
   };
-
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setIsLoading(false);
-    }, 5000);
-
-    return () => clearTimeout(timeoutId);
-  }, [selectedSite]);
 
   return (
     <div className="min-h-screen bg-zinc-50/50">
@@ -99,10 +91,28 @@ export default function AdultContent() {
             className="w-full h-full border-0"
             onLoad={handleIframeLoad}
             title="Adult Content"
-            sandbox="allow-forms allow-scripts allow-same-origin allow-popups"
+            sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+            referrerPolicy="no-referrer"
           />
         </div>
       </main>
+
+      {/* Quick Access Links */}
+      <div className="fixed bottom-4 left-4 right-4 flex justify-center">
+        <div className="bg-white/90 backdrop-blur shadow-lg rounded-full px-6 py-3 flex space-x-4">
+          {sites.map(site => (
+            <a 
+              key={site.id}
+              href={site.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              {site.name}
+            </a>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
