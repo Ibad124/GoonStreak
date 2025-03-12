@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { storage } from "./storage";
+import { XP_REWARDS } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
@@ -14,10 +15,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get user stats and achievements
   app.get("/api/stats", requireAuth, async (req, res) => {
-    const achievements = await storage.getUserAchievements(req.user!.id);
+    const user = req.user!;
+    const achievements = await storage.getUserAchievements(user.id);
+    const { nextLevelXP, currentLevelXP } = storage.calculateLevel(user.xpPoints);
+
     res.json({
-      user: req.user,
-      achievements
+      user,
+      achievements,
+      nextLevelXP,
+      currentLevelXP
     });
   });
 
@@ -26,9 +32,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const user = req.user!;
     const today = new Date();
     const lastDate = user.lastSessionDate ? new Date(user.lastSessionDate) : null;
-    
+
     let currentStreak = user.currentStreak;
     let todaySessions = user.todaySessions;
+    let xpToAward = XP_REWARDS.SESSION_COMPLETE;
 
     // Reset today's sessions if it's a new day
     if (!lastDate || lastDate.getDate() !== today.getDate()) {
@@ -41,34 +48,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
       currentStreak = 1;
     } else if (lastDate.getDate() !== today.getDate()) {
       currentStreak += 1;
+
+      // Award bonus XP for streak milestones
+      if (currentStreak % 7 === 0) {
+        xpToAward += XP_REWARDS.STREAK_MILESTONE;
+        await storage.addAchievement(
+          user.id,
+          "STREAK_MILESTONE",
+          `Maintained a ${currentStreak}-day streak!`,
+          XP_REWARDS.STREAK_MILESTONE
+        );
+      }
     }
 
+    // Update user stats
     const updatedUser = await storage.updateUser(user.id, {
-      lastSessionDate: today,
+      lastSessionDate: today.toISOString(),
       currentStreak,
       longestStreak: Math.max(currentStreak, user.longestStreak),
       totalSessions: user.totalSessions + 1,
       todaySessions: todaySessions + 1,
     });
 
-    // Check and award achievements
+    // Award XP for the session
+    const { leveledUp, nextLevelXP, currentLevelXP } = await storage.updateUserXP(user.id, xpToAward);
+
+    // Check for session-based achievements
+    const newAchievements = [];
     if (currentStreak === 3) {
-      await storage.addAchievement(
+      const achievement = await storage.addAchievement(
         user.id,
         "STREAK_3",
         "Achieved a 3-day streak!"
       );
+      newAchievements.push(achievement);
     }
 
     if (updatedUser.totalSessions === 10) {
-      await storage.addAchievement(
+      const achievement = await storage.addAchievement(
         user.id,
         "SESSIONS_10",
         "Logged 10 total sessions!"
       );
+      newAchievements.push(achievement);
     }
 
-    res.json(updatedUser);
+    res.json({
+      user: updatedUser,
+      leveledUp,
+      nextLevelXP,
+      currentLevelXP,
+      newAchievements,
+      xpAwarded: xpToAward
+    });
   });
 
   // Get leaderboard
