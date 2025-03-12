@@ -1,48 +1,80 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import StreakStats from "@/components/StreakStats";
 import Achievements from "@/components/Achievements";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Menu, Film, Users } from "lucide-react"; 
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Loader2, Menu, Film, Users, Trophy, Activity, PlusCircle } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import Challenges from "@/components/Challenges";
 import { motion } from "framer-motion";
 import FriendsList from "@/components/FriendsList";
 import LogSessionModal from '@/components/LogSessionModal';
 
-const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5 }
+const menuItems = [
+  {
+    title: "Social Hub",
+    icon: Users,
+    href: "/social",
+    description: "Connect with friends and start circle sessions",
+    color: "bg-purple-500"
+  },
+  {
+    title: "Adult Content",
+    icon: Film,
+    href: "/adult-content",
+    description: "Access premium adult content",
+    color: "bg-pink-500"
+  },
+  {
+    title: "Leaderboard",
+    icon: Trophy,
+    href: "/leaderboard",
+    description: "See how you rank against others",
+    color: "bg-yellow-500"
+  }
+];
+
+const defaultUser = {
+  username: "Guest User",
+};
+
+// Animation variants
+const containerAnimation = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
+const itemAnimation = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 }
 };
 
 export default function HomePage() {
-  const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
 
-  const { data: stats, isLoading: isStatsLoading } = useQuery({
+  const { data: stats, isLoading } = useQuery({
     queryKey: ["/api/stats"],
+    initialData: {
+      user: defaultUser,
+      challenges: [],
+      achievements: []
+    }
   });
 
   const sessionMutation = useMutation({
     mutationFn: async (sessionData) => {
-      try {
-        const res = await apiRequest("POST", "/api/session", sessionData);
-        return await res.json();
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to log session. Please try again.",
-          variant: "destructive",
-        });
-        throw error;
-      }
+      const res = await apiRequest("POST", "/api/session", sessionData);
+      return res.json();
     },
     onSuccess: (data) => {
       queryClient.setQueryData(["/api/stats"], (oldData) => ({
@@ -74,21 +106,15 @@ export default function HomePage() {
 
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
     },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to log session. Please try again.",
-        variant: "destructive",
-      });
-    },
   });
 
-  const handleSessionSubmit = async (sessionData) => {
+  // Add back the handleSessionSubmit function
+  const handleSessionSubmit = (sessionData) => {
     sessionMutation.mutate(sessionData);
     setIsSessionModalOpen(false);
   };
 
-  if (isStatsLoading || !stats) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-border" />
@@ -102,48 +128,40 @@ export default function HomePage() {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <motion.h1
             className="text-xl font-semibold tracking-tight bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent"
-            {...fadeInUp}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
           >
-            Hi, {user?.username}!
+            Welcome, {stats.user.username}!
           </motion.h1>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
+              <Button variant="outline" size="icon" className="rounded-full">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent>
-              <div className="space-y-4 mt-8">
-                <Link href="/social">
-                  <Button
-                    variant="outline"
-                    className="w-full rounded-full flex items-center"
-                  >
-                    <Users className="h-4 w-4 mr-2" />
-                    Social Hub
-                  </Button>
-                </Link>
-                <Link href="/adult-content">
-                  <Button
-                    variant="outline"
-                    className="w-full rounded-full flex items-center"
-                  >
-                    <Film className="h-4 w-4 mr-2" />
-                    Adult Content
-                  </Button>
-                </Link>
-                <Link href="/leaderboard">
-                  <Button variant="outline" className="w-full rounded-full">
-                    Leaderboard
-                  </Button>
-                </Link>
-                <Button
-                  variant="destructive"
-                  className="w-full rounded-full"
-                  onClick={() => logoutMutation.mutate()}
-                >
-                  Logout
-                </Button>
+            <SheetContent className="w-full sm:w-[400px] p-0">
+              <SheetHeader className="p-6 bg-gradient-to-b from-blue-500 to-blue-600 text-white">
+                <SheetTitle className="text-2xl font-bold text-white">Menu</SheetTitle>
+              </SheetHeader>
+              <div className="p-6 space-y-6">
+                <div className="grid gap-4">
+                  {menuItems.map((item) => (
+                    <Link key={item.href} href={item.href}>
+                      <Button
+                        variant="outline"
+                        className="w-full h-auto p-4 flex flex-col items-start gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                      >
+                        <div className={`${item.color} p-2 rounded-lg`}>
+                          <item.icon className="h-5 w-5 text-white" />
+                        </div>
+                        <div className="text-left">
+                          <div className="font-semibold">{item.title}</div>
+                          <div className="text-sm text-muted-foreground">{item.description}</div>
+                        </div>
+                      </Button>
+                    </Link>
+                  ))}
+                </div>
               </div>
             </SheetContent>
           </Sheet>
@@ -151,9 +169,14 @@ export default function HomePage() {
       </header>
 
       <div className="container mx-auto px-4">
-        <div className="flex min-h-screen pt-24 pb-32 gap-6">
+        <motion.div 
+          className="flex min-h-screen pt-24 pb-32 gap-6"
+          variants={containerAnimation}
+          initial="hidden"
+          animate="show"
+        >
           <div className="flex-1 space-y-6">
-            <motion.div {...fadeInUp} transition={{ delay: 0.1 }}>
+            <motion.div variants={itemAnimation}>
               <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
                 <CardHeader>
                   <CardTitle className="text-2xl font-semibold tracking-tight">
@@ -166,7 +189,7 @@ export default function HomePage() {
               </Card>
             </motion.div>
 
-            <motion.div {...fadeInUp} transition={{ delay: 0.2 }}>
+            <motion.div variants={itemAnimation}>
               <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
                 <CardHeader>
                   <CardTitle className="text-2xl font-semibold tracking-tight">
@@ -179,7 +202,7 @@ export default function HomePage() {
               </Card>
             </motion.div>
 
-            <motion.div {...fadeInUp} transition={{ delay: 0.3 }}>
+            <motion.div variants={itemAnimation}>
               <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
                 <CardHeader>
                   <CardTitle className="text-2xl font-semibold tracking-tight">
@@ -198,7 +221,7 @@ export default function HomePage() {
               <FriendsList />
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       <motion.div
@@ -216,7 +239,9 @@ export default function HomePage() {
           >
             {sessionMutation.isPending ? (
               <Loader2 className="h-6 w-6 animate-spin mr-2" />
-            ) : null}
+            ) : (
+              <PlusCircle className="h-6 w-6 mr-2" />
+            )}
             Log Session
           </Button>
           <LogSessionModal
