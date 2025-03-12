@@ -1,3 +1,4 @@
+
 import { Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
@@ -8,10 +9,10 @@ import Achievements from "@/components/Achievements";
 import XPProgress from "@/components/XPProgress";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Menu, Sparkles, Trophy, Star } from "lucide-react";
+import { Loader2, Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Challenges from "@/components/Challenges";
-import SessionInsights from "@/components/SessionInsights"; // Added import
+import React from "react";
 
 export default function HomePage() {
   const { user, logoutMutation } = useAuth();
@@ -21,7 +22,7 @@ export default function HomePage() {
     queryKey: ["/api/stats"],
   });
 
-  console.log('Stats data:', stats);
+  console.log("Stats data:", stats);
 
   const sessionMutation = useMutation({
     mutationFn: async () => {
@@ -42,7 +43,7 @@ export default function HomePage() {
       toast({
         title: "XP Gained!",
         description: `+${xpGained} XP`,
-        icon: <Star className="h-5 w-5 text-yellow-500" />,
+        variant: "default",
       });
 
       // If user leveled up, show special toast
@@ -50,22 +51,22 @@ export default function HomePage() {
         toast({
           title: "Level Up!",
           description: `Congratulations! You're now ${data.user.title}!`,
-          icon: <Sparkles className="h-5 w-5 text-yellow-500" />,
+          variant: "default",
         });
       }
 
       // If new achievements were earned, show them
-      data.newAchievements?.forEach(achievement => {
+      data.newAchievements?.forEach((achievement) => {
         toast({
           title: "Achievement Unlocked!",
           description: achievement.description,
-          icon: <Trophy className="h-5 w-5 text-purple-500" />,
+          variant: "default",
         });
       });
     },
   });
 
-  if (isLoading) {
+  if (isLoading || !stats) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-border" />
@@ -92,7 +93,7 @@ export default function HomePage() {
                     Leaderboard
                   </Button>
                 </Link>
-                <Link href="/adult">
+                <Link href="/adult-content">
                   <Button variant="outline" className="w-full rounded-full">
                     Adult Content
                   </Button>
@@ -114,16 +115,20 @@ export default function HomePage() {
       <main className="container mx-auto px-4 pt-20">
         <div className="space-y-6">
           {/* XP Progress */}
-          <XPProgress 
-            user={stats.user} 
-            nextLevelXP={stats.nextLevelXP}
-            currentLevelXP={stats.currentLevelXP}
-          />
+          {stats && (
+            <XPProgress
+              user={stats.user}
+              nextLevelXP={stats.nextLevelXP}
+              currentLevelXP={stats.currentLevelXP}
+            />
+          )}
 
           {/* Challenges Section */}
           <Card className="backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-zinc-100/50">
             <CardHeader>
-              <CardTitle className="text-2xl font-semibold tracking-tight">Daily Challenges</CardTitle>
+              <CardTitle className="text-2xl font-semibold tracking-tight">
+                Daily Challenges
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <Challenges challenges={stats?.challenges || []} />
@@ -133,33 +138,34 @@ export default function HomePage() {
           {/* Streak Stats */}
           <Card className="backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-zinc-100/50">
             <CardHeader>
-              <CardTitle className="text-2xl font-semibold tracking-tight">Your Streak</CardTitle>
+              <CardTitle className="text-2xl font-semibold tracking-tight">
+                Your Streak
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <StreakStats stats={stats} />
+              <StreakStats
+                stats={{
+                  user: {
+                    currentStreak: 0,
+                    longestStreak: 0,
+                    totalSessions: 0,
+                  },
+                }}
+              />
             </CardContent>
           </Card>
 
           {/* Achievements */}
           <Card className="backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-zinc-100/50">
             <CardHeader>
-              <CardTitle className="text-2xl font-semibold tracking-tight">Achievements</CardTitle>
+              <CardTitle className="text-2xl font-semibold tracking-tight">
+                Achievements
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <Achievements achievements={stats?.achievements || []} />
             </CardContent>
           </Card>
-
-          {/* Session Insights */}
-          <Card className="backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-zinc-100/50">
-            <CardHeader>
-              <CardTitle className="text-2xl font-semibold tracking-tight">Session Insights</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <SessionInsights />
-            </CardContent>
-          </Card>
-
         </div>
       </main>
 
