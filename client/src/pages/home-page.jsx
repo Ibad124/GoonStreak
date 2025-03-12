@@ -8,7 +8,7 @@ import StreakStats from "@/components/StreakStats";
 import Achievements from "@/components/Achievements";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Menu, Film } from "lucide-react";
+import { Loader2, Menu, Film, Users } from "lucide-react"; 
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Challenges from "@/components/Challenges";
 import { motion } from "framer-motion";
@@ -45,20 +45,17 @@ export default function HomePage() {
       }
     },
     onSuccess: (data) => {
-      // Update stats cache
       queryClient.setQueryData(["/api/stats"], (oldData) => ({
         ...oldData,
         user: data.user,
         challenges: data.challenges,
       }));
 
-      // Show session logged toast
       toast({
         title: "Session Logged",
         description: "Your streak has been updated!",
       });
 
-      // Show achievement toasts
       data.newAchievements?.forEach((achievement) => {
         toast({
           title: "Achievement Unlocked!",
@@ -67,7 +64,6 @@ export default function HomePage() {
         });
       });
 
-      // Show challenge completion toasts
       data.completedChallenges?.forEach((completion) => {
         toast({
           title: "Challenge Completed!",
@@ -76,7 +72,6 @@ export default function HomePage() {
         });
       });
 
-      // Finally invalidate stats query to ensure everything is in sync
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
     },
     onError: (error) => {
@@ -103,7 +98,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50/50 to-white">
-      {/* Fixed Header */}
       <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 z-50 border-b border-zinc-200/50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <motion.h1
@@ -120,6 +114,15 @@ export default function HomePage() {
             </SheetTrigger>
             <SheetContent>
               <div className="space-y-4 mt-8">
+                <Link href="/social">
+                  <Button
+                    variant="outline"
+                    className="w-full rounded-full flex items-center"
+                  >
+                    <Users className="h-4 w-4 mr-2" />
+                    Social Hub
+                  </Button>
+                </Link>
                 <Link href="/adult-content">
                   <Button
                     variant="outline"
@@ -147,12 +150,9 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* Main Content */}
       <div className="container mx-auto px-4">
         <div className="flex min-h-screen pt-24 pb-32 gap-6">
-          {/* Main Content Column */}
           <div className="flex-1 space-y-6">
-            {/* Challenges Section */}
             <motion.div {...fadeInUp} transition={{ delay: 0.1 }}>
               <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
                 <CardHeader>
@@ -166,7 +166,6 @@ export default function HomePage() {
               </Card>
             </motion.div>
 
-            {/* Streak Stats */}
             <motion.div {...fadeInUp} transition={{ delay: 0.2 }}>
               <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
                 <CardHeader>
@@ -180,7 +179,6 @@ export default function HomePage() {
               </Card>
             </motion.div>
 
-            {/* Achievements */}
             <motion.div {...fadeInUp} transition={{ delay: 0.3 }}>
               <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
                 <CardHeader>
@@ -195,7 +193,6 @@ export default function HomePage() {
             </motion.div>
           </div>
 
-          {/* Friends Column - Fixed width */}
           <div className="hidden lg:block w-96">
             <div className="sticky top-24">
               <FriendsList />
@@ -204,7 +201,6 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Fixed Bottom Bar with Log Session Button */}
       <motion.div
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
