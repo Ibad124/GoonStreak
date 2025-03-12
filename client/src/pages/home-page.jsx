@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
@@ -16,6 +15,7 @@ import SessionInsights from "@/components/SessionInsights";
 import { motion } from "framer-motion";
 import FriendsList from "@/components/FriendsList";
 import LogSessionModal from '@/components/LogSessionModal';
+import { useState } from "react";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },

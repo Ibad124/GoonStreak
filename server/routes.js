@@ -58,7 +58,7 @@ export async function registerRoutes(app) {
     if (!lastDate ||
         (today.getTime() - lastDate.getTime()) > 24 * 60 * 60 * 1000) {
       currentStreak = 1;
-      xpToAward += 10;
+      xpToAward += XP_REWARDS.STREAK_MILESTONE;
     } else if (lastDate.getDate() !== today.getDate()) {
       currentStreak += 1;
       if (currentStreak % 3 === 0) {
