@@ -7,7 +7,7 @@ import StreakStats from "@/components/StreakStats";
 import Achievements from "@/components/Achievements";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Film } from "lucide-react";
 
 export default function HomePage() {
   const { user, logoutMutation } = useAuth();
@@ -15,6 +15,17 @@ export default function HomePage() {
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ["/api/stats"],
+    queryFn: async () => {
+      // Mock stats data for now
+      return {
+        user: {
+          currentStreak: 5,
+          longestStreak: 10,
+          totalSessions: 25,
+        },
+        achievements: [],
+      };
+    },
   });
 
   const sessionMutation = useMutation({
@@ -44,6 +55,12 @@ export default function HomePage() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Welcome, {user?.username}!</h1>
         <div className="space-x-4">
+          <Link href="/adult">
+            <Button variant="outline" className="gap-2">
+              <Film className="h-4 w-4" />
+              Adult Content
+            </Button>
+          </Link>
           <Link href="/leaderboard">
             <Button variant="outline">Leaderboard</Button>
           </Link>
