@@ -7,12 +7,56 @@ import StreakStats from "@/components/StreakStats";
 import Achievements from "@/components/Achievements";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Menu, Film, Users, Trophy, Flame, Activity, PlusCircle, Clock, Star, Heart } from "lucide-react";
+import { Loader2, Menu, Film, Users, Trophy, Flame, Activity, PlusCircle, Clock, Star, Heart, Award } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import Challenges from "@/components/Challenges";
 import { motion } from "framer-motion";
 import FriendsList from "@/components/FriendsList";
 import LogSessionModal from '@/components/LogSessionModal';
+
+// Level system configuration
+const levels = [
+  { level: 1, points: 0, badge: "Novice", color: "from-zinc-500 to-slate-600" },
+  { level: 2, points: 100, badge: "Apprentice", color: "from-blue-500 to-blue-600" },
+  { level: 3, points: 300, badge: "Intermediate", color: "from-green-500 to-green-600" },
+  { level: 4, points: 600, badge: "Advanced", color: "from-purple-500 to-purple-600" },
+  { level: 5, points: 1000, badge: "Expert", color: "from-yellow-500 to-yellow-600" },
+  { level: 6, points: 2000, badge: "Master", color: "from-red-500 to-red-600" },
+  { level: 7, points: 5000, badge: "Grandmaster", color: "from-pink-500 to-pink-600" },
+  { level: 8, points: 10000, badge: "Legend", color: "from-orange-500 to-orange-600" }
+];
+
+const getCurrentLevel = (points) => {
+  for (let i = levels.length - 1; i >= 0; i--) {
+    if (points >= levels[i].points) {
+      return levels[i];
+    }
+  }
+  return levels[0];
+};
+
+const getNextLevel = (points) => {
+  for (let i = 0; i < levels.length; i++) {
+    if (points < levels[i].points) {
+      return levels[i];
+    }
+  }
+  return levels[levels.length - 1];
+};
+
+// Sample rewards data
+const rewards = [
+  { id: 1, name: "Early Bird", description: "Complete a session before 8 AM", points: 50, icon: Clock },
+  { id: 2, name: "Streak Master", description: "Maintain a 7-day streak", points: 100, icon: Flame },
+  { id: 3, name: "Social Butterfly", description: "Join 3 group sessions", points: 75, icon: Users },
+];
+
+// Sample goals data
+const goals = [
+  { id: 1, title: "Daily Meditation", current: 3, target: 5, unit: "sessions" },
+  { id: 2, title: "Weekly Social Calls", current: 2, target: 4, unit: "calls" },
+  { id: 3, title: "Monthly Achievements", current: 8, target: 10, unit: "achievements" },
+];
 
 const menuItems = [
   {
@@ -86,20 +130,6 @@ const menuItemAnimation = {
   tap: { scale: 0.98 }
 };
 
-// Sample rewards data
-const rewards = [
-  { id: 1, name: "Early Bird", description: "Complete a session before 8 AM", points: 50, icon: Clock },
-  { id: 2, name: "Streak Master", description: "Maintain a 7-day streak", points: 100, icon: Flame },
-  { id: 3, name: "Social Butterfly", description: "Join 3 group sessions", points: 75, icon: Users },
-];
-
-// Sample goals data
-const goals = [
-  { id: 1, title: "Daily Meditation", current: 3, target: 5, unit: "sessions" },
-  { id: 2, title: "Weekly Social Calls", current: 2, target: 4, unit: "calls" },
-  { id: 3, title: "Monthly Achievements", current: 8, target: 10, unit: "achievements" },
-];
-
 export default function HomePage() {
   const { toast } = useToast();
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
@@ -162,6 +192,13 @@ export default function HomePage() {
       </div>
     );
   }
+
+  // Mock user points for demonstration
+  const userPoints = 450; // This would come from the API in real implementation
+  const currentLevel = getCurrentLevel(userPoints);
+  const nextLevel = getNextLevel(userPoints);
+  const progressToNextLevel = nextLevel.points === currentLevel.points ? 100 :
+    ((userPoints - currentLevel.points) / (nextLevel.points - currentLevel.points)) * 100;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50/50 to-white">
@@ -237,6 +274,64 @@ export default function HomePage() {
           animate="show"
         >
           <div className="flex-1 space-y-6">
+            {/* Level Progress Card */}
+            <motion.div variants={itemAnimation}>
+              <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-semibold tracking-tight flex items-center justify-between">
+                    <span>Current Level</span>
+                    <div className="flex items-center gap-2">
+                      <Award className="h-6 w-6 text-blue-600" />
+                      <span className="text-blue-600">{userPoints} points</span>
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className={`p-4 rounded-xl bg-gradient-to-br ${currentLevel.color} shadow-lg`}>
+                      <Award className="h-8 w-8 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">{currentLevel.badge}</h3>
+                      <p className="text-sm text-muted-foreground">Level {currentLevel.level}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Progress to {nextLevel.badge}</span>
+                      <span>{Math.round(progressToNextLevel)}%</span>
+                    </div>
+                    <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full transition-all duration-500 bg-gradient-to-r ${nextLevel.color}`}
+                        style={{ width: `${progressToNextLevel}%` }}
+                      />
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {nextLevel.points - userPoints} points needed for next level
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4">
+                    {levels.map((level) => (
+                      <div
+                        key={level.level}
+                        className={`p-2 rounded-lg text-center ${
+                          userPoints >= level.points
+                            ? `bg-gradient-to-br ${level.color} text-white`
+                            : 'bg-zinc-100 text-zinc-500'
+                        }`}
+                      >
+                        <Award className="h-4 w-4 mx-auto mb-1" />
+                        <div className="text-xs font-medium">{level.badge}</div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
             {/* Goals Section */}
             <motion.div variants={itemAnimation}>
               <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
