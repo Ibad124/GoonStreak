@@ -170,40 +170,44 @@ export default function HomePage() {
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent className="w-full sm:max-w-[450px] p-0">
-              <SheetHeader className="p-6 bg-gradient-to-br from-blue-600 to-blue-800 text-white">
+            <SheetContent className="w-full sm:max-w-[450px] p-0 flex flex-col">
+              <SheetHeader className="p-6 bg-gradient-to-br from-blue-600 to-blue-800 text-white shrink-0">
                 <SheetTitle className="text-2xl font-bold text-white flex items-center gap-2">
                   <Heart className="h-6 w-6" />
                   Main Menu
                 </SheetTitle>
                 <p className="text-blue-100 mt-2">Explore features and connect with others</p>
               </SheetHeader>
-              <div className="p-6 space-y-6">
-                <div className="grid gap-4">
-                  {menuItems.map((item) => (
-                    <Link key={item.href} href={item.href}>
-                      <motion.div
-                        variants={menuItemAnimation}
-                        initial="initial"
-                        whileHover="hover"
-                        whileTap="tap"
-                      >
-                        <Button
-                          variant="outline"
-                          className="w-full h-auto p-4 flex flex-col items-start gap-3 group"
+              <div className="flex-1 overflow-y-auto">
+                <div className="p-4 sm:p-6 space-y-4">
+                  <div className="grid gap-3">
+                    {menuItems.map((item) => (
+                      <Link key={item.href} href={item.href}>
+                        <motion.div
+                          variants={menuItemAnimation}
+                          initial="initial"
+                          whileHover="hover"
+                          whileTap="tap"
                         >
-                          <div className={`${item.color} p-3 rounded-xl shadow-lg group-hover:shadow-xl transition-shadow`}>
-                            <item.icon className="h-6 w-6 text-white" />
-                          </div>
-                          <div className="text-left">
-                            <div className="font-semibold text-lg">{item.title}</div>
-                            <div className="text-sm text-muted-foreground">{item.description}</div>
-                            <div className="mt-2 text-xs font-medium text-blue-600">{item.stats}</div>
-                          </div>
-                        </Button>
-                      </motion.div>
-                    </Link>
-                  ))}
+                          <Button
+                            variant="outline"
+                            className="w-full h-auto p-4 flex flex-col items-start gap-3 group relative overflow-hidden"
+                          >
+                            <div className={`${item.color} p-3 rounded-xl shadow-lg group-hover:shadow-xl transition-shadow`}>
+                              <item.icon className="h-6 w-6 text-white" />
+                            </div>
+                            <div className="text-left w-full">
+                              <div className="font-semibold text-lg flex items-center justify-between">
+                                {item.title}
+                                <span className="text-xs font-medium text-blue-600">{item.stats}</span>
+                              </div>
+                              <div className="text-sm text-muted-foreground mt-1">{item.description}</div>
+                            </div>
+                          </Button>
+                        </motion.div>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </div>
             </SheetContent>
