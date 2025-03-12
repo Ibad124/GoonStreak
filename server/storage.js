@@ -462,13 +462,16 @@ export class MemStorage {
     return newCompletions;
   }
 
-  async logSession(userId, timestamp) {
+  async logSession(userId, sessionData) {
     const sessionLog = {
       id: this.sessionLogId++,
       userId,
-      timestamp,
-      dayOfWeek: timestamp.getDay(),
-      hourOfDay: timestamp.getHours(),
+      timestamp: sessionData.timestamp,
+      dayOfWeek: sessionData.timestamp.getDay(),
+      hourOfDay: sessionData.timestamp.getHours(),
+      duration: sessionData.duration,
+      intensity: sessionData.intensity,
+      mood: sessionData.mood,
     };
 
     this.sessionLogs.set(sessionLog.id, sessionLog);
