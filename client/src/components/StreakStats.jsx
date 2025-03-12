@@ -125,7 +125,17 @@ function getMotivationalMessage(streak) {
 }
 
 export default function StreakStats({ stats }) {
-  const { currentStreak, longestStreak, totalSessions, todaySessions, lastSessionDate } = stats.user;
+  if (!stats || !stats.user) {
+    return null;
+  }
+
+  const { 
+    currentStreak = 0, 
+    longestStreak = 0, 
+    totalSessions = 0, 
+    todaySessions = 0, 
+    lastSessionDate = null 
+  } = stats.user;
 
   // Calculate next milestone and multiplier
   const nextMilestone = Math.ceil(currentStreak / 5) * 5;
