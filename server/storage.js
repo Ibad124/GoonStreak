@@ -75,6 +75,15 @@ export class MemStorage {
     const newXP = user.xpPoints + xpToAdd;
     const { level, title, nextLevelXP, currentLevelXP } = this.calculateLevel(newXP);
 
+    console.log('Storage updateUserXP:', {
+      userId,
+      oldXP: user.xpPoints,
+      xpToAdd,
+      newXP,
+      oldLevel,
+      newLevel: level
+    });
+
     const updatedUser = await this.updateUser(userId, {
       xpPoints: newXP,
       level,
@@ -95,6 +104,15 @@ export class MemStorage {
 
     const updatedUser = { ...user, ...data };
     this.users.set(id, updatedUser);
+
+    if ('xpPoints' in data) {
+      console.log('Storage updateUser:', {
+        userId: id,
+        newXP: updatedUser.xpPoints,
+        newLevel: updatedUser.level
+      });
+    }
+
     return updatedUser;
   }
 

@@ -16,6 +16,14 @@ export async function registerRoutes(app) {
   app.get("/api/stats", requireAuth, async (req, res) => {
     const achievements = await storage.getUserAchievements(req.user.id);
     const { nextLevelXP, currentLevelXP } = storage.calculateLevel(req.user.xpPoints);
+
+    console.log('GET /api/stats response:', {
+      xpPoints: req.user.xpPoints,
+      nextLevelXP,
+      currentLevelXP,
+      level: req.user.level
+    });
+
     res.json({
       user: req.user,
       achievements,
@@ -60,6 +68,12 @@ export async function registerRoutes(app) {
       xpToAward += todaySessions * 5;  // Progressive bonus
     }
 
+    console.log('Before XP update:', {
+      currentXP: user.xpPoints,
+      xpToAward,
+      currentLevel: user.level
+    });
+
     const updatedUser = await storage.updateUser(user.id, {
       lastSessionDate: today,
       currentStreak,
@@ -70,6 +84,14 @@ export async function registerRoutes(app) {
 
     // Award XP and check for level up
     const xpResult = await storage.updateUserXP(user.id, xpToAward);
+
+    console.log('After XP update:', {
+      newXP: xpResult.user.xpPoints,
+      newLevel: xpResult.user.level,
+      leveledUp: xpResult.leveledUp,
+      nextLevelXP: xpResult.nextLevelXP,
+      currentLevelXP: xpResult.currentLevelXP
+    });
 
     // Check and award achievements
     const newAchievements = [];
@@ -99,6 +121,7 @@ export async function registerRoutes(app) {
       leveledUp: xpResult.leveledUp,
       nextLevelXP: xpResult.nextLevelXP,
       currentLevelXP: xpResult.currentLevelXP,
+      xpGained: xpToAward,
       newAchievements,
     });
   });
