@@ -36,6 +36,16 @@ export async function registerRoutes(app) {
     });
   });
 
+  // Log activity helper function
+  const logActivity = async (userId, type, description) => {
+    return storage.createActivity({
+      userId,
+      type,
+      description,
+      timestamp: new Date(),
+    });
+  };
+
   app.post("/api/session", requireAuth, async (req, res) => {
     const user = req.user;
     const today = new Date();
@@ -53,8 +63,12 @@ export async function registerRoutes(app) {
     if (!lastDate ||
         (today.getTime() - lastDate.getTime()) > 24 * 60 * 60 * 1000) {
       currentStreak = 1;
+      // Log streak reset
+      await logActivity(user.id, "STREAK", "started a new streak");
     } else if (lastDate.getDate() !== today.getDate()) {
       currentStreak += 1;
+      // Log streak increase
+      await logActivity(user.id, "STREAK", `reached a ${currentStreak}-day streak! 🔥`);
     }
 
     const sessionLog = await storage.logSession(user.id, {
@@ -84,6 +98,7 @@ export async function registerRoutes(app) {
         "Achieved a 3-day streak!"
       );
       newAchievements.push(achievement);
+      await logActivity(user.id, "ACHIEVEMENT", "earned the 3-Day Streak achievement! 🏆");
     }
 
     if (updatedUser.totalSessions === 10) {
@@ -93,6 +108,16 @@ export async function registerRoutes(app) {
         "Logged 10 total sessions!"
       );
       newAchievements.push(achievement);
+      await logActivity(user.id, "ACHIEVEMENT", "earned the Session Master achievement! 🎯");
+    }
+
+    // Log completed challenges
+    for (const completion of completedChallenges) {
+      await logActivity(
+        user.id,
+        "CHALLENGE",
+        `completed the "${completion.challenge.title}" challenge! 🎉`
+      );
     }
 
     // Get updated challenges
@@ -116,6 +141,26 @@ export async function registerRoutes(app) {
       completedChallenges,
       challenges: challengesWithProgress,
     });
+  });
+
+  // Get friend activities
+  app.get("/api/friends/activity", requireAuth, async (req, res) => {
+    const friends = await storage.getUserFriends(req.user.id);
+    const friendIds = friends.map(f => f.friendId);
+    const activities = await storage.getFriendActivities(friendIds);
+
+    // Get user data for each activity
+    const activitiesWithUserData = await Promise.all(
+      activities.map(async (activity) => {
+        const user = await storage.getUser(activity.userId);
+        return {
+          ...activity,
+          username: user.username,
+        };
+      })
+    );
+
+    res.json(activitiesWithUserData);
   });
 
   // Get leaderboard

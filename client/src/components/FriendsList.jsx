@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { UserPlus, Check, X, Search, Circle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
+import FriendActivity from "./FriendActivity";
 
 function FriendRequestCard({ request, onAccept, onReject }) {
   const { otherUser } = request;
@@ -67,12 +68,12 @@ function FriendCard({ friend }) {
       className="flex items-center justify-between p-4 border-b last:border-0 hover:bg-zinc-50/50 transition-colors"
     >
       <div className="flex items-center gap-3">
-        <motion.div 
+        <motion.div
           className={`h-2 w-2 rounded-full ${isOnlineIndicator}`}
           initial={{ scale: 0.5 }}
           animate={{ scale: [1, 1.2, 1] }}
-          transition={{ 
-            repeat: Infinity, 
+          transition={{
+            repeat: Infinity,
             duration: 2,
             repeatType: "reverse"
           }}
@@ -166,6 +167,14 @@ export default function FriendsList() {
 
   return (
     <div className="space-y-6">
+      {/* Friend Activity Feed */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <FriendActivity />
+      </motion.div>
+
       {/* Friend Requests Section */}
       <AnimatePresence>
         {pendingRequests.length > 0 && (
@@ -211,7 +220,7 @@ export default function FriendsList() {
               className="pl-9 rounded-full"
             />
           </div>
-          <motion.div 
+          <motion.div
             className="divide-y"
             layout
           >

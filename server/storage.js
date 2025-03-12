@@ -6,6 +6,7 @@ const MemoryStore = createMemoryStore(session);
 
 export class MemStorage {
   constructor() {
+    // Existing storage maps
     this.users = new Map();
     this.achievements = new Map();
     this.challenges = new Map();
@@ -25,6 +26,10 @@ export class MemStorage {
     this.friendships = new Map();
     this.friendRequestId = 1;
     this.friendshipId = 1;
+
+    // New storage for activities
+    this.activities = new Map();
+    this.activityId = 1;
 
     // Add test users
     this.createUser({
@@ -610,6 +615,29 @@ export class MemStorage {
     };
     this.users.set(userId, updatedUser);
     return updatedUser;
+  }
+
+
+  // Add new methods for activity feed
+  async createActivity(activityData) {
+    const activity = {
+      id: this.activityId++,
+      ...activityData,
+    };
+    this.activities.set(activity.id, activity);
+    return activity;
+  }
+
+  async getFriendActivities(friendIds) {
+    const now = new Date();
+    const threeDaysAgo = new Date(now.getTime() - (3 * 24 * 60 * 60 * 1000));
+
+    return Array.from(this.activities.values())
+      .filter(activity =>
+        friendIds.includes(activity.userId) &&
+        new Date(activity.timestamp) > threeDaysAgo
+      )
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
   }
 }
 
