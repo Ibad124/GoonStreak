@@ -17,11 +17,11 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Timer, Clock, CheckCircle } from "lucide-react";
+import { Loader2, Timer, Clock, CheckCircle, Activity, Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function LogSessionModal({ isOpen, onClose, onSubmit, isPending }) {
-  const [mode, setMode] = useState(null); // "timer" or "manual"
+  const [mode, setMode] = useState(null);
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [intensity, setIntensity] = useState("medium");
@@ -69,6 +69,18 @@ export default function LogSessionModal({ isOpen, onClose, onSubmit, isPending }
     }
   }, [isOpen]);
 
+  const intensityOptions = [
+    { value: "low", label: "Low", icon: Activity, color: "text-green-500" },
+    { value: "medium", label: "Medium", icon: Activity, color: "text-yellow-500" },
+    { value: "high", label: "High", icon: Activity, color: "text-red-500" },
+  ];
+
+  const moodOptions = [
+    { value: "relaxed", label: "Relaxed", icon: Heart, color: "text-blue-500" },
+    { value: "energetic", label: "Energetic", icon: Heart, color: "text-purple-500" },
+    { value: "focused", label: "Focused", icon: Heart, color: "text-indigo-500" },
+  ];
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
@@ -81,22 +93,30 @@ export default function LogSessionModal({ isOpen, onClose, onSubmit, isPending }
 
         {!mode && (
           <div className="grid grid-cols-2 gap-4">
-            <Button
-              variant="outline"
-              className="h-32 flex flex-col gap-2"
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 p-0.5"
               onClick={() => setMode("timer")}
             >
-              <Timer className="h-8 w-8" />
-              <span>Start Timer</span>
-            </Button>
-            <Button
-              variant="outline"
-              className="h-32 flex flex-col gap-2"
+              <div className="h-32 flex flex-col items-center justify-center gap-2 rounded-[calc(0.75rem-1px)] bg-white dark:bg-zinc-950">
+                <Timer className="h-8 w-8 text-blue-500" />
+                <span className="font-medium">Start Timer</span>
+                <span className="text-xs text-muted-foreground">Track in real-time</span>
+              </div>
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="relative overflow-hidden rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 p-0.5"
               onClick={() => setMode("manual")}
             >
-              <Clock className="h-8 w-8" />
-              <span>Log Past Session</span>
-            </Button>
+              <div className="h-32 flex flex-col items-center justify-center gap-2 rounded-[calc(0.75rem-1px)] bg-white dark:bg-zinc-950">
+                <Clock className="h-8 w-8 text-blue-500" />
+                <span className="font-medium">Log Past Session</span>
+                <span className="text-xs text-muted-foreground">Enter manually</span>
+              </div>
+            </motion.button>
           </div>
         )}
 
@@ -109,9 +129,36 @@ export default function LogSessionModal({ isOpen, onClose, onSubmit, isPending }
               className="space-y-6"
             >
               <div className="text-center">
-                <div className="text-4xl font-mono mb-4">{formatTime(time)}</div>
+                <div className="relative inline-block">
+                  <svg className="w-32 h-32">
+                    <circle
+                      className="text-muted stroke-current"
+                      strokeWidth="4"
+                      fill="none"
+                      r="58"
+                      cx="64"
+                      cy="64"
+                    />
+                    <circle
+                      className="text-blue-500 stroke-current"
+                      strokeWidth="4"
+                      fill="none"
+                      r="58"
+                      cx="64"
+                      cy="64"
+                      strokeDasharray="364.425"
+                      strokeDashoffset={364.425 * (1 - (time % 60) / 60)}
+                      transform="rotate(-90 64 64)"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-2xl font-mono font-medium">{formatTime(time)}</div>
+                  </div>
+                </div>
                 <Button
                   variant={isRunning ? "destructive" : "default"}
+                  size="lg"
+                  className="mt-4"
                   onClick={() => setIsRunning(!isRunning)}
                 >
                   {isRunning ? "Stop" : "Start"}
@@ -152,11 +199,19 @@ export default function LogSessionModal({ isOpen, onClose, onSubmit, isPending }
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
+                    {intensityOptions.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        <div className="flex items-center gap-2">
+                          <option.icon className={`h-4 w-4 ${option.color}`} />
+                          {option.label}
+                        </div>
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground">
+                  How intense was your session?
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -166,19 +221,31 @@ export default function LogSessionModal({ isOpen, onClose, onSubmit, isPending }
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="relaxed">Relaxed</SelectItem>
-                    <SelectItem value="energetic">Energetic</SelectItem>
-                    <SelectItem value="focused">Focused</SelectItem>
+                    {moodOptions.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        <div className="flex items-center gap-2">
+                          <option.icon className={`h-4 w-4 ${option.color}`} />
+                          {option.label}
+                        </div>
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground">
+                  How did you feel during the session?
+                </p>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
         {mode && (
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setMode(null)}>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="ghost"
+              onClick={() => setMode(null)}
+              className="flex-1 sm:flex-none"
+            >
               Back
             </Button>
             <Button
@@ -188,6 +255,7 @@ export default function LogSessionModal({ isOpen, onClose, onSubmit, isPending }
                 (mode === "timer" && time === 0) ||
                 (mode === "manual" && !duration)
               }
+              className="flex-1 sm:flex-none"
             >
               {isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
