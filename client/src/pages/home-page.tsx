@@ -1,4 +1,5 @@
-import { Link } from "wouter";
+
+import React from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -8,10 +9,10 @@ import Achievements from "@/components/Achievements";
 import XPProgress from "@/components/XPProgress";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Menu, Sparkles, Trophy, Star, Film } from "lucide-react";
+import { Loader2, Menu, Film } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Challenges from "@/components/Challenges";
-import React from "react";
+import { Link } from "wouter";
 
 interface StatsData {
   user: {
