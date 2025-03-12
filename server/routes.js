@@ -44,6 +44,7 @@ export async function registerRoutes(app) {
   app.post("/api/session", requireAuth, async (req, res) => {
     const user = req.user;
     const today = new Date();
+    const { duration, intensity, mood } = req.body;
     const lastDate = user.lastSessionDate ? new Date(user.lastSessionDate) : null;
 
     let currentStreak = user.currentStreak;
@@ -65,11 +66,20 @@ export async function registerRoutes(app) {
       }
     }
 
+    // Award bonus XP based on duration and intensity
+    if (duration > 60) xpToAward += 15;
+    if (intensity === 'high') xpToAward += 10;
+
     if (todaySessions < 5) {
       xpToAward += todaySessions * 5;
     }
 
-    const sessionLog = await storage.logSession(user.id, today);
+    const sessionLog = await storage.logSession(user.id, {
+      timestamp: today,
+      duration,
+      intensity,
+      mood,
+    });
 
     const updatedUser = await storage.updateUser(user.id, {
       lastSessionDate: today,
@@ -203,7 +213,7 @@ export async function registerRoutes(app) {
     // Check if there's a pending request
     const existingRequests = await storage.getFriendRequests(req.user.id);
     const alreadyRequested = existingRequests.some(
-      request => 
+      request =>
         (request.senderId === req.user.id && request.receiverId === receiverId) ||
         (request.senderId === receiverId && request.receiverId === req.user.id)
     );

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
@@ -14,6 +15,7 @@ import Challenges from "@/components/Challenges";
 import SessionInsights from "@/components/SessionInsights";
 import { motion } from "framer-motion";
 import FriendsList from "@/components/FriendsList";
+import LogSessionModal from '@/components/LogSessionModal';
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -24,14 +26,15 @@ const fadeInUp = {
 export default function HomePage() {
   const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
+  const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ["/api/stats"],
   });
 
   const sessionMutation = useMutation({
-    mutationFn: async () => {
-      const res = await apiRequest("POST", "/api/session");
+    mutationFn: async (sessionData) => {
+      const res = await apiRequest("POST", "/api/session", sessionData);
       return res.json();
     },
     onSuccess: (data) => {
@@ -67,6 +70,11 @@ export default function HomePage() {
     },
   });
 
+  const handleSessionSubmit = async (sessionData) => {
+    sessionMutation.mutate(sessionData);
+    setIsSessionModalOpen(false);
+  };
+
   if (isLoading || !stats) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -76,11 +84,11 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen pb-24 bg-gradient-to-b from-blue-50/50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50/50 to-white">
       {/* Fixed Header */}
       <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 z-50 border-b border-zinc-200/50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <motion.h1 
+          <motion.h1
             className="text-xl font-semibold tracking-tight bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent"
             {...fadeInUp}
           >
@@ -122,19 +130,17 @@ export default function HomePage() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 pt-24">
-        <div className="flex flex-col-reverse lg:flex-row gap-6">
+      <div className="container mx-auto px-4">
+        <div className="flex min-h-screen pt-24 pb-32 gap-6">
           {/* Main Content Column */}
           <div className="flex-1 space-y-6">
             {/* XP Progress */}
             <motion.div {...fadeInUp}>
-              {stats && (
-                <XPProgress
-                  user={stats.user}
-                  nextLevelXP={stats.nextLevelXP}
-                  currentLevelXP={stats.currentLevelXP}
-                />
-              )}
+              <XPProgress
+                user={stats.user}
+                nextLevelXP={stats.nextLevelXP}
+                currentLevelXP={stats.currentLevelXP}
+              />
             </motion.div>
 
             {/* Challenges Section */}
@@ -195,20 +201,16 @@ export default function HomePage() {
           </div>
 
           {/* Friends Column - Fixed width */}
-          <motion.div 
-            {...fadeInUp} 
-            transition={{ delay: 0.5 }}
-            className="w-full lg:w-96"
-          >
-            <div className="lg:sticky lg:top-24">
+          <div className="hidden lg:block w-96">
+            <div className="sticky top-24">
               <FriendsList />
             </div>
-          </motion.div>
+          </div>
         </div>
-      </main>
+      </div>
 
       {/* Fixed Bottom Bar with Log Session Button */}
-      <motion.div 
+      <motion.div
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.5, type: "spring" }}
@@ -218,7 +220,7 @@ export default function HomePage() {
           <Button
             className="w-full h-14 text-lg rounded-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transform hover:scale-[1.02] active:scale-[0.98]"
             size="lg"
-            onClick={() => sessionMutation.mutate()}
+            onClick={() => setIsSessionModalOpen(true)}
             disabled={sessionMutation.isPending}
           >
             {sessionMutation.isPending ? (
@@ -226,6 +228,12 @@ export default function HomePage() {
             ) : null}
             Log Session
           </Button>
+          <LogSessionModal
+            isOpen={isSessionModalOpen}
+            onClose={() => setIsSessionModalOpen(false)}
+            onSubmit={handleSessionSubmit}
+            isPending={sessionMutation.isPending}
+          />
         </div>
       </motion.div>
     </div>

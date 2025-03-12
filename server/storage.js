@@ -106,6 +106,69 @@ export class MemStorage {
         hourOfDay: date.getHours()
       });
     }
+
+    // Add more test session logs with varied times
+    const users = [1, 2, 3]; // Test user IDs
+    for (let userId of users) {
+      for (let i = 0; i < 50; i++) {
+        const date = new Date(now);
+        date.setDate(date.getDate() - Math.floor(Math.random() * 14)); // Last 2 weeks
+        date.setHours(Math.floor(Math.random() * 24));
+
+        this.sessionLogs.set(this.sessionLogId++, {
+          id: this.sessionLogId,
+          userId,
+          timestamp: date,
+          dayOfWeek: date.getDay(),
+          hourOfDay: date.getHours(),
+          duration: Math.floor(Math.random() * 120) + 30, // 30-150 minutes
+          intensity: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)],
+          mood: ['relaxed', 'energetic', 'focused'][Math.floor(Math.random() * 3)],
+        });
+      }
+    }
+
+    // Initialize default challenges
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(23, 59, 59, 999);
+
+    const nextWeek = new Date(now);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    nextWeek.setHours(23, 59, 59, 999);
+
+    this.createChallenge({
+      title: "Daily Dedication",
+      description: "Complete 3 sessions today",
+      type: "DAILY",
+      requirement: 3,
+      xpReward: 50,
+      startDate: now,
+      endDate: tomorrow,
+      isActive: true,
+    });
+
+    this.createChallenge({
+      title: "Week Warrior",
+      description: "Maintain a 7-day streak",
+      type: "WEEKLY",
+      requirement: 7,
+      xpReward: 100,
+      startDate: now,
+      endDate: nextWeek,
+      isActive: true,
+    });
+
+    this.createChallenge({
+      title: "Intensity Master",
+      description: "Complete 5 high-intensity sessions",
+      type: "WEEKLY",
+      requirement: 5,
+      xpReward: 75,
+      startDate: now,
+      endDate: nextWeek,
+      isActive: true,
+    });
   }
 
   async getUser(id) {
