@@ -7,7 +7,7 @@ import { ProtectedRoute } from "@/lib/protected-route";
 import HomePage from "@/pages/home-page";
 import AuthPage from "@/pages/auth-page";
 import LeaderboardPage from "@/pages/leaderboard-page";
-import AdultPage from "@/pages/adult";
+import AdultPage from "@/pages/adult.tsx";
 import NotFound from "@/pages/not-found";
 
 function Router() {
