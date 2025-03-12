@@ -179,29 +179,51 @@ export async function registerRoutes(app) {
     console.log('Creating default challenges...');
 
     try {
-      // Daily Challenge
-      const dailyChallenge = await storage.createChallenge({
-        title: "Daily Dedication",
-        description: "Maintain a streak for 24 hours",
-        type: CHALLENGE_TYPES.DAILY,
-        requirement: 1,
-        xpReward: XP_REWARDS.CHALLENGE_COMPLETED,
-        startDate: now,
-        endDate: tomorrow,
-      });
+      // Clear existing challenges
+      const existingChallenges = await storage.getAllActiveChallenges();
+      if (existingChallenges.length === 0) {
+        // Daily Challenge
+        const dailyChallenge = await storage.createChallenge({
+          title: "Daily Dedication",
+          description: "Maintain a streak for 24 hours",
+          type: CHALLENGE_TYPES.DAILY,
+          requirement: 1,
+          xpReward: XP_REWARDS.CHALLENGE_COMPLETED,
+          startDate: now,
+          endDate: tomorrow,
+          isActive: true,
+        });
 
-      // Weekly Challenge
-      const weeklyChallenge = await storage.createChallenge({
-        title: "Week Warrior",
-        description: "Complete 7 sessions this week",
-        type: CHALLENGE_TYPES.WEEKLY,
-        requirement: 7,
-        xpReward: XP_REWARDS.CHALLENGE_COMPLETED * 2,
-        startDate: now,
-        endDate: nextWeek,
-      });
+        // Weekly Challenge
+        const weeklyChallenge = await storage.createChallenge({
+          title: "Week Warrior",
+          description: "Complete 7 sessions this week",
+          type: CHALLENGE_TYPES.WEEKLY,
+          requirement: 7,
+          xpReward: XP_REWARDS.CHALLENGE_COMPLETED * 2,
+          startDate: now,
+          endDate: nextWeek,
+          isActive: true,
+        });
 
-      console.log('Created challenges:', { dailyChallenge, weeklyChallenge });
+        // Special Challenge
+        const specialChallenge = await storage.createChallenge({
+          title: "Dedication Master",
+          description: "Complete 3 sessions today",
+          type: CHALLENGE_TYPES.DAILY,
+          requirement: 3,
+          xpReward: XP_REWARDS.CHALLENGE_COMPLETED * 1.5,
+          startDate: now,
+          endDate: tomorrow,
+          isActive: true,
+        });
+
+        console.log('Created challenges:', { 
+          dailyChallenge, 
+          weeklyChallenge,
+          specialChallenge 
+        });
+      }
     } catch (error) {
       console.error('Error creating challenges:', error);
     }

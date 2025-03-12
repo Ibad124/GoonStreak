@@ -167,11 +167,31 @@ export class MemStorage {
   }
 
   async getAllActiveChallenges() {
-    return Array.from(this.challenges.values()).filter(
-      (challenge) => challenge.isActive &&
-        new Date(challenge.startDate) <= new Date() &&
-        new Date(challenge.endDate) >= new Date()
-    );
+    const now = new Date();
+    const challenges = Array.from(this.challenges.values());
+
+    console.log('Getting active challenges, total challenges:', challenges.length);
+
+    const activeOnes = challenges.filter(challenge => {
+      const startDate = new Date(challenge.startDate);
+      const endDate = new Date(challenge.endDate);
+      const isActive = challenge.isActive && 
+                      startDate <= now && 
+                      endDate >= now;
+
+      console.log('Challenge:', {
+        id: challenge.id,
+        title: challenge.title,
+        startDate,
+        endDate,
+        isActive
+      });
+
+      return isActive;
+    });
+
+    console.log('Active challenges found:', activeOnes.length);
+    return activeOnes;
   }
 
   async getUserChallengeProgress(userId, challengeId) {
