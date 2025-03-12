@@ -41,25 +41,27 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className="min-h-screen pb-20 bg-zinc-50/50 backdrop-blur">
       {/* Fixed Header */}
-      <header className="fixed top-0 left-0 right-0 bg-background/95 backdrop-blur border-b z-50">
+      <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 z-50 border-b border-zinc-200/50">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-          <h1 className="font-semibold">Hi, {user?.username}!</h1>
+          <h1 className="text-xl font-semibold tracking-tight">Hi, {user?.username}!</h1>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="rounded-full">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
             <SheetContent>
               <div className="space-y-4 mt-8">
                 <Link href="/leaderboard">
-                  <Button variant="outline" className="w-full">Leaderboard</Button>
+                  <Button variant="outline" className="w-full rounded-full">
+                    Leaderboard
+                  </Button>
                 </Link>
                 <Button 
                   variant="destructive" 
-                  className="w-full"
+                  className="w-full rounded-full"
                   onClick={() => logoutMutation.mutate()}
                 >
                   Logout
@@ -73,18 +75,18 @@ export default function HomePage() {
       {/* Main Content */}
       <main className="container mx-auto px-4 pt-20">
         <div className="space-y-6">
-          <Card>
+          <Card className="backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-zinc-100/50">
             <CardHeader>
-              <CardTitle>Your Streak</CardTitle>
+              <CardTitle className="text-2xl font-semibold tracking-tight">Your Streak</CardTitle>
             </CardHeader>
             <CardContent>
               <StreakStats stats={stats} />
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-zinc-100/50">
             <CardHeader>
-              <CardTitle>Achievements</CardTitle>
+              <CardTitle className="text-2xl font-semibold tracking-tight">Achievements</CardTitle>
             </CardHeader>
             <CardContent>
               <Achievements achievements={stats?.achievements || []} />
@@ -94,10 +96,10 @@ export default function HomePage() {
       </main>
 
       {/* Fixed Bottom Bar with Log Session Button */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur border-t">
-        <div className="container mx-auto">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t border-zinc-200/50">
+        <div className="container mx-auto max-w-lg">
           <Button
-            className="w-full h-14 text-lg rounded-full"
+            className="w-full h-14 text-lg rounded-full bg-blue-500 hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20"
             size="lg"
             onClick={() => sessionMutation.mutate()}
             disabled={sessionMutation.isPending}
