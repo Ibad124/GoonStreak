@@ -63,7 +63,7 @@ export default function SocialPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50/50">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50/50 to-white">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 z-50 border-b border-zinc-200/50">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
@@ -263,7 +263,7 @@ export default function SocialPage() {
                   <CardContent>
                     <div className="space-y-4">
                       {groupChallenges.map(challenge => (
-                        <div key={challenge.id} className="p-4 border rounded-lg">
+                        <div key={challenge.id} className="p-4 border rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 hover:from-blue-100 hover:to-blue-200/50 transition-colors shadow-md">
                           <div className="flex items-center justify-between">
                             <div>
                               <h3 className="font-semibold">{challenge.title}</h3>
@@ -271,9 +271,9 @@ export default function SocialPage() {
                                 {challenge.participants} participants
                               </p>
                             </div>
-                            <Button>Join Challenge</Button>
+                            <Button className="bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700">Join Challenge</Button>
                           </div>
-                          <div className="mt-2 text-sm">
+                          <div className="mt-2 text-sm font-medium text-blue-600">
                             Reward: {challenge.reward}
                           </div>
                         </div>
@@ -291,9 +291,9 @@ export default function SocialPage() {
                   <CardContent>
                     <div className="grid gap-4">
                       {achievements.map(achievement => (
-                        <div key={achievement.id} className="flex items-center gap-4 p-4 border rounded-lg">
-                          <div className="p-2 bg-blue-100 rounded-lg">
-                            <achievement.icon className="h-6 w-6 text-blue-600" />
+                        <div key={achievement.id} className="flex items-center gap-4 p-4 border rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 hover:from-blue-100 hover:to-blue-200/50 transition-colors shadow-md">
+                          <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
+                            <achievement.icon className="h-6 w-6 text-white" />
                           </div>
                           <div>
                             <h3 className="font-semibold">{achievement.title}</h3>
@@ -301,7 +301,7 @@ export default function SocialPage() {
                               {achievement.description}
                             </p>
                           </div>
-                          <Button variant="outline" size="sm" className="ml-auto">
+                          <Button variant="outline" size="sm" className="ml-auto hover:bg-blue-50">
                             <Share2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -328,7 +328,7 @@ export default function SocialPage() {
 
       {/* Chat Button */}
       <Button
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg"
+        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/20 transform hover:scale-110"
         size="icon"
       >
         <MessageSquare className="h-6 w-6" />
