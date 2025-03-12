@@ -33,18 +33,18 @@ export const insertUserSchema = createInsertSchema(users).pick({
   showOnLeaderboard: true,
 });
 
-// Level configuration
+// Level configuration - made more achievable
 export const LEVEL_THRESHOLDS = {
   1: { xp: 0, title: "Goon Apprentice" },
-  2: { xp: 100, title: "Goon Enthusiast" },
-  3: { xp: 250, title: "Goon Expert" },
-  4: { xp: 500, title: "Master Stroker" },
-  5: { xp: 1000, title: "Legendary Gooner" },
+  2: { xp: 50, title: "Goon Enthusiast" },
+  3: { xp: 150, title: "Goon Expert" },
+  4: { xp: 300, title: "Master Stroker" },
+  5: { xp: 500, title: "Legendary Gooner" },
 };
 
-// XP rewards configuration
+// XP rewards configuration - increased rewards
 export const XP_REWARDS = {
-  SESSION_COMPLETE: 10,
-  STREAK_MILESTONE: 50,
+  SESSION_COMPLETE: 15,  // Increased base XP
+  STREAK_MILESTONE: 30,  // Bonus for hitting streak milestones
   ACHIEVEMENT_EARNED: 25,
 };

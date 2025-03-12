@@ -32,6 +32,8 @@ export async function registerRoutes(app) {
 
     let currentStreak = user.currentStreak;
     let todaySessions = user.todaySessions;
+
+    // Base XP for completing a session
     let xpToAward = XP_REWARDS.SESSION_COMPLETE;
 
     // Reset today's sessions if it's a new day
@@ -43,12 +45,19 @@ export async function registerRoutes(app) {
     if (!lastDate ||
         (today.getTime() - lastDate.getTime()) > 24 * 60 * 60 * 1000) {
       currentStreak = 1;
+      // Bonus XP for starting a new streak
+      xpToAward += 10;
     } else if (lastDate.getDate() !== today.getDate()) {
       currentStreak += 1;
       // Award XP for streak milestones
       if (currentStreak % 3 === 0) {
         xpToAward += XP_REWARDS.STREAK_MILESTONE;
       }
+    }
+
+    // Award bonus XP for multiple sessions in a day
+    if (todaySessions < 5) {  // Cap the bonus at 5 sessions per day
+      xpToAward += todaySessions * 5;  // Progressive bonus
     }
 
     const updatedUser = await storage.updateUser(user.id, {
