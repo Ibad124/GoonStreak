@@ -5,6 +5,8 @@ import { DAYS_OF_WEEK } from "@shared/schema";
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
 function SessionHeatmap({ heatmapData }) {
+  if (!heatmapData) return null;
+
   return (
     <div className="w-full overflow-x-auto">
       <div className="min-w-[800px]">
@@ -44,6 +46,8 @@ function SessionHeatmap({ heatmapData }) {
 }
 
 function SessionTrends({ trends }) {
+  if (!trends) return null;
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
@@ -88,6 +92,14 @@ export default function SessionInsights() {
       <div className="space-y-4">
         <div className="h-[300px] rounded-lg bg-muted animate-pulse" />
         <div className="h-24 rounded-lg bg-muted animate-pulse" />
+      </div>
+    );
+  }
+
+  if (!insights || (!insights.heatmap?.length && !insights.trends)) {
+    return (
+      <div className="text-center text-muted-foreground py-8">
+        No session data yet. Start logging sessions to see your patterns!
       </div>
     );
   }
