@@ -102,6 +102,7 @@ export default function FriendsList() {
 
   const { data: friends = [] } = useQuery({
     queryKey: ["/api/friends"],
+    refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   const { data: requests = [] } = useQuery({
