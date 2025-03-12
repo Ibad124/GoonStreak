@@ -7,7 +7,7 @@ import StreakStats from "@/components/StreakStats";
 import Achievements from "@/components/Achievements";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Menu, Film, Users, Trophy, Activity, PlusCircle } from "lucide-react";
+import { Loader2, Menu, Film, Users, Trophy, Flame, Activity, PlusCircle, Clock, Star, Heart } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import Challenges from "@/components/Challenges";
 import { motion } from "framer-motion";
@@ -19,22 +19,41 @@ const menuItems = [
     title: "Social Hub",
     icon: Users,
     href: "/social",
-    description: "Connect with friends and start circle sessions",
-    color: "bg-purple-500"
+    description: "Connect with friends and start circle sessions together",
+    color: "bg-gradient-to-br from-purple-500 to-indigo-600",
+    stats: "12 friends online"
   },
   {
     title: "Adult Content",
     icon: Film,
     href: "/adult-content",
-    description: "Access premium adult content",
-    color: "bg-pink-500"
+    description: "Premium adult content curated just for you",
+    color: "bg-gradient-to-br from-pink-500 to-rose-600",
+    stats: "1000+ videos"
   },
   {
     title: "Leaderboard",
     icon: Trophy,
     href: "/leaderboard",
-    description: "See how you rank against others",
-    color: "bg-yellow-500"
+    description: "Compete with others and climb the rankings",
+    color: "bg-gradient-to-br from-amber-500 to-yellow-600",
+    stats: "Top 100 players"
+  },
+  {
+    title: "Daily Streaks",
+    icon: Flame,
+    href: "/streaks",
+    description: "Keep your momentum going with daily activities",
+    color: "bg-gradient-to-br from-orange-500 to-red-600",
+    stats: "Current: 5 days"
+  },
+  {
+    title: "Latest Updates",
+    icon: Star,
+    href: "/updates",
+    description: "Check out new features and improvements",
+    color: "bg-gradient-to-br from-cyan-500 to-blue-600",
+    stats: "3 new updates"
   }
 ];
 
@@ -56,6 +75,15 @@ const containerAnimation = {
 const itemAnimation = {
   hidden: { opacity: 0, y: 20 },
   show: { opacity: 1, y: 0 }
+};
+
+const menuItemAnimation = {
+  initial: { scale: 1 },
+  hover: { 
+    scale: 1.02,
+    transition: { type: "spring", stiffness: 400, damping: 10 }
+  },
+  tap: { scale: 0.98 }
 };
 
 export default function HomePage() {
@@ -108,7 +136,6 @@ export default function HomePage() {
     },
   });
 
-  // Add back the handleSessionSubmit function
   const handleSessionSubmit = (sessionData) => {
     sessionMutation.mutate(sessionData);
     setIsSessionModalOpen(false);
@@ -135,30 +162,46 @@ export default function HomePage() {
           </motion.h1>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="rounded-full">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="rounded-full hover:scale-105 transition-transform active:scale-95"
+              >
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent className="w-full sm:w-[400px] p-0">
-              <SheetHeader className="p-6 bg-gradient-to-b from-blue-500 to-blue-600 text-white">
-                <SheetTitle className="text-2xl font-bold text-white">Menu</SheetTitle>
+            <SheetContent className="w-full sm:max-w-[450px] p-0">
+              <SheetHeader className="p-6 bg-gradient-to-br from-blue-600 to-blue-800 text-white">
+                <SheetTitle className="text-2xl font-bold text-white flex items-center gap-2">
+                  <Heart className="h-6 w-6" />
+                  Main Menu
+                </SheetTitle>
+                <p className="text-blue-100 mt-2">Explore features and connect with others</p>
               </SheetHeader>
               <div className="p-6 space-y-6">
                 <div className="grid gap-4">
                   {menuItems.map((item) => (
                     <Link key={item.href} href={item.href}>
-                      <Button
-                        variant="outline"
-                        className="w-full h-auto p-4 flex flex-col items-start gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                      <motion.div
+                        variants={menuItemAnimation}
+                        initial="initial"
+                        whileHover="hover"
+                        whileTap="tap"
                       >
-                        <div className={`${item.color} p-2 rounded-lg`}>
-                          <item.icon className="h-5 w-5 text-white" />
-                        </div>
-                        <div className="text-left">
-                          <div className="font-semibold">{item.title}</div>
-                          <div className="text-sm text-muted-foreground">{item.description}</div>
-                        </div>
-                      </Button>
+                        <Button
+                          variant="outline"
+                          className="w-full h-auto p-4 flex flex-col items-start gap-3 group"
+                        >
+                          <div className={`${item.color} p-3 rounded-xl shadow-lg group-hover:shadow-xl transition-shadow`}>
+                            <item.icon className="h-6 w-6 text-white" />
+                          </div>
+                          <div className="text-left">
+                            <div className="font-semibold text-lg">{item.title}</div>
+                            <div className="text-sm text-muted-foreground">{item.description}</div>
+                            <div className="mt-2 text-xs font-medium text-blue-600">{item.stats}</div>
+                          </div>
+                        </Button>
+                      </motion.div>
                     </Link>
                   ))}
                 </div>
