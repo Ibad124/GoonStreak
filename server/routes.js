@@ -18,10 +18,13 @@ export async function registerRoutes(app) {
     const { nextLevelXP, currentLevelXP } = storage.calculateLevel(req.user.xpPoints);
     const activeChallenges = await storage.getAllActiveChallenges();
 
+    console.log('Active challenges:', activeChallenges);
+
     // Get progress for each active challenge
     const challengesWithProgress = await Promise.all(
       activeChallenges.map(async (challenge) => {
         const progress = await storage.getUserChallengeProgress(req.user.id, challenge.id);
+        console.log(`Challenge ${challenge.id} progress:`, progress);
         return {
           ...challenge,
           progress: progress || {
@@ -31,6 +34,8 @@ export async function registerRoutes(app) {
         };
       })
     );
+
+    console.log('Challenges with progress:', challengesWithProgress);
 
     res.json({
       user: req.user,
@@ -171,30 +176,38 @@ export async function registerRoutes(app) {
     nextWeek.setDate(nextWeek.getDate() + 7);
     nextWeek.setHours(23, 59, 59, 999);
 
-    // Daily Challenge
-    await storage.createChallenge({
-      title: "Daily Dedication",
-      description: "Maintain a streak for 24 hours",
-      type: CHALLENGE_TYPES.DAILY,
-      requirement: 1,
-      xpReward: XP_REWARDS.CHALLENGE_COMPLETED,
-      startDate: now,
-      endDate: tomorrow,
-    });
+    console.log('Creating default challenges...');
 
-    // Weekly Challenge
-    await storage.createChallenge({
-      title: "Week Warrior",
-      description: "Complete 7 sessions this week",
-      type: CHALLENGE_TYPES.WEEKLY,
-      requirement: 7,
-      xpReward: XP_REWARDS.CHALLENGE_COMPLETED * 2,
-      startDate: now,
-      endDate: nextWeek,
-    });
+    try {
+      // Daily Challenge
+      const dailyChallenge = await storage.createChallenge({
+        title: "Daily Dedication",
+        description: "Maintain a streak for 24 hours",
+        type: CHALLENGE_TYPES.DAILY,
+        requirement: 1,
+        xpReward: XP_REWARDS.CHALLENGE_COMPLETED,
+        startDate: now,
+        endDate: tomorrow,
+      });
+
+      // Weekly Challenge
+      const weeklyChallenge = await storage.createChallenge({
+        title: "Week Warrior",
+        description: "Complete 7 sessions this week",
+        type: CHALLENGE_TYPES.WEEKLY,
+        requirement: 7,
+        xpReward: XP_REWARDS.CHALLENGE_COMPLETED * 2,
+        startDate: now,
+        endDate: nextWeek,
+      });
+
+      console.log('Created challenges:', { dailyChallenge, weeklyChallenge });
+    } catch (error) {
+      console.error('Error creating challenges:', error);
+    }
   };
 
-  // Initialize challenges
+  // Initialize challenges immediately when routes are registered
   await initializeDefaultChallenges();
 
   const httpServer = createServer(app);

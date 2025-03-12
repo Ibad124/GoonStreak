@@ -19,14 +19,14 @@ function formatTimeLeft(endDate) {
 
 function ChallengeCard({ challenge }) {
   const progress = (challenge.progress.currentProgress / challenge.requirement) * 100;
-  
+
   return (
     <Card className="p-4 backdrop-blur bg-white/80 border-zinc-200/50">
       <div className="flex items-start gap-4">
         <div className="p-2 rounded-full bg-primary/10">
           <Trophy className="h-6 w-6 text-primary" />
         </div>
-        
+
         <div className="flex-1">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold">{challenge.title}</h3>
@@ -42,9 +42,9 @@ function ChallengeCard({ challenge }) {
               </div>
             )}
           </div>
-          
+
           <p className="text-sm text-zinc-500 mt-1">{challenge.description}</p>
-          
+
           <div className="mt-4">
             <div className="flex justify-between mb-2">
               <span className="text-sm font-medium">
@@ -66,6 +66,8 @@ function ChallengeCard({ challenge }) {
 }
 
 export default function Challenges({ challenges }) {
+  console.log('Rendering challenges:', challenges);
+
   if (!challenges?.length) {
     return (
       <div className="text-center text-muted-foreground py-8">

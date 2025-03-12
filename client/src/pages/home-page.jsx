@@ -20,6 +20,8 @@ export default function HomePage() {
     queryKey: ["/api/stats"],
   });
 
+  console.log('Stats data:', stats);
+
   const sessionMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", "/api/session");
