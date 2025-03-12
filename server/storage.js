@@ -21,11 +21,91 @@ export class MemStorage {
       checkPeriod: 86400000,
     });
     this.sessionLogs = new Map();
-    // New maps for friend-related data
     this.friendRequests = new Map();
     this.friendships = new Map();
     this.friendRequestId = 1;
     this.friendshipId = 1;
+
+    // Add test users
+    this.createUser({
+      username: "GoonMaster",
+      password: "test123",
+      isAnonymous: false,
+      showOnLeaderboard: true,
+      currentStreak: 15,
+      longestStreak: 20,
+      totalSessions: 45,
+      xpPoints: 450,
+      level: 4,
+      title: "Master Stroker"
+    });
+
+    this.createUser({
+      username: "StrokeKing",
+      password: "test123",
+      isAnonymous: false,
+      showOnLeaderboard: true,
+      currentStreak: 12,
+      longestStreak: 18,
+      totalSessions: 38,
+      xpPoints: 380,
+      level: 3,
+      title: "Goon Expert"
+    });
+
+    this.createUser({
+      username: "EdgeLord",
+      password: "test123",
+      isAnonymous: false,
+      showOnLeaderboard: true,
+      currentStreak: 10,
+      longestStreak: 15,
+      totalSessions: 30,
+      xpPoints: 300,
+      level: 3,
+      title: "Goon Expert"
+    });
+
+    // Add test achievements
+    this.achievements.set(1, {
+      id: 1,
+      userId: 1,
+      type: "STREAK_MASTER",
+      description: "Maintained a 15-day streak!",
+      earnedAt: new Date()
+    });
+
+    this.achievements.set(2, {
+      id: 2,
+      userId: 1,
+      type: "XP_MILESTONE",
+      description: "Reached 450 XP points!",
+      earnedAt: new Date()
+    });
+
+    this.achievements.set(3, {
+      id: 3,
+      userId: 2,
+      type: "SESSION_MASTER",
+      description: "Completed 30 sessions!",
+      earnedAt: new Date()
+    });
+
+    // Add test session logs for insights
+    const now = new Date();
+    for (let i = 0; i < 50; i++) {
+      const date = new Date(now);
+      date.setDate(date.getDate() - Math.floor(Math.random() * 7));
+      date.setHours(Math.floor(Math.random() * 24));
+
+      this.sessionLogs.set(this.sessionLogId++, {
+        id: this.sessionLogId,
+        userId: 1,
+        timestamp: date,
+        dayOfWeek: date.getDay(),
+        hourOfDay: date.getHours()
+      });
+    }
   }
 
   async getUser(id) {
@@ -53,7 +133,7 @@ export class MemStorage {
       title: LEVEL_THRESHOLDS[1].title,
       stealthMode: false,
       stealthNotifications: false,
-      showOnLeaderboard: true, 
+      showOnLeaderboard: true,
     };
     this.users.set(id, user);
     return user;
@@ -152,7 +232,7 @@ export class MemStorage {
       const currentLeaderboard = Array.from(this.users.values())
         .filter(user => user.showOnLeaderboard)
         .sort((a, b) => b.currentStreak - a.currentStreak)
-        .slice(0, 3); 
+        .slice(0, 3);
 
       for (let i = 0; i < currentLeaderboard.length; i++) {
         const user = currentLeaderboard[i];
@@ -234,8 +314,8 @@ export class MemStorage {
     const activeOnes = challenges.filter(challenge => {
       const startDate = new Date(challenge.startDate);
       const endDate = new Date(challenge.endDate);
-      const isActive = challenge.isActive && 
-                      startDate <= now && 
+      const isActive = challenge.isActive &&
+                      startDate <= now &&
                       endDate >= now;
 
       console.log('Challenge:', {
