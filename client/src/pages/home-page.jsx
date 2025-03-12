@@ -1,0 +1,114 @@
+import { Link } from "wouter";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import StreakStats from "@/components/StreakStats";
+import Achievements from "@/components/Achievements";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2, Menu } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+
+export default function HomePage() {
+  const { user, logoutMutation } = useAuth();
+  const { toast } = useToast();
+
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ["/api/stats"],
+  });
+
+  const sessionMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/session");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+      toast({
+        title: "Session Logged",
+        description: "Your streak has been updated!",
+      });
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-border" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen pb-20">
+      {/* Fixed Header */}
+      <header className="fixed top-0 left-0 right-0 bg-background/95 backdrop-blur border-b z-50">
+        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
+          <h1 className="font-semibold">Hi, {user?.username}!</h1>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <div className="space-y-4 mt-8">
+                <Link href="/leaderboard">
+                  <Button variant="outline" className="w-full">Leaderboard</Button>
+                </Link>
+                <Button 
+                  variant="destructive" 
+                  className="w-full"
+                  onClick={() => logoutMutation.mutate()}
+                >
+                  Logout
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 pt-20">
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Your Streak</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <StreakStats stats={stats} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Achievements</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Achievements achievements={stats?.achievements || []} />
+            </CardContent>
+          </Card>
+        </div>
+      </main>
+
+      {/* Fixed Bottom Bar with Log Session Button */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur border-t">
+        <div className="container mx-auto">
+          <Button
+            className="w-full h-14 text-lg rounded-full"
+            size="lg"
+            onClick={() => sessionMutation.mutate()}
+            disabled={sessionMutation.isPending}
+          >
+            {sessionMutation.isPending ? (
+              <Loader2 className="h-6 w-6 animate-spin mr-2" />
+            ) : null}
+            Log Session
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
