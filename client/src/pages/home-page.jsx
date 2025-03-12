@@ -38,8 +38,14 @@ export default function HomePage() {
       return res.json();
     },
     onSuccess: (data) => {
-      // Invalidate stats query to trigger a refresh
-      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+      // Immediately update the stats cache with new values
+      queryClient.setQueryData(["/api/stats"], (oldData) => ({
+        ...oldData,
+        user: data.user,
+        nextLevelXP: data.nextLevelXP,
+        currentLevelXP: data.currentLevelXP,
+        challenges: data.challenges,
+      }));
 
       // Show session logged toast
       toast({
@@ -47,11 +53,15 @@ export default function HomePage() {
         description: "Your streak has been updated!",
       });
 
-      // Calculate and show XP gained
-      const xpGained = data.user.xpPoints - (stats?.user.xpPoints || 0);
+      // Show XP gained toast with animation
       toast({
         title: "XP Gained!",
-        description: `+${xpGained} XP`,
+        description: (
+          <div className="flex items-center gap-2">
+            <span className="text-xl font-bold text-blue-500">+{data.xpGained}</span>
+            <span>XP</span>
+          </div>
+        ),
         variant: "default",
       });
 
@@ -72,6 +82,18 @@ export default function HomePage() {
           variant: "default",
         });
       });
+
+      // Show challenge completion toasts
+      data.completedChallenges?.forEach((completion) => {
+        toast({
+          title: "Challenge Completed!",
+          description: `${completion.challenge.title} - ${completion.challenge.xpReward} XP`,
+          variant: "default",
+        });
+      });
+
+      // Finally invalidate stats query to ensure everything is in sync
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
     },
   });
 

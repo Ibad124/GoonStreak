@@ -40,7 +40,6 @@ export async function registerRoutes(app) {
     });
   });
 
-  // Log a new session
   app.post("/api/session", requireAuth, async (req, res) => {
     const user = req.user;
     const today = new Date();
@@ -51,6 +50,7 @@ export async function registerRoutes(app) {
     let todaySessions = user.todaySessions;
     let xpToAward = XP_REWARDS.SESSION_COMPLETE;
 
+    // Update streak and XP
     if (!lastDate || lastDate.getDate() !== today.getDate()) {
       todaySessions = 0;
     }
@@ -89,15 +89,22 @@ export async function registerRoutes(app) {
       todaySessions: todaySessions + 1,
     });
 
+    // Calculate XP updates
     const xpResult = await storage.updateUserXP(user.id, xpToAward);
+
+    // Check for completed challenges
     const completedChallenges = await storage.checkAndUpdateChallenges(user.id);
 
+    // Award XP for completed challenges
+    let challengeXP = 0;
     for (const completion of completedChallenges) {
+      challengeXP += completion.challenge.xpReward;
       await storage.updateUserXP(user.id, completion.challenge.xpReward);
     }
 
     const newAchievements = [];
 
+    // Award achievements based on streak milestones
     if (currentStreak === 3) {
       const achievement = await storage.addAchievement(
         user.id,
@@ -118,6 +125,7 @@ export async function registerRoutes(app) {
       await storage.updateUserXP(user.id, XP_REWARDS.ACHIEVEMENT_EARNED);
     }
 
+    // Get updated challenges
     const activeChallenges = await storage.getAllActiveChallenges();
     const challengesWithProgress = await Promise.all(
       activeChallenges.map(async (challenge) => {
@@ -132,12 +140,16 @@ export async function registerRoutes(app) {
       })
     );
 
+    // Get final XP calculations
+    const finalUser = await storage.getUser(user.id);
+    const { nextLevelXP, currentLevelXP } = storage.calculateLevel(finalUser.xpPoints);
+
     res.json({
-      user: xpResult.user,
+      user: finalUser,
       leveledUp: xpResult.leveledUp,
-      nextLevelXP: xpResult.nextLevelXP,
-      currentLevelXP: xpResult.currentLevelXP,
-      xpGained: xpToAward,
+      nextLevelXP,
+      currentLevelXP,
+      xpGained: xpToAward + challengeXP + (newAchievements.length * XP_REWARDS.ACHIEVEMENT_EARNED),
       newAchievements,
       completedChallenges,
       challenges: challengesWithProgress,
