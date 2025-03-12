@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Menu, Sparkles, Trophy, Star } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Challenges from "@/components/Challenges";
+import SessionInsights from "@/components/SessionInsights"; // Added import
 
 export default function HomePage() {
   const { user, logoutMutation } = useAuth();
@@ -143,6 +144,17 @@ export default function HomePage() {
               <Achievements achievements={stats?.achievements || []} />
             </CardContent>
           </Card>
+
+          {/* Session Insights */}
+          <Card className="backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-zinc-100/50">
+            <CardHeader>
+              <CardTitle className="text-2xl font-semibold tracking-tight">Session Insights</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SessionInsights />
+            </CardContent>
+          </Card>
+
         </div>
       </main>
 

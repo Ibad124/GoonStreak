@@ -48,6 +48,14 @@ export const challengeProgress = pgTable("challenge_progress", {
   completedAt: timestamp("completed_at"),
 });
 
+export const sessionLogs = pgTable("session_logs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  timestamp: timestamp("timestamp").notNull(),
+  dayOfWeek: integer("day_of_week").notNull(), // 0-6 for Sunday-Saturday
+  hourOfDay: integer("hour_of_day").notNull(), // 0-23
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -73,8 +81,7 @@ export const XP_REWARDS = {
   CHALLENGE_COMPLETED: 50,
 };
 
-export const CHALLENGE_TYPES = {
-  DAILY: "DAILY",
-  WEEKLY: "WEEKLY",
-  EVENT: "EVENT",
-};
+export const DAYS_OF_WEEK = [
+  "Sunday", "Monday", "Tuesday", "Wednesday",
+  "Thursday", "Friday", "Saturday"
+];

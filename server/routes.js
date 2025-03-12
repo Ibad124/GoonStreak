@@ -78,6 +78,8 @@ export async function registerRoutes(app) {
       xpToAward += todaySessions * 5;
     }
 
+    const sessionLog = await storage.logSession(user.id, today); // Added session logging
+
     const updatedUser = await storage.updateUser(user.id, {
       lastSessionDate: today,
       currentStreak,
@@ -165,6 +167,12 @@ export async function registerRoutes(app) {
     res.json(history);
   });
 
+
+  // Add to the routes section
+  app.get("/api/insights", requireAuth, async (req, res) => {
+    const insights = await storage.getUserInsights(req.user.id);
+    res.json(insights);
+  });
 
   // Update user privacy settings
   app.patch("/api/privacy", requireAuth, async (req, res) => {

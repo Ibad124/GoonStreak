@@ -15,10 +15,12 @@ export class MemStorage {
     this.achievementId = 1;
     this.challengeId = 1;
     this.challengeProgressId = 1;
+    this.sessionLogId = 1; // Initialize sessionLogId
     this.lastLeaderboardReset = new Date();
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000,
     });
+    this.sessionLogs = new Map(); // Initialize sessionLogs
   }
 
   async getUser(id) {
@@ -317,6 +319,52 @@ export class MemStorage {
     }
 
     return newCompletions;
+  }
+
+  async logSession(userId, timestamp) {
+    const sessionLog = {
+      id: this.sessionLogId++,
+      userId,
+      timestamp,
+      dayOfWeek: timestamp.getDay(),
+      hourOfDay: timestamp.getHours(),
+    };
+
+    this.sessionLogs.set(sessionLog.id, sessionLog);
+    return sessionLog;
+  }
+
+  async getUserInsights(userId) {
+    const userSessions = Array.from(this.sessionLogs.values())
+      .filter(log => log.userId === userId);
+
+    // Initialize heatmap data structure
+    const heatmap = Array(7).fill(null).map(() => Array(24).fill(0));
+
+    // Initialize counters for trends
+    const hourCounts = Array(24).fill(0);
+    const dayCounts = Array(7).fill(0);
+
+    // Process all sessions
+    userSessions.forEach(session => {
+      heatmap[session.dayOfWeek][session.hourOfDay]++;
+      hourCounts[session.hourOfDay]++;
+      dayCounts[session.dayOfWeek]++;
+    });
+
+    // Find most active times
+    const mostActiveHour = hourCounts.indexOf(Math.max(...hourCounts));
+    const mostActiveDay = dayCounts.indexOf(Math.max(...dayCounts));
+
+    return {
+      heatmap,
+      trends: {
+        mostActiveHour,
+        mostActiveHourSessions: hourCounts[mostActiveHour],
+        mostActiveDay,
+        mostActiveDaySessions: dayCounts[mostActiveDay],
+      }
+    };
   }
 }
 
