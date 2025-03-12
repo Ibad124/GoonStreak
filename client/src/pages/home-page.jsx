@@ -28,14 +28,23 @@ export default function HomePage() {
   const { toast } = useToast();
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
 
-  const { data: stats, isLoading } = useQuery({
+  const { data: stats, isLoading: isStatsLoading } = useQuery({
     queryKey: ["/api/stats"],
   });
 
   const sessionMutation = useMutation({
     mutationFn: async (sessionData) => {
-      const res = await apiRequest("POST", "/api/session", sessionData);
-      return res.json();
+      try {
+        const res = await apiRequest("POST", "/api/session", sessionData);
+        return await res.json();
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to log session. Please try again.",
+          variant: "destructive",
+        });
+        throw error;
+      }
     },
     onSuccess: (data) => {
       // Immediately update the stats cache with new values
@@ -95,6 +104,13 @@ export default function HomePage() {
       // Finally invalidate stats query to ensure everything is in sync
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
     },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to log session. Please try again.",
+        variant: "destructive",
+      });
+    },
   });
 
   const handleSessionSubmit = async (sessionData) => {
@@ -102,7 +118,7 @@ export default function HomePage() {
     setIsSessionModalOpen(false);
   };
 
-  if (isLoading || !stats) {
+  if (isStatsLoading || !stats) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-border" />
@@ -193,7 +209,7 @@ export default function HomePage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <StreakStats stats={{ user: stats.user }} />
+                  <StreakStats stats={stats} />
                 </CardContent>
               </Card>
             </motion.div>
