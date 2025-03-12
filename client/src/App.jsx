@@ -7,15 +7,15 @@ import { ProtectedRoute } from "@/lib/protected-route";
 import HomePage from "@/pages/home-page";
 import AuthPage from "@/pages/auth-page";
 import LeaderboardPage from "@/pages/leaderboard-page";
-import AdultPage from "@/pages/adult-content";
+import AdultContent from "@/pages/adult-content";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
     <Switch>
-      <ProtectedRoute path="/adult-content" component={AdultPage} />
+      <ProtectedRoute path="/adult-content" component={AdultContent} />
       <ProtectedRoute path="/leaderboard" component={LeaderboardPage} />
-      <ProtectedRoute path="/" exact component={HomePage} />
+      <ProtectedRoute path="/" component={HomePage} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>

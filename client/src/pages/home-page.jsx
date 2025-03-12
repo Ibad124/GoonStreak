@@ -1,4 +1,3 @@
-
 import { Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
@@ -9,10 +8,10 @@ import Achievements from "@/components/Achievements";
 import XPProgress from "@/components/XPProgress";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Menu } from "lucide-react";
+import { Loader2, Menu, Film } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Challenges from "@/components/Challenges";
-import React from "react";
+import SessionInsights from "@/components/SessionInsights";
 
 export default function HomePage() {
   const { user, logoutMutation } = useAuth();
@@ -88,18 +87,22 @@ export default function HomePage() {
             </SheetTrigger>
             <SheetContent>
               <div className="space-y-4 mt-8">
+                <Link href="/adult-content">
+                  <Button
+                    variant="outline"
+                    className="w-full rounded-full flex items-center"
+                  >
+                    <Film className="h-4 w-4 mr-2" />
+                    Adult Content
+                  </Button>
+                </Link>
                 <Link href="/leaderboard">
                   <Button variant="outline" className="w-full rounded-full">
                     Leaderboard
                   </Button>
                 </Link>
-                <Link href="/adult-content">
-                  <Button variant="outline" className="w-full rounded-full">
-                    Adult Content
-                  </Button>
-                </Link>
-                <Button 
-                  variant="destructive" 
+                <Button
+                  variant="destructive"
                   className="w-full rounded-full"
                   onClick={() => logoutMutation.mutate()}
                 >
