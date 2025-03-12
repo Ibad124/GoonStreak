@@ -8,7 +8,7 @@ import Achievements from "@/components/Achievements";
 import XPProgress from "@/components/XPProgress";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Menu, Sparkles, Trophy } from "lucide-react";
+import { Loader2, Menu, Sparkles, Trophy, Star } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export default function HomePage() {
@@ -31,6 +31,14 @@ export default function HomePage() {
       toast({
         title: "Session Logged",
         description: "Your streak has been updated!",
+      });
+
+      // Show XP gained toast
+      const xpGained = data.user.xpPoints - (stats?.user.xpPoints || 0);
+      toast({
+        title: "XP Gained!",
+        description: `+${xpGained} XP`,
+        icon: <Star className="h-5 w-5 text-yellow-500" />,
       });
 
       // If user leveled up, show special toast
@@ -99,7 +107,8 @@ export default function HomePage() {
           {/* XP Progress */}
           <XPProgress 
             user={stats.user} 
-            nextLevelXP={stats.nextLevelXP} 
+            nextLevelXP={stats.nextLevelXP}
+            currentLevelXP={stats.currentLevelXP}
           />
 
           {/* Streak Stats */}
