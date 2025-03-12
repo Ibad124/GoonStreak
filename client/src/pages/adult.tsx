@@ -24,7 +24,7 @@ interface StatsData {
   achievements: any[];
 }
 
-export default function HomePage() {
+export default function AdultPage() {
   const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
 
