@@ -1,7 +1,6 @@
 import { createServer } from "http";
 import { setupAuth } from "./auth.js";
 import { storage } from "./storage.js";
-import { XP_REWARDS, CHALLENGE_TYPES } from "../shared/schema.js";
 
 export async function registerRoutes(app) {
   setupAuth(app);
@@ -15,7 +14,6 @@ export async function registerRoutes(app) {
   // Get user stats and achievements
   app.get("/api/stats", requireAuth, async (req, res) => {
     const achievements = await storage.getUserAchievements(req.user.id);
-    const { nextLevelXP, currentLevelXP } = storage.calculateLevel(req.user.xpPoints);
     const activeChallenges = await storage.getAllActiveChallenges();
 
     const challengesWithProgress = await Promise.all(
@@ -34,8 +32,6 @@ export async function registerRoutes(app) {
     res.json({
       user: req.user,
       achievements,
-      nextLevelXP,
-      currentLevelXP,
       challenges: challengesWithProgress,
     });
   });
@@ -48,9 +44,8 @@ export async function registerRoutes(app) {
 
     let currentStreak = user.currentStreak;
     let todaySessions = user.todaySessions;
-    let xpToAward = XP_REWARDS.SESSION_COMPLETE;
 
-    // Update streak and XP
+    // Update streak
     if (!lastDate || lastDate.getDate() !== today.getDate()) {
       todaySessions = 0;
     }
@@ -58,20 +53,8 @@ export async function registerRoutes(app) {
     if (!lastDate ||
         (today.getTime() - lastDate.getTime()) > 24 * 60 * 60 * 1000) {
       currentStreak = 1;
-      xpToAward += XP_REWARDS.STREAK_MILESTONE;
     } else if (lastDate.getDate() !== today.getDate()) {
       currentStreak += 1;
-      if (currentStreak % 3 === 0) {
-        xpToAward += XP_REWARDS.STREAK_MILESTONE;
-      }
-    }
-
-    // Award bonus XP based on duration and intensity
-    if (duration > 60) xpToAward += 15;
-    if (intensity === 'high') xpToAward += 10;
-
-    if (todaySessions < 5) {
-      xpToAward += todaySessions * 5;
     }
 
     const sessionLog = await storage.logSession(user.id, {
@@ -89,19 +72,8 @@ export async function registerRoutes(app) {
       todaySessions: todaySessions + 1,
     });
 
-    // Calculate XP updates
-    const xpResult = await storage.updateUserXP(user.id, xpToAward);
-
     // Check for completed challenges
     const completedChallenges = await storage.checkAndUpdateChallenges(user.id);
-
-    // Award XP for completed challenges
-    let challengeXP = 0;
-    for (const completion of completedChallenges) {
-      challengeXP += completion.challenge.xpReward;
-      await storage.updateUserXP(user.id, completion.challenge.xpReward);
-    }
-
     const newAchievements = [];
 
     // Award achievements based on streak milestones
@@ -112,7 +84,6 @@ export async function registerRoutes(app) {
         "Achieved a 3-day streak!"
       );
       newAchievements.push(achievement);
-      await storage.updateUserXP(user.id, XP_REWARDS.ACHIEVEMENT_EARNED);
     }
 
     if (updatedUser.totalSessions === 10) {
@@ -122,7 +93,6 @@ export async function registerRoutes(app) {
         "Logged 10 total sessions!"
       );
       newAchievements.push(achievement);
-      await storage.updateUserXP(user.id, XP_REWARDS.ACHIEVEMENT_EARNED);
     }
 
     // Get updated challenges
@@ -140,16 +110,8 @@ export async function registerRoutes(app) {
       })
     );
 
-    // Get final XP calculations
-    const finalUser = await storage.getUser(user.id);
-    const { nextLevelXP, currentLevelXP } = storage.calculateLevel(finalUser.xpPoints);
-
     res.json({
-      user: finalUser,
-      leveledUp: xpResult.leveledUp,
-      nextLevelXP,
-      currentLevelXP,
-      xpGained: xpToAward + challengeXP + (newAchievements.length * XP_REWARDS.ACHIEVEMENT_EARNED),
+      user: updatedUser,
       newAchievements,
       completedChallenges,
       challenges: challengesWithProgress,
@@ -162,13 +124,9 @@ export async function registerRoutes(app) {
     res.json(leaderboard);
   });
 
-  // New Friend System Routes
-
-  // Get user's friend list
+  // Friend System Routes
   app.get("/api/friends", requireAuth, async (req, res) => {
     const friends = await storage.getUserFriends(req.user.id);
-
-    // Get full user data for each friend
     const friendsWithData = await Promise.all(
       friends.map(async (friend) => {
         const userData = await storage.getUser(friend.friendId);
@@ -179,20 +137,15 @@ export async function registerRoutes(app) {
           lastActive: userData.lastActive,
           status: userData.status,
           currentStreak: userData.currentStreak,
-          level: userData.level,
-          title: userData.title,
         };
       })
     );
-
     res.json(friendsWithData);
   });
 
   // Get pending friend requests
   app.get("/api/friends/requests", requireAuth, async (req, res) => {
     const requests = await storage.getFriendRequests(req.user.id);
-
-    // Get user data for each request
     const requestsWithData = await Promise.all(
       requests.map(async (request) => {
         const otherUserId = request.senderId === req.user.id ? request.receiverId : request.senderId;
@@ -208,32 +161,25 @@ export async function registerRoutes(app) {
         };
       })
     );
-
     res.json(requestsWithData);
   });
 
   // Send a friend request
   app.post("/api/friends/request", requireAuth, async (req, res) => {
     const { receiverId } = req.body;
-
-    // Check if users are already friends
     const existingFriendship = await storage.getFriendship(req.user.id, receiverId);
     if (existingFriendship) {
       return res.status(400).json({ error: "Already friends with this user" });
     }
-
-    // Check if there's a pending request
     const existingRequests = await storage.getFriendRequests(req.user.id);
     const alreadyRequested = existingRequests.some(
       request =>
         (request.senderId === req.user.id && request.receiverId === receiverId) ||
         (request.senderId === receiverId && request.receiverId === req.user.id)
     );
-
     if (alreadyRequested) {
       return res.status(400).json({ error: "Friend request already exists" });
     }
-
     const request = await storage.sendFriendRequest(req.user.id, receiverId);
     res.status(201).json(request);
   });
@@ -242,11 +188,9 @@ export async function registerRoutes(app) {
   app.post("/api/friends/request/:id/respond", requireAuth, async (req, res) => {
     const { id } = req.params;
     const { status } = req.body; // 'accepted' or 'rejected'
-
     if (!['accepted', 'rejected'].includes(status)) {
       return res.status(400).json({ error: "Invalid status" });
     }
-
     const request = await storage.respondToFriendRequest(parseInt(id), status);
     res.json(request);
   });
@@ -307,9 +251,8 @@ export async function registerRoutes(app) {
         await storage.createChallenge({
           title: "Daily Dedication",
           description: "Maintain a streak for 24 hours",
-          type: CHALLENGE_TYPES.DAILY,
+          type: "DAILY",
           requirement: 1,
-          xpReward: XP_REWARDS.CHALLENGE_COMPLETED,
           startDate: now,
           endDate: tomorrow,
           isActive: true,
@@ -318,22 +261,10 @@ export async function registerRoutes(app) {
         await storage.createChallenge({
           title: "Week Warrior",
           description: "Complete 7 sessions this week",
-          type: CHALLENGE_TYPES.WEEKLY,
+          type: "WEEKLY",
           requirement: 7,
-          xpReward: XP_REWARDS.CHALLENGE_COMPLETED * 2,
           startDate: now,
           endDate: nextWeek,
-          isActive: true,
-        });
-
-        await storage.createChallenge({
-          title: "Dedication Master",
-          description: "Complete 3 sessions today",
-          type: CHALLENGE_TYPES.DAILY,
-          requirement: 3,
-          xpReward: XP_REWARDS.CHALLENGE_COMPLETED * 1.5,
-          startDate: now,
-          endDate: tomorrow,
           isActive: true,
         });
       }

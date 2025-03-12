@@ -6,13 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import StreakStats from "@/components/StreakStats";
 import Achievements from "@/components/Achievements";
-import XPProgress from "@/components/XPProgress";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Menu, Film, Settings } from "lucide-react";
+import { Loader2, Menu, Film } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Challenges from "@/components/Challenges";
-import SessionInsights from "@/components/SessionInsights";
 import { motion } from "framer-motion";
 import FriendsList from "@/components/FriendsList";
 import LogSessionModal from '@/components/LogSessionModal';
@@ -47,12 +45,10 @@ export default function HomePage() {
       }
     },
     onSuccess: (data) => {
-      // Immediately update the stats cache with new values
+      // Update stats cache
       queryClient.setQueryData(["/api/stats"], (oldData) => ({
         ...oldData,
         user: data.user,
-        nextLevelXP: data.nextLevelXP,
-        currentLevelXP: data.currentLevelXP,
         challenges: data.challenges,
       }));
 
@@ -61,27 +57,6 @@ export default function HomePage() {
         title: "Session Logged",
         description: "Your streak has been updated!",
       });
-
-      // Show XP gained toast with animation
-      toast({
-        title: "XP Gained!",
-        description: (
-          <div className="flex items-center gap-2">
-            <span className="text-xl font-bold text-blue-500">+{data.xpGained}</span>
-            <span>XP</span>
-          </div>
-        ),
-        variant: "default",
-      });
-
-      // Show level up toast if applicable
-      if (data.leveledUp) {
-        toast({
-          title: "Level Up!",
-          description: `Congratulations! You're now ${data.user.title}!`,
-          variant: "default",
-        });
-      }
 
       // Show achievement toasts
       data.newAchievements?.forEach((achievement) => {
@@ -96,7 +71,7 @@ export default function HomePage() {
       data.completedChallenges?.forEach((completion) => {
         toast({
           title: "Challenge Completed!",
-          description: `${completion.challenge.title} - ${completion.challenge.xpReward} XP`,
+          description: `${completion.challenge.title}`,
           variant: "default",
         });
       });
@@ -177,15 +152,6 @@ export default function HomePage() {
         <div className="flex min-h-screen pt-24 pb-32 gap-6">
           {/* Main Content Column */}
           <div className="flex-1 space-y-6">
-            {/* XP Progress */}
-            <motion.div {...fadeInUp}>
-              <XPProgress
-                user={stats.user}
-                nextLevelXP={stats.nextLevelXP}
-                currentLevelXP={stats.currentLevelXP}
-              />
-            </motion.div>
-
             {/* Challenges Section */}
             <motion.div {...fadeInUp} transition={{ delay: 0.1 }}>
               <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
@@ -214,22 +180,8 @@ export default function HomePage() {
               </Card>
             </motion.div>
 
-            {/* Session Insights */}
-            <motion.div {...fadeInUp} transition={{ delay: 0.3 }}>
-              <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-semibold tracking-tight">
-                    Session Insights
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <SessionInsights />
-                </CardContent>
-              </Card>
-            </motion.div>
-
             {/* Achievements */}
-            <motion.div {...fadeInUp} transition={{ delay: 0.4 }}>
+            <motion.div {...fadeInUp} transition={{ delay: 0.3 }}>
               <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
                 <CardHeader>
                   <CardTitle className="text-2xl font-semibold tracking-tight">
