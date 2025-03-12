@@ -10,17 +10,22 @@ export class MemStorage {
     this.achievements = new Map();
     this.challenges = new Map();
     this.challengeProgress = new Map();
-    this.leaderboardHistory = new Map(); // Store weekly leaderboard history
+    this.leaderboardHistory = new Map();
     this.currentId = 1;
     this.achievementId = 1;
     this.challengeId = 1;
     this.challengeProgressId = 1;
-    this.sessionLogId = 1; // Initialize sessionLogId
+    this.sessionLogId = 1;
     this.lastLeaderboardReset = new Date();
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000,
     });
-    this.sessionLogs = new Map(); // Initialize sessionLogs
+    this.sessionLogs = new Map();
+    // New maps for friend-related data
+    this.friendRequests = new Map();
+    this.friendships = new Map();
+    this.friendRequestId = 1;
+    this.friendshipId = 1;
   }
 
   async getUser(id) {
@@ -48,7 +53,7 @@ export class MemStorage {
       title: LEVEL_THRESHOLDS[1].title,
       stealthMode: false,
       stealthNotifications: false,
-      showOnLeaderboard: true, // Added to control leaderboard visibility
+      showOnLeaderboard: true, 
     };
     this.users.set(id, user);
     return user;
@@ -127,13 +132,11 @@ export class MemStorage {
   }
 
   async getLeaderboard() {
-    // Check if we need to reset the leaderboard (weekly)
     await this.checkLeaderboardReset();
 
     return Array.from(this.users.values())
       .filter(user => user.showOnLeaderboard)
       .sort((a, b) => {
-        // Sort by currentStreak first, then by XP points
         if (b.currentStreak !== a.currentStreak) {
           return b.currentStreak - a.currentStreak;
         }
@@ -146,18 +149,15 @@ export class MemStorage {
     const weekInMillis = 7 * 24 * 60 * 60 * 1000;
 
     if (now - this.lastLeaderboardReset >= weekInMillis) {
-      // Store current leaderboard in history
       const currentLeaderboard = Array.from(this.users.values())
         .filter(user => user.showOnLeaderboard)
         .sort((a, b) => b.currentStreak - a.currentStreak)
-        .slice(0, 3); // Store top 3
+        .slice(0, 3); 
 
-      // Award XP bonuses to top 3
       for (let i = 0; i < currentLeaderboard.length; i++) {
         const user = currentLeaderboard[i];
         const bonusXP = i === 0 ? 100 : i === 1 ? 50 : 25;
 
-        // Award XP and achievement
         await this.updateUserXP(user.id, bonusXP);
         await this.addAchievement(
           user.id,
@@ -166,7 +166,6 @@ export class MemStorage {
         );
       }
 
-      // Store this week's results
       this.leaderboardHistory.set(this.lastLeaderboardReset.toISOString(), {
         topUsers: currentLeaderboard.map(user => ({
           username: user.username,
@@ -176,7 +175,6 @@ export class MemStorage {
         resetDate: this.lastLeaderboardReset,
       });
 
-      // Update reset timestamp
       this.lastLeaderboardReset = now;
     }
   }
@@ -338,21 +336,17 @@ export class MemStorage {
     const userSessions = Array.from(this.sessionLogs.values())
       .filter(log => log.userId === userId);
 
-    // Initialize heatmap data structure
     const heatmap = Array(7).fill(null).map(() => Array(24).fill(0));
 
-    // Initialize counters for trends
     const hourCounts = Array(24).fill(0);
     const dayCounts = Array(7).fill(0);
 
-    // Process all sessions
     userSessions.forEach(session => {
       heatmap[session.dayOfWeek][session.hourOfDay]++;
       hourCounts[session.hourOfDay]++;
       dayCounts[session.dayOfWeek]++;
     });
 
-    // Find most active times
     const mostActiveHour = hourCounts.indexOf(Math.max(...hourCounts));
     const mostActiveDay = dayCounts.indexOf(Math.max(...dayCounts));
 
@@ -365,6 +359,111 @@ export class MemStorage {
         mostActiveDaySessions: dayCounts[mostActiveDay],
       }
     };
+  }
+
+  // New friend-related methods
+  async sendFriendRequest(senderId, receiverId) {
+    const id = this.friendRequestId++;
+    const request = {
+      id,
+      senderId,
+      receiverId,
+      status: "pending",
+      sentAt: new Date(),
+      respondedAt: null,
+    };
+    this.friendRequests.set(id, request);
+    return request;
+  }
+
+  async getFriendRequests(userId) {
+    return Array.from(this.friendRequests.values()).filter(
+      (request) =>
+        (request.receiverId === userId || request.senderId === userId) &&
+        request.status === "pending"
+    );
+  }
+
+  async getPendingReceivedRequests(userId) {
+    return Array.from(this.friendRequests.values()).filter(
+      (request) =>
+        request.receiverId === userId && request.status === "pending"
+    );
+  }
+
+  async respondToFriendRequest(requestId, status) {
+    const request = this.friendRequests.get(requestId);
+    if (!request) throw new Error("Friend request not found");
+
+    const updatedRequest = {
+      ...request,
+      status,
+      respondedAt: new Date(),
+    };
+    this.friendRequests.set(requestId, updatedRequest);
+
+    if (status === "accepted") {
+      await this.createFriendship(request.senderId, request.receiverId);
+    }
+
+    return updatedRequest;
+  }
+
+  async createFriendship(user1Id, user2Id) {
+    const id = this.friendshipId++;
+    const friendship = {
+      id,
+      user1Id,
+      user2Id,
+      createdAt: new Date(),
+    };
+    this.friendships.set(id, friendship);
+    return friendship;
+  }
+
+  async getUserFriends(userId) {
+    return Array.from(this.friendships.values()).filter(
+      (friendship) =>
+        friendship.user1Id === userId || friendship.user2Id === userId
+    ).map(friendship => ({
+      friendshipId: friendship.id,
+      friendId: friendship.user1Id === userId ? friendship.user2Id : friendship.user1Id,
+      createdAt: friendship.createdAt
+    }));
+  }
+
+  async getFriendship(user1Id, user2Id) {
+    return Array.from(this.friendships.values()).find(
+      (friendship) =>
+        (friendship.user1Id === user1Id && friendship.user2Id === user2Id) ||
+        (friendship.user1Id === user2Id && friendship.user2Id === user1Id)
+    );
+  }
+
+  async updateUserStatus(userId, status) {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error("User not found");
+
+    const updatedUser = {
+      ...user,
+      status,
+      lastActive: new Date(),
+    };
+    this.users.set(userId, updatedUser);
+    return updatedUser;
+  }
+
+  async setUserOnlineStatus(userId, isOnline) {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error("User not found");
+
+    const updatedUser = {
+      ...user,
+      isOnline,
+      lastActive: new Date(),
+    };
+    this.users.set(userId, updatedUser);
+    return updatedUser;
   }
 }
 

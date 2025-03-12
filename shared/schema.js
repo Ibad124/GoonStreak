@@ -17,6 +17,28 @@ export const users = pgTable("users", {
   title: text("title").notNull().default("Goon Apprentice"),
   stealthMode: boolean("stealth_mode").notNull().default(false),
   stealthNotifications: boolean("stealth_notifications").notNull().default(false),
+  // New social-related fields
+  status: text("status").default(""),
+  lastActive: timestamp("last_active"),
+  isOnline: boolean("is_online").default(false),
+});
+
+// New table for friend requests
+export const friendRequests = pgTable("friend_requests", {
+  id: serial("id").primaryKey(),
+  senderId: integer("sender_id").notNull(),
+  receiverId: integer("receiver_id").notNull(),
+  status: text("status").notNull().default("pending"), // pending, accepted, rejected
+  sentAt: timestamp("sent_at").notNull(),
+  respondedAt: timestamp("responded_at"),
+});
+
+// New table for confirmed friendships
+export const friendships = pgTable("friendships", {
+  id: serial("id").primaryKey(),
+  user1Id: integer("user1_id").notNull(),
+  user2Id: integer("user2_id").notNull(),
+  createdAt: timestamp("created_at").notNull(),
 });
 
 export const achievements = pgTable("achievements", {
@@ -56,11 +78,24 @@ export const sessionLogs = pgTable("session_logs", {
   hourOfDay: integer("hour_of_day").notNull(), // 0-23
 });
 
+// New insert schemas for friend-related tables
+export const insertFriendRequestSchema = createInsertSchema(friendRequests).omit({
+  id: true,
+  status: true,
+  respondedAt: true,
+});
+
+export const insertFriendshipSchema = createInsertSchema(friendships).omit({
+  id: true,
+});
+
+// Update user schema to include new fields
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
   isAnonymous: true,
   showOnLeaderboard: true,
+  status: true,
 });
 
 export const insertChallengeSchema = createInsertSchema(challenges);

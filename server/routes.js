@@ -18,13 +18,9 @@ export async function registerRoutes(app) {
     const { nextLevelXP, currentLevelXP } = storage.calculateLevel(req.user.xpPoints);
     const activeChallenges = await storage.getAllActiveChallenges();
 
-    console.log('Active challenges:', activeChallenges);
-
-    // Get progress for each active challenge
     const challengesWithProgress = await Promise.all(
       activeChallenges.map(async (challenge) => {
         const progress = await storage.getUserChallengeProgress(req.user.id, challenge.id);
-        console.log(`Challenge ${challenge.id} progress:`, progress);
         return {
           ...challenge,
           progress: progress || {
@@ -34,8 +30,6 @@ export async function registerRoutes(app) {
         };
       })
     );
-
-    console.log('Challenges with progress:', challengesWithProgress);
 
     res.json({
       user: req.user,
@@ -56,12 +50,10 @@ export async function registerRoutes(app) {
     let todaySessions = user.todaySessions;
     let xpToAward = XP_REWARDS.SESSION_COMPLETE;
 
-    // Reset today's sessions if it's a new day
     if (!lastDate || lastDate.getDate() !== today.getDate()) {
       todaySessions = 0;
     }
 
-    // Check if streak should continue or reset
     if (!lastDate ||
         (today.getTime() - lastDate.getTime()) > 24 * 60 * 60 * 1000) {
       currentStreak = 1;
@@ -73,12 +65,11 @@ export async function registerRoutes(app) {
       }
     }
 
-    // Award bonus XP for multiple sessions in a day
     if (todaySessions < 5) {
       xpToAward += todaySessions * 5;
     }
 
-    const sessionLog = await storage.logSession(user.id, today); // Added session logging
+    const sessionLog = await storage.logSession(user.id, today);
 
     const updatedUser = await storage.updateUser(user.id, {
       lastSessionDate: today,
@@ -88,18 +79,13 @@ export async function registerRoutes(app) {
       todaySessions: todaySessions + 1,
     });
 
-    // Award XP and check for level up
     const xpResult = await storage.updateUserXP(user.id, xpToAward);
-
-    // Check and update challenges
     const completedChallenges = await storage.checkAndUpdateChallenges(user.id);
 
-    // Award XP for completed challenges
     for (const completion of completedChallenges) {
       await storage.updateUserXP(user.id, completion.challenge.xpReward);
     }
 
-    // Check and award achievements
     const newAchievements = [];
 
     if (currentStreak === 3) {
@@ -122,7 +108,6 @@ export async function registerRoutes(app) {
       await storage.updateUserXP(user.id, XP_REWARDS.ACHIEVEMENT_EARNED);
     }
 
-    // Get updated challenge progress
     const activeChallenges = await storage.getAllActiveChallenges();
     const challengesWithProgress = await Promise.all(
       activeChallenges.map(async (challenge) => {
@@ -155,12 +140,109 @@ export async function registerRoutes(app) {
     res.json(leaderboard);
   });
 
+  // New Friend System Routes
+
+  // Get user's friend list
+  app.get("/api/friends", requireAuth, async (req, res) => {
+    const friends = await storage.getUserFriends(req.user.id);
+
+    // Get full user data for each friend
+    const friendsWithData = await Promise.all(
+      friends.map(async (friend) => {
+        const userData = await storage.getUser(friend.friendId);
+        return {
+          ...friend,
+          username: userData.username,
+          isOnline: userData.isOnline,
+          lastActive: userData.lastActive,
+          status: userData.status,
+          currentStreak: userData.currentStreak,
+          level: userData.level,
+          title: userData.title,
+        };
+      })
+    );
+
+    res.json(friendsWithData);
+  });
+
+  // Get pending friend requests
+  app.get("/api/friends/requests", requireAuth, async (req, res) => {
+    const requests = await storage.getFriendRequests(req.user.id);
+
+    // Get user data for each request
+    const requestsWithData = await Promise.all(
+      requests.map(async (request) => {
+        const otherUserId = request.senderId === req.user.id ? request.receiverId : request.senderId;
+        const otherUser = await storage.getUser(otherUserId);
+        return {
+          ...request,
+          otherUser: {
+            id: otherUser.id,
+            username: otherUser.username,
+            level: otherUser.level,
+            title: otherUser.title,
+          },
+        };
+      })
+    );
+
+    res.json(requestsWithData);
+  });
+
+  // Send a friend request
+  app.post("/api/friends/request", requireAuth, async (req, res) => {
+    const { receiverId } = req.body;
+
+    // Check if users are already friends
+    const existingFriendship = await storage.getFriendship(req.user.id, receiverId);
+    if (existingFriendship) {
+      return res.status(400).json({ error: "Already friends with this user" });
+    }
+
+    // Check if there's a pending request
+    const existingRequests = await storage.getFriendRequests(req.user.id);
+    const alreadyRequested = existingRequests.some(
+      request => 
+        (request.senderId === req.user.id && request.receiverId === receiverId) ||
+        (request.senderId === receiverId && request.receiverId === req.user.id)
+    );
+
+    if (alreadyRequested) {
+      return res.status(400).json({ error: "Friend request already exists" });
+    }
+
+    const request = await storage.sendFriendRequest(req.user.id, receiverId);
+    res.status(201).json(request);
+  });
+
+  // Respond to a friend request
+  app.post("/api/friends/request/:id/respond", requireAuth, async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body; // 'accepted' or 'rejected'
+
+    if (!['accepted', 'rejected'].includes(status)) {
+      return res.status(400).json({ error: "Invalid status" });
+    }
+
+    const request = await storage.respondToFriendRequest(parseInt(id), status);
+    res.json(request);
+  });
+
+  // Update user status
+  app.patch("/api/friends/status", requireAuth, async (req, res) => {
+    const { status } = req.body;
+    const updatedUser = await storage.updateUserStatus(req.user.id, status);
+    res.json(updatedUser);
+  });
+
   // Add to the routes section
   app.get("/api/leaderboard/reset-time", requireAuth, async (req, res) => {
     const timeUntilReset = storage.getTimeUntilReset();
     res.json({ timeUntilReset });
   });
 
+  // Add to the routes section
   app.get("/api/leaderboard/history", requireAuth, async (req, res) => {
     const history = Array.from(storage.leaderboardHistory.values())
       .sort((a, b) => new Date(b.resetDate) - new Date(a.resetDate));
@@ -197,14 +279,10 @@ export async function registerRoutes(app) {
     nextWeek.setDate(nextWeek.getDate() + 7);
     nextWeek.setHours(23, 59, 59, 999);
 
-    console.log('Creating default challenges...');
-
     try {
-      // Clear existing challenges
       const existingChallenges = await storage.getAllActiveChallenges();
       if (existingChallenges.length === 0) {
-        // Daily Challenge
-        const dailyChallenge = await storage.createChallenge({
+        await storage.createChallenge({
           title: "Daily Dedication",
           description: "Maintain a streak for 24 hours",
           type: CHALLENGE_TYPES.DAILY,
@@ -215,8 +293,7 @@ export async function registerRoutes(app) {
           isActive: true,
         });
 
-        // Weekly Challenge
-        const weeklyChallenge = await storage.createChallenge({
+        await storage.createChallenge({
           title: "Week Warrior",
           description: "Complete 7 sessions this week",
           type: CHALLENGE_TYPES.WEEKLY,
@@ -227,8 +304,7 @@ export async function registerRoutes(app) {
           isActive: true,
         });
 
-        // Special Challenge
-        const specialChallenge = await storage.createChallenge({
+        await storage.createChallenge({
           title: "Dedication Master",
           description: "Complete 3 sessions today",
           type: CHALLENGE_TYPES.DAILY,
@@ -238,19 +314,12 @@ export async function registerRoutes(app) {
           endDate: tomorrow,
           isActive: true,
         });
-
-        console.log('Created challenges:', { 
-          dailyChallenge, 
-          weeklyChallenge,
-          specialChallenge 
-        });
       }
     } catch (error) {
       console.error('Error creating challenges:', error);
     }
   };
 
-  // Initialize challenges immediately when routes are registered
   await initializeDefaultChallenges();
 
   const httpServer = createServer(app);

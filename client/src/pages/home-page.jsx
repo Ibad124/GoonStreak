@@ -13,6 +13,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Challenges from "@/components/Challenges";
 import SessionInsights from "@/components/SessionInsights";
 import { motion } from "framer-motion";
+import FriendsList from "@/components/FriendsList";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -122,72 +123,84 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 pt-24">
-        <div className="space-y-6">
-          {/* XP Progress */}
-          <motion.div {...fadeInUp}>
-            {stats && (
-              <XPProgress
-                user={stats.user}
-                nextLevelXP={stats.nextLevelXP}
-                currentLevelXP={stats.currentLevelXP}
-              />
-            )}
-          </motion.div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Progress Column */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* XP Progress */}
+            <motion.div {...fadeInUp}>
+              {stats && (
+                <XPProgress
+                  user={stats.user}
+                  nextLevelXP={stats.nextLevelXP}
+                  currentLevelXP={stats.currentLevelXP}
+                />
+              )}
+            </motion.div>
 
-          {/* Challenges Section */}
-          <motion.div {...fadeInUp} transition={{ delay: 0.1 }}>
-            <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
-              <CardHeader>
-                <CardTitle className="text-2xl font-semibold tracking-tight">
-                  Daily Challenges
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Challenges challenges={stats?.challenges || []} />
-              </CardContent>
-            </Card>
-          </motion.div>
+            {/* Challenges Section */}
+            <motion.div {...fadeInUp} transition={{ delay: 0.1 }}>
+              <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-semibold tracking-tight">
+                    Daily Challenges
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Challenges challenges={stats?.challenges || []} />
+                </CardContent>
+              </Card>
+            </motion.div>
 
-          {/* Streak Stats */}
-          <motion.div {...fadeInUp} transition={{ delay: 0.2 }}>
-            <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
-              <CardHeader>
-                <CardTitle className="text-2xl font-semibold tracking-tight">
-                  Your Streak
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <StreakStats stats={{ user: stats.user }} />
-              </CardContent>
-            </Card>
-          </motion.div>
+            {/* Streak Stats */}
+            <motion.div {...fadeInUp} transition={{ delay: 0.2 }}>
+              <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-semibold tracking-tight">
+                    Your Streak
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <StreakStats stats={{ user: stats.user }} />
+                </CardContent>
+              </Card>
+            </motion.div>
 
-          {/* Achievements */}
-          <motion.div {...fadeInUp} transition={{ delay: 0.3 }}>
-            <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
-              <CardHeader>
-                <CardTitle className="text-2xl font-semibold tracking-tight">
-                  Achievements
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Achievements achievements={stats?.achievements || []} />
-              </CardContent>
-            </Card>
-          </motion.div>
+            {/* Session Insights */}
+            <motion.div {...fadeInUp} transition={{ delay: 0.3 }}>
+              <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-semibold tracking-tight">
+                    Session Insights
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <SessionInsights />
+                </CardContent>
+              </Card>
+            </motion.div>
 
-          {/* Session Insights */}
-          <motion.div {...fadeInUp} transition={{ delay: 0.4 }}>
-            <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
-              <CardHeader>
-                <CardTitle className="text-2xl font-semibold tracking-tight">
-                  Session Insights
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <SessionInsights />
-              </CardContent>
-            </Card>
+            {/* Achievements */}
+            <motion.div {...fadeInUp} transition={{ delay: 0.4 }}>
+              <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-semibold tracking-tight">
+                    Achievements
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Achievements achievements={stats?.achievements || []} />
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+
+          {/* Friends Column */}
+          <motion.div 
+            {...fadeInUp} 
+            transition={{ delay: 0.5 }}
+            className="lg:col-span-1 space-y-6"
+          >
+            <FriendsList />
           </motion.div>
         </div>
       </main>
