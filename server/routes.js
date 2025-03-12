@@ -1,7 +1,7 @@
 import { createServer } from "http";
 import { setupAuth } from "./auth.js";
 import { storage } from "./storage.js";
-import { XP_REWARDS } from "../shared/schema.js";
+import { XP_REWARDS, CHALLENGE_TYPES } from "../shared/schema.js";
 
 export async function registerRoutes(app) {
   setupAuth(app);
@@ -16,19 +16,28 @@ export async function registerRoutes(app) {
   app.get("/api/stats", requireAuth, async (req, res) => {
     const achievements = await storage.getUserAchievements(req.user.id);
     const { nextLevelXP, currentLevelXP } = storage.calculateLevel(req.user.xpPoints);
+    const activeChallenges = await storage.getAllActiveChallenges();
 
-    console.log('GET /api/stats response:', {
-      xpPoints: req.user.xpPoints,
-      nextLevelXP,
-      currentLevelXP,
-      level: req.user.level
-    });
+    // Get progress for each active challenge
+    const challengesWithProgress = await Promise.all(
+      activeChallenges.map(async (challenge) => {
+        const progress = await storage.getUserChallengeProgress(req.user.id, challenge.id);
+        return {
+          ...challenge,
+          progress: progress || {
+            currentProgress: 0,
+            completed: false,
+          },
+        };
+      })
+    );
 
     res.json({
       user: req.user,
       achievements,
       nextLevelXP,
-      currentLevelXP
+      currentLevelXP,
+      challenges: challengesWithProgress,
     });
   });
 
@@ -40,8 +49,6 @@ export async function registerRoutes(app) {
 
     let currentStreak = user.currentStreak;
     let todaySessions = user.todaySessions;
-
-    // Base XP for completing a session
     let xpToAward = XP_REWARDS.SESSION_COMPLETE;
 
     // Reset today's sessions if it's a new day
@@ -53,26 +60,18 @@ export async function registerRoutes(app) {
     if (!lastDate ||
         (today.getTime() - lastDate.getTime()) > 24 * 60 * 60 * 1000) {
       currentStreak = 1;
-      // Bonus XP for starting a new streak
       xpToAward += 10;
     } else if (lastDate.getDate() !== today.getDate()) {
       currentStreak += 1;
-      // Award XP for streak milestones
       if (currentStreak % 3 === 0) {
         xpToAward += XP_REWARDS.STREAK_MILESTONE;
       }
     }
 
     // Award bonus XP for multiple sessions in a day
-    if (todaySessions < 5) {  // Cap the bonus at 5 sessions per day
-      xpToAward += todaySessions * 5;  // Progressive bonus
+    if (todaySessions < 5) {
+      xpToAward += todaySessions * 5;
     }
-
-    console.log('Before XP update:', {
-      currentXP: user.xpPoints,
-      xpToAward,
-      currentLevel: user.level
-    });
 
     const updatedUser = await storage.updateUser(user.id, {
       lastSessionDate: today,
@@ -85,13 +84,13 @@ export async function registerRoutes(app) {
     // Award XP and check for level up
     const xpResult = await storage.updateUserXP(user.id, xpToAward);
 
-    console.log('After XP update:', {
-      newXP: xpResult.user.xpPoints,
-      newLevel: xpResult.user.level,
-      leveledUp: xpResult.leveledUp,
-      nextLevelXP: xpResult.nextLevelXP,
-      currentLevelXP: xpResult.currentLevelXP
-    });
+    // Check and update challenges
+    const completedChallenges = await storage.checkAndUpdateChallenges(user.id);
+
+    // Award XP for completed challenges
+    for (const completion of completedChallenges) {
+      await storage.updateUserXP(user.id, completion.challenge.xpReward);
+    }
 
     // Check and award achievements
     const newAchievements = [];
@@ -116,6 +115,21 @@ export async function registerRoutes(app) {
       await storage.updateUserXP(user.id, XP_REWARDS.ACHIEVEMENT_EARNED);
     }
 
+    // Get updated challenge progress
+    const activeChallenges = await storage.getAllActiveChallenges();
+    const challengesWithProgress = await Promise.all(
+      activeChallenges.map(async (challenge) => {
+        const progress = await storage.getUserChallengeProgress(user.id, challenge.id);
+        return {
+          ...challenge,
+          progress: progress || {
+            currentProgress: 0,
+            completed: false,
+          },
+        };
+      })
+    );
+
     res.json({
       user: xpResult.user,
       leveledUp: xpResult.leveledUp,
@@ -123,6 +137,8 @@ export async function registerRoutes(app) {
       currentLevelXP: xpResult.currentLevelXP,
       xpGained: xpToAward,
       newAchievements,
+      completedChallenges,
+      challenges: challengesWithProgress,
     });
   });
 
@@ -134,13 +150,52 @@ export async function registerRoutes(app) {
 
   // Update user privacy settings
   app.patch("/api/privacy", requireAuth, async (req, res) => {
-    const { isAnonymous, showOnLeaderboard } = req.body;
+    const { isAnonymous, showOnLeaderboard, stealthMode, stealthNotifications } = req.body;
     const updatedUser = await storage.updateUser(req.user.id, {
       isAnonymous,
       showOnLeaderboard,
+      stealthMode,
+      stealthNotifications,
     });
     res.json(updatedUser);
   });
+
+  // Initialize some default challenges
+  const initializeDefaultChallenges = async () => {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(23, 59, 59, 999);
+
+    const nextWeek = new Date(now);
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    nextWeek.setHours(23, 59, 59, 999);
+
+    // Daily Challenge
+    await storage.createChallenge({
+      title: "Daily Dedication",
+      description: "Maintain a streak for 24 hours",
+      type: CHALLENGE_TYPES.DAILY,
+      requirement: 1,
+      xpReward: XP_REWARDS.CHALLENGE_COMPLETED,
+      startDate: now,
+      endDate: tomorrow,
+    });
+
+    // Weekly Challenge
+    await storage.createChallenge({
+      title: "Week Warrior",
+      description: "Complete 7 sessions this week",
+      type: CHALLENGE_TYPES.WEEKLY,
+      requirement: 7,
+      xpReward: XP_REWARDS.CHALLENGE_COMPLETED * 2,
+      startDate: now,
+      endDate: nextWeek,
+    });
+  };
+
+  // Initialize challenges
+  await initializeDefaultChallenges();
 
   const httpServer = createServer(app);
   return httpServer;

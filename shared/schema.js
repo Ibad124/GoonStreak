@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, date } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, date, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 
 export const users = pgTable("users", {
@@ -12,10 +12,11 @@ export const users = pgTable("users", {
   lastSessionDate: date("last_session_date"),
   totalSessions: integer("total_sessions").notNull().default(0),
   todaySessions: integer("today_sessions").notNull().default(0),
-  // Add XP system fields
   xpPoints: integer("xp_points").notNull().default(0),
   level: integer("level").notNull().default(1),
   title: text("title").notNull().default("Goon Apprentice"),
+  stealthMode: boolean("stealth_mode").notNull().default(false),
+  stealthNotifications: boolean("stealth_notifications").notNull().default(false),
 });
 
 export const achievements = pgTable("achievements", {
@@ -26,6 +27,27 @@ export const achievements = pgTable("achievements", {
   description: text("description").notNull(),
 });
 
+export const challenges = pgTable("challenges", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  type: text("type").notNull(),
+  requirement: integer("requirement").notNull(),
+  xpReward: integer("xp_reward").notNull(),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+});
+
+export const challengeProgress = pgTable("challenge_progress", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  challengeId: integer("challenge_id").notNull(),
+  currentProgress: integer("current_progress").notNull().default(0),
+  completed: boolean("completed").notNull().default(false),
+  completedAt: timestamp("completed_at"),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -33,7 +55,9 @@ export const insertUserSchema = createInsertSchema(users).pick({
   showOnLeaderboard: true,
 });
 
-// Level configuration - made more achievable
+export const insertChallengeSchema = createInsertSchema(challenges);
+export const insertChallengeProgressSchema = createInsertSchema(challengeProgress);
+
 export const LEVEL_THRESHOLDS = {
   1: { xp: 0, title: "Goon Apprentice" },
   2: { xp: 50, title: "Goon Enthusiast" },
@@ -42,9 +66,15 @@ export const LEVEL_THRESHOLDS = {
   5: { xp: 500, title: "Legendary Gooner" },
 };
 
-// XP rewards configuration - increased rewards
 export const XP_REWARDS = {
-  SESSION_COMPLETE: 15,  // Increased base XP
-  STREAK_MILESTONE: 30,  // Bonus for hitting streak milestones
+  SESSION_COMPLETE: 15,
+  STREAK_MILESTONE: 30,
   ACHIEVEMENT_EARNED: 25,
+  CHALLENGE_COMPLETED: 50,
+};
+
+export const CHALLENGE_TYPES = {
+  DAILY: "DAILY",
+  WEEKLY: "WEEKLY",
+  EVENT: "EVENT",
 };

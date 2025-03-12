@@ -1,6 +1,6 @@
 import session from "express-session";
 import createMemoryStore from "memorystore";
-import { LEVEL_THRESHOLDS } from "../shared/schema.js";
+import { LEVEL_THRESHOLDS, CHALLENGE_TYPES } from "../shared/schema.js";
 
 const MemoryStore = createMemoryStore(session);
 
@@ -8,8 +8,12 @@ export class MemStorage {
   constructor() {
     this.users = new Map();
     this.achievements = new Map();
+    this.challenges = new Map();
+    this.challengeProgress = new Map();
     this.currentId = 1;
     this.achievementId = 1;
+    this.challengeId = 1;
+    this.challengeProgressId = 1;
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000,
     });
@@ -38,6 +42,8 @@ export class MemStorage {
       xpPoints: 0,
       level: 1,
       title: LEVEL_THRESHOLDS[1].title,
+      stealthMode: false,
+      stealthNotifications: false,
     };
     this.users.set(id, user);
     return user;
@@ -48,7 +54,6 @@ export class MemStorage {
     let nextLevelXP = LEVEL_THRESHOLDS[1].xp;
     let currentLevelXP = 0;
 
-    // Find current level and XP thresholds
     for (const [lvl, data] of Object.entries(LEVEL_THRESHOLDS)) {
       if (xpPoints >= data.xp) {
         level = parseInt(lvl);
@@ -140,6 +145,99 @@ export class MemStorage {
 
   async getUserAchievements(userId) {
     return this.achievements.get(userId) || [];
+  }
+
+  async createChallenge(challengeData) {
+    const id = this.challengeId++;
+    const challenge = {
+      ...challengeData,
+      id,
+      isActive: true,
+    };
+    this.challenges.set(id, challenge);
+    return challenge;
+  }
+
+  async getActiveChallenge() {
+    return Array.from(this.challenges.values()).find(
+      (challenge) => challenge.isActive &&
+        new Date(challenge.startDate) <= new Date() &&
+        new Date(challenge.endDate) >= new Date()
+    );
+  }
+
+  async getAllActiveChallenges() {
+    return Array.from(this.challenges.values()).filter(
+      (challenge) => challenge.isActive &&
+        new Date(challenge.startDate) <= new Date() &&
+        new Date(challenge.endDate) >= new Date()
+    );
+  }
+
+  async getUserChallengeProgress(userId, challengeId) {
+    return Array.from(this.challengeProgress.values()).find(
+      (progress) => progress.userId === userId && progress.challengeId === challengeId
+    );
+  }
+
+  async createOrUpdateChallengeProgress(userId, challengeId, progress) {
+    let existingProgress = await this.getUserChallengeProgress(userId, challengeId);
+
+    if (!existingProgress) {
+      existingProgress = {
+        id: this.challengeProgressId++,
+        userId,
+        challengeId,
+        currentProgress: 0,
+        completed: false,
+        completedAt: null,
+      };
+    }
+
+    const updatedProgress = {
+      ...existingProgress,
+      ...progress,
+    };
+
+    this.challengeProgress.set(updatedProgress.id, updatedProgress);
+    return updatedProgress;
+  }
+
+  async checkAndUpdateChallenges(userId) {
+    const activeChallenges = await this.getAllActiveChallenges();
+    const newCompletions = [];
+
+    for (const challenge of activeChallenges) {
+      const progress = await this.getUserChallengeProgress(userId, challenge.id);
+      if (!progress?.completed) {
+        const user = await this.getUser(userId);
+        let currentProgress = 0;
+
+        switch (challenge.type) {
+          case CHALLENGE_TYPES.DAILY:
+            currentProgress = user.currentStreak;
+            break;
+          case CHALLENGE_TYPES.WEEKLY:
+            currentProgress = user.totalSessions;
+            break;
+        }
+
+        if (currentProgress >= challenge.requirement) {
+          const updatedProgress = await this.createOrUpdateChallengeProgress(userId, challenge.id, {
+            currentProgress,
+            completed: true,
+            completedAt: new Date(),
+          });
+          newCompletions.push({ challenge, progress: updatedProgress });
+        } else {
+          await this.createOrUpdateChallengeProgress(userId, challenge.id, {
+            currentProgress,
+          });
+        }
+      }
+    }
+
+    return newCompletions;
   }
 }
 
