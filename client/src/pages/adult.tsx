@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Menu, Sparkles, Trophy, Star, Film } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Challenges from "@/components/Challenges";
-import { Link } from "react-router-dom";
+import { Link } from "wouter";
 
 interface StatsData {
   user: {
@@ -100,7 +100,7 @@ export default function HomePage() {
             </SheetTrigger>
             <SheetContent>
               <div className="space-y-4 mt-8">
-                <Link to="/adult-content">
+                <Link href="/adult-content">
                   <Button
                     variant="outline"
                     className="w-full rounded-full flex items-center"
@@ -109,7 +109,7 @@ export default function HomePage() {
                     Adult Content
                   </Button>
                 </Link>
-                <Link to="/leaderboard">
+                <Link href="/leaderboard">
                   <Button variant="outline" className="w-full rounded-full">
                     Leaderboard
                   </Button>
@@ -129,6 +129,7 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 pt-20">
+        <h1 className="text-3xl font-bold mb-6">Adult Content</h1>
         <div className="space-y-6">
           {/* XP Progress */}
           {stats && (
