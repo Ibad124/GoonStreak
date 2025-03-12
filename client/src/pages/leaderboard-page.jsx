@@ -9,17 +9,48 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ChevronLeft, Crown, Medal } from "lucide-react";
+import { ChevronLeft, Crown, Medal, Star, Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { motion } from "framer-motion";
+
+const rankColors = {
+  0: "bg-gradient-to-r from-yellow-500/20 to-transparent",
+  1: "bg-gradient-to-r from-gray-400/20 to-transparent",
+  2: "bg-gradient-to-r from-amber-600/20 to-transparent",
+};
 
 function getRankIcon(index) {
   switch (index) {
     case 0:
-      return <Crown className="h-5 w-5 text-yellow-500" />;
+      return (
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", bounce: 0.5 }}
+        >
+          <Crown className="h-6 w-6 text-yellow-500" />
+        </motion.div>
+      );
     case 1:
-      return <Medal className="h-5 w-5 text-gray-400" />;
+      return (
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", bounce: 0.5, delay: 0.1 }}
+        >
+          <Medal className="h-6 w-6 text-gray-400" />
+        </motion.div>
+      );
     case 2:
-      return <Medal className="h-5 w-5 text-amber-600" />;
+      return (
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", bounce: 0.5, delay: 0.2 }}
+        >
+          <Medal className="h-6 w-6 text-amber-600" />
+        </motion.div>
+      );
     default:
       return null;
   }
@@ -41,6 +72,10 @@ export default function LeaderboardPage() {
             </Button>
           </Link>
           <h1 className="font-semibold">Leaderboard</h1>
+          <div className="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
+            <Star className="h-4 w-4" />
+            <span>Weekly Reset in 3d 12h</span>
+          </div>
         </div>
       </header>
 
@@ -55,7 +90,7 @@ export default function LeaderboardPage() {
                   <TableHead>User</TableHead>
                   <TableHead className="text-right">Streak</TableHead>
                   <TableHead className="text-right">Best</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
+                  <TableHead className="text-right">XP</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -80,26 +115,45 @@ export default function LeaderboardPage() {
                       </TableRow>
                     ))
                   : leaderboard?.map((user, index) => (
-                      <TableRow key={user.id}>
+                      <motion.tr
+                        key={user.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className={`${rankColors[index] || ""}`}
+                      >
                         <TableCell className="font-medium">
-                          <div className="flex items-center">
+                          <div className="flex items-center gap-2">
                             {getRankIcon(index)}
                             <span className="ml-2">{index + 1}</span>
                           </div>
                         </TableCell>
                         <TableCell>
-                          {user.isAnonymous ? "Anonymous User" : user.username}
+                          <div className="flex items-center gap-2">
+                            <span>
+                              {user.isAnonymous ? "Anonymous User" : user.username}
+                            </span>
+                            {user.level > 3 && (
+                              <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.5 }}
+                              >
+                                <Sparkles className="h-4 w-4 text-primary/60" />
+                              </motion.div>
+                            )}
+                          </div>
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right font-medium">
                           {user.currentStreak}
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right text-muted-foreground">
                           {user.longestStreak}
                         </TableCell>
-                        <TableCell className="text-right">
-                          {user.totalSessions}
+                        <TableCell className="text-right font-medium">
+                          {user.xpPoints}
                         </TableCell>
-                      </TableRow>
+                      </motion.tr>
                     ))}
               </TableBody>
             </Table>

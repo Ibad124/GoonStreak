@@ -10,10 +10,12 @@ export class MemStorage {
     this.achievements = new Map();
     this.challenges = new Map();
     this.challengeProgress = new Map();
+    this.leaderboardHistory = new Map(); // Store weekly leaderboard history
     this.currentId = 1;
     this.achievementId = 1;
     this.challengeId = 1;
     this.challengeProgressId = 1;
+    this.lastLeaderboardReset = new Date();
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000,
     });
@@ -44,6 +46,7 @@ export class MemStorage {
       title: LEVEL_THRESHOLDS[1].title,
       stealthMode: false,
       stealthNotifications: false,
+      showOnLeaderboard: true, // Added to control leaderboard visibility
     };
     this.users.set(id, user);
     return user;
@@ -122,9 +125,65 @@ export class MemStorage {
   }
 
   async getLeaderboard() {
+    // Check if we need to reset the leaderboard (weekly)
+    await this.checkLeaderboardReset();
+
     return Array.from(this.users.values())
       .filter(user => user.showOnLeaderboard)
-      .sort((a, b) => b.currentStreak - a.currentStreak);
+      .sort((a, b) => {
+        // Sort by currentStreak first, then by XP points
+        if (b.currentStreak !== a.currentStreak) {
+          return b.currentStreak - a.currentStreak;
+        }
+        return b.xpPoints - a.xpPoints;
+      });
+  }
+
+  async checkLeaderboardReset() {
+    const now = new Date();
+    const weekInMillis = 7 * 24 * 60 * 60 * 1000;
+
+    if (now - this.lastLeaderboardReset >= weekInMillis) {
+      // Store current leaderboard in history
+      const currentLeaderboard = Array.from(this.users.values())
+        .filter(user => user.showOnLeaderboard)
+        .sort((a, b) => b.currentStreak - a.currentStreak)
+        .slice(0, 3); // Store top 3
+
+      // Award XP bonuses to top 3
+      for (let i = 0; i < currentLeaderboard.length; i++) {
+        const user = currentLeaderboard[i];
+        const bonusXP = i === 0 ? 100 : i === 1 ? 50 : 25;
+
+        // Award XP and achievement
+        await this.updateUserXP(user.id, bonusXP);
+        await this.addAchievement(
+          user.id,
+          "LEADERBOARD_TOP_3",
+          `Ranked #${i + 1} on the weekly leaderboard!`
+        );
+      }
+
+      // Store this week's results
+      this.leaderboardHistory.set(this.lastLeaderboardReset.toISOString(), {
+        topUsers: currentLeaderboard.map(user => ({
+          username: user.username,
+          streak: user.currentStreak,
+          xpPoints: user.xpPoints,
+        })),
+        resetDate: this.lastLeaderboardReset,
+      });
+
+      // Update reset timestamp
+      this.lastLeaderboardReset = now;
+    }
+  }
+
+  getTimeUntilReset() {
+    const now = new Date();
+    const weekInMillis = 7 * 24 * 60 * 60 * 1000;
+    const nextReset = new Date(this.lastLeaderboardReset.getTime() + weekInMillis);
+    return nextReset - now;
   }
 
   async addAchievement(userId, type, description) {

@@ -153,6 +153,19 @@ export async function registerRoutes(app) {
     res.json(leaderboard);
   });
 
+  // Add to the routes section
+  app.get("/api/leaderboard/reset-time", requireAuth, async (req, res) => {
+    const timeUntilReset = storage.getTimeUntilReset();
+    res.json({ timeUntilReset });
+  });
+
+  app.get("/api/leaderboard/history", requireAuth, async (req, res) => {
+    const history = Array.from(storage.leaderboardHistory.values())
+      .sort((a, b) => new Date(b.resetDate) - new Date(a.resetDate));
+    res.json(history);
+  });
+
+
   // Update user privacy settings
   app.patch("/api/privacy", requireAuth, async (req, res) => {
     const { isAnonymous, showOnLeaderboard, stealthMode, stealthNotifications } = req.body;
