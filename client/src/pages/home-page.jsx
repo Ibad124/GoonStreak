@@ -274,62 +274,65 @@ export default function HomePage() {
           animate="show"
         >
           <div className="flex-1 space-y-6">
-            {/* Level Progress Card */}
-            <motion.div variants={itemAnimation}>
-              <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-semibold tracking-tight flex items-center justify-between">
-                    <span>Current Level</span>
-                    <div className="flex items-center gap-2">
-                      <Award className="h-6 w-6 text-blue-600" />
-                      <span className="text-blue-600">{userPoints} points</span>
-                    </div>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-4">
-                    <div className={`p-4 rounded-xl bg-gradient-to-br ${currentLevel.color} shadow-lg`}>
-                      <Award className="h-8 w-8 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">{currentLevel.badge}</h3>
-                      <p className="text-sm text-muted-foreground">Level {currentLevel.level}</p>
-                    </div>
-                  </div>
+            {/* Hero Section with Level Progress */}
+            <motion.div 
+              variants={itemAnimation}
+              className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 text-white p-8 shadow-xl"
+            >
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                  <h2 className="text-3xl font-bold mb-2">Level {currentLevel.level}</h2>
+                  <p className="text-blue-100">{currentLevel.badge}</p>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold">{userPoints}</div>
+                  <div className="text-blue-200 text-sm">Total Points</div>
+                </div>
+              </div>
 
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Progress to {nextLevel.badge}</span>
-                      <span>{Math.round(progressToNextLevel)}%</span>
-                    </div>
-                    <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full rounded-full transition-all duration-500 bg-gradient-to-r ${nextLevel.color}`}
-                        style={{ width: `${progressToNextLevel}%` }}
-                      />
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {nextLevel.points - userPoints} points needed for next level
-                    </p>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm text-blue-100">
+                    <span>Progress to {nextLevel.badge}</span>
+                    <span>{Math.round(progressToNextLevel)}%</span>
                   </div>
+                  <div className="h-3 bg-blue-900/30 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full rounded-full bg-gradient-to-r from-blue-200 to-white transition-all duration-500"
+                      style={{ width: `${progressToNextLevel}%` }}
+                    />
+                  </div>
+                  <p className="text-sm text-blue-200">
+                    {nextLevel.points - userPoints} points needed for next level
+                  </p>
+                </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4">
-                    {levels.map((level) => (
-                      <div
-                        key={level.level}
-                        className={`p-2 rounded-lg text-center ${
-                          userPoints >= level.points
-                            ? `bg-gradient-to-br ${level.color} text-white`
-                            : 'bg-zinc-100 text-zinc-500'
-                        }`}
-                      >
-                        <Award className="h-4 w-4 mx-auto mb-1" />
-                        <div className="text-xs font-medium">{level.badge}</div>
+                <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+                  {levels.map((level) => (
+                    <div
+                      key={level.level}
+                      className={`p-2 rounded-lg text-center ${
+                        userPoints >= level.points
+                          ? 'bg-white/20 backdrop-blur'
+                          : 'bg-blue-900/20'
+                      }`}
+                    >
+                      <Award className={`h-4 w-4 mx-auto mb-1 ${
+                        userPoints >= level.points ? 'text-white' : 'text-blue-300/50'
+                      }`} />
+                      <div className={`text-xs font-medium ${
+                        userPoints >= level.points ? 'text-white' : 'text-blue-300/50'
+                      }`}>
+                        {level.badge}
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Decorative background elements */}
+              <div className="absolute -right-8 -bottom-8 w-48 h-48 rounded-full bg-white/10" />
+              <div className="absolute -right-4 -bottom-4 w-32 h-32 rounded-full bg-white/5" />
             </motion.div>
 
             {/* Goals Section */}
