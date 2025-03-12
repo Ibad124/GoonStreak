@@ -4,9 +4,15 @@ import { Star, Trophy, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function XPProgress({ user, nextLevelXP, currentLevelXP }) {
-  // Calculate XP progress percentage
-  const progressInCurrentLevel = user.xpPoints - currentLevelXP;
-  const xpNeededForNextLevel = nextLevelXP - currentLevelXP;
+  if (!user) return null;
+
+  // Calculate XP progress percentage with default values
+  const xpPoints = user?.xpPoints || 0;
+  const currentLevel = currentLevelXP || 0;
+  const nextLevel = nextLevelXP || 100;
+
+  const progressInCurrentLevel = xpPoints - currentLevel;
+  const xpNeededForNextLevel = nextLevel - currentLevel;
   const xpProgress = Math.min(100, Math.max(0, (progressInCurrentLevel / xpNeededForNextLevel) * 100));
 
   return (
@@ -14,7 +20,7 @@ export default function XPProgress({ user, nextLevelXP, currentLevelXP }) {
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <Star className="h-5 w-5 text-yellow-500/90" />
-          <span className="font-semibold tracking-tight">{user.title}</span>
+          <span className="font-semibold tracking-tight">{user.title || 'Novice'}</span>
         </div>
         <motion.span 
           key={user.level}
@@ -22,7 +28,7 @@ export default function XPProgress({ user, nextLevelXP, currentLevelXP }) {
           animate={{ scale: 1, opacity: 1 }}
           className="text-sm text-zinc-500"
         >
-          Level {user.level}
+          Level {user.level || 1}
         </motion.span>
       </div>
 
@@ -30,12 +36,12 @@ export default function XPProgress({ user, nextLevelXP, currentLevelXP }) {
         <div className="flex justify-between mb-2">
           <span className="text-sm text-zinc-500">XP Progress</span>
           <motion.span 
-            key={user.xpPoints}
+            key={xpPoints}
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="text-sm font-medium"
           >
-            {user.xpPoints} / {nextLevelXP}
+            {xpPoints} / {nextLevel}
           </motion.span>
         </div>
         <div className="relative">
@@ -60,7 +66,7 @@ export default function XPProgress({ user, nextLevelXP, currentLevelXP }) {
       </div>
 
       <div className="mt-4 text-sm text-zinc-500">
-        {nextLevelXP - user.xpPoints} XP needed for next level
+        {nextLevel - xpPoints} XP needed for next level
       </div>
     </Card>
   );
