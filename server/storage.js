@@ -45,17 +45,25 @@ export class MemStorage {
 
   calculateLevel(xpPoints) {
     let level = 1;
+    let nextLevelXP = LEVEL_THRESHOLDS[1].xp;
+    let currentLevelXP = 0;
+
+    // Find current level and XP thresholds
     for (const [lvl, data] of Object.entries(LEVEL_THRESHOLDS)) {
       if (xpPoints >= data.xp) {
         level = parseInt(lvl);
+        currentLevelXP = data.xp;
+        nextLevelXP = LEVEL_THRESHOLDS[parseInt(lvl) + 1]?.xp || data.xp;
       } else {
         break;
       }
     }
+
     return {
       level,
       title: LEVEL_THRESHOLDS[level].title,
-      nextLevelXP: LEVEL_THRESHOLDS[level + 1]?.xp || LEVEL_THRESHOLDS[level].xp,
+      nextLevelXP,
+      currentLevelXP
     };
   }
 
@@ -63,8 +71,9 @@ export class MemStorage {
     const user = await this.getUser(userId);
     if (!user) throw new Error("User not found");
 
+    const oldLevel = user.level;
     const newXP = user.xpPoints + xpToAdd;
-    const { level, title, nextLevelXP } = this.calculateLevel(newXP);
+    const { level, title, nextLevelXP, currentLevelXP } = this.calculateLevel(newXP);
 
     const updatedUser = await this.updateUser(userId, {
       xpPoints: newXP,
@@ -74,8 +83,9 @@ export class MemStorage {
 
     return {
       user: updatedUser,
-      leveledUp: level > user.level,
+      leveledUp: level > oldLevel,
       nextLevelXP,
+      currentLevelXP
     };
   }
 

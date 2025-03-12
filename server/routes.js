@@ -15,11 +15,12 @@ export async function registerRoutes(app) {
   // Get user stats and achievements
   app.get("/api/stats", requireAuth, async (req, res) => {
     const achievements = await storage.getUserAchievements(req.user.id);
-    const { nextLevelXP } = storage.calculateLevel(req.user.xpPoints);
+    const { nextLevelXP, currentLevelXP } = storage.calculateLevel(req.user.xpPoints);
     res.json({
       user: req.user,
       achievements,
-      nextLevelXP
+      nextLevelXP,
+      currentLevelXP
     });
   });
 
@@ -88,6 +89,7 @@ export async function registerRoutes(app) {
       user: xpResult.user,
       leveledUp: xpResult.leveledUp,
       nextLevelXP: xpResult.nextLevelXP,
+      currentLevelXP: xpResult.currentLevelXP,
       newAchievements,
     });
   });
