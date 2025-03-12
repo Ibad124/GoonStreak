@@ -86,6 +86,20 @@ const menuItemAnimation = {
   tap: { scale: 0.98 }
 };
 
+// Sample rewards data
+const rewards = [
+  { id: 1, name: "Early Bird", description: "Complete a session before 8 AM", points: 50, icon: Clock },
+  { id: 2, name: "Streak Master", description: "Maintain a 7-day streak", points: 100, icon: Flame },
+  { id: 3, name: "Social Butterfly", description: "Join 3 group sessions", points: 75, icon: Users },
+];
+
+// Sample goals data
+const goals = [
+  { id: 1, title: "Daily Meditation", current: 3, target: 5, unit: "sessions" },
+  { id: 2, title: "Weekly Social Calls", current: 2, target: 4, unit: "calls" },
+  { id: 3, title: "Monthly Achievements", current: 8, target: 10, unit: "achievements" },
+];
+
 export default function HomePage() {
   const { toast } = useToast();
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
@@ -223,6 +237,37 @@ export default function HomePage() {
           animate="show"
         >
           <div className="flex-1 space-y-6">
+            {/* Goals Section */}
+            <motion.div variants={itemAnimation}>
+              <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-semibold tracking-tight">
+                    Your Goals
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {goals.map(goal => (
+                      <div key={goal.id} className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium">{goal.title}</span>
+                          <span className="text-sm text-muted-foreground">
+                            {goal.current}/{goal.target} {goal.unit}
+                          </span>
+                        </div>
+                        <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-blue-500 rounded-full transition-all duration-500"
+                            style={{ width: `${(goal.current / goal.target) * 100}%` }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
             <motion.div variants={itemAnimation}>
               <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
                 <CardHeader>
@@ -258,6 +303,35 @@ export default function HomePage() {
                 </CardHeader>
                 <CardContent>
                   <Achievements achievements={stats?.achievements || []} />
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Rewards Section */}
+            <motion.div variants={itemAnimation}>
+              <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-semibold tracking-tight">
+                    Available Rewards
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4">
+                    {rewards.map(reward => (
+                      <div key={reward.id} className="flex items-center gap-4 p-4 border rounded-lg">
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                          <reward.icon className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">{reward.name}</h3>
+                          <p className="text-sm text-muted-foreground">{reward.description}</p>
+                        </div>
+                        <div className="ml-auto text-sm font-medium text-blue-600">
+                          {reward.points} points
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
