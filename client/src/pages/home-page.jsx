@@ -7,10 +7,21 @@ import StreakStats from "@/components/StreakStats";
 import Achievements from "@/components/Achievements";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Menu, Film, Users, Trophy, Flame, Activity, PlusCircle, Clock, Star, Heart, Award } from "lucide-react";
+import { 
+  Loader2, 
+  Menu, 
+  Film, 
+  Users, 
+  Trophy, 
+  Flame, 
+  PlusCircle, 
+  Clock, 
+  Star, 
+  Heart,
+  Award 
+} from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import Challenges from "@/components/Challenges";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import FriendsList from "@/components/FriendsList";
 import LogSessionModal from '@/components/LogSessionModal';
 
@@ -26,38 +37,7 @@ const levels = [
   { level: 8, points: 10000, badge: "Legend", color: "from-orange-500 to-orange-600" }
 ];
 
-const getCurrentLevel = (points) => {
-  for (let i = levels.length - 1; i >= 0; i--) {
-    if (points >= levels[i].points) {
-      return levels[i];
-    }
-  }
-  return levels[0];
-};
-
-const getNextLevel = (points) => {
-  for (let i = 0; i < levels.length; i++) {
-    if (points < levels[i].points) {
-      return levels[i];
-    }
-  }
-  return levels[levels.length - 1];
-};
-
-// Sample rewards data
-const rewards = [
-  { id: 1, name: "Early Bird", description: "Complete a session before 8 AM", points: 50, icon: Clock },
-  { id: 2, name: "Streak Master", description: "Maintain a 7-day streak", points: 100, icon: Flame },
-  { id: 3, name: "Social Butterfly", description: "Join 3 group sessions", points: 75, icon: Users },
-];
-
-// Sample goals data
-const goals = [
-  { id: 1, title: "Daily Meditation", current: 3, target: 5, unit: "sessions" },
-  { id: 2, title: "Weekly Social Calls", current: 2, target: 4, unit: "calls" },
-  { id: 3, title: "Monthly Achievements", current: 8, target: 10, unit: "achievements" },
-];
-
+// Navigation menu items
 const menuItems = [
   {
     title: "Social Hub",
@@ -90,29 +70,22 @@ const menuItems = [
     description: "Keep your momentum going with daily activities",
     color: "bg-gradient-to-br from-orange-500 to-red-600",
     stats: "Current: 5 days"
-  },
-  {
-    title: "Latest Updates",
-    icon: Star,
-    href: "/updates",
-    description: "Check out new features and improvements",
-    color: "bg-gradient-to-br from-cyan-500 to-blue-600",
-    stats: "3 new updates"
   }
 ];
 
-const defaultUser = {
-  username: "Guest User",
-};
+// Daily goals data
+const goals = [
+  { id: 1, title: "Daily Sessions", current: 3, target: 5, unit: "sessions" },
+  { id: 2, title: "Streak Days", current: 2, target: 7, unit: "days" },
+  { id: 3, title: "XP Earned Today", current: 80, target: 100, unit: "XP" },
+];
 
 // Animation variants
 const containerAnimation = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
+    transition: { staggerChildren: 0.1 }
   }
 };
 
@@ -130,19 +103,45 @@ const menuItemAnimation = {
   tap: { scale: 0.98 }
 };
 
+const getCurrentLevel = (points) => {
+  for (let i = levels.length - 1; i >= 0; i--) {
+    if (points >= levels[i].points) {
+      return levels[i];
+    }
+  }
+  return levels[0];
+};
+
+const getNextLevel = (points) => {
+  for (let i = 0; i < levels.length; i++) {
+    if (points < levels[i].points) {
+      return levels[i];
+    }
+  }
+  return levels[levels.length - 1];
+};
+
+const defaultUser = {
+  username: "Guest User",
+};
+
 export default function HomePage() {
   const { toast } = useToast();
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
 
+  // Fetch user stats and achievements
   const { data: stats, isLoading } = useQuery({
     queryKey: ["/api/stats"],
     initialData: {
-      user: defaultUser,
+      user: { username: "Guest User", xpPoints: 0 },
       challenges: [],
-      achievements: []
+      achievements: [],
+      nextLevelXP: 100,
+      currentLevelXP: 0
     }
   });
 
+  // Session logging mutation
   const sessionMutation = useMutation({
     mutationFn: async (sessionData) => {
       const res = await apiRequest("POST", "/api/session", sessionData);
@@ -155,11 +154,13 @@ export default function HomePage() {
         challenges: data.challenges,
       }));
 
+      // Show success toast
       toast({
         title: "Session Logged",
         description: "Your streak has been updated!",
       });
 
+      // Show achievement toasts
       data.newAchievements?.forEach((achievement) => {
         toast({
           title: "Achievement Unlocked!",
@@ -168,13 +169,14 @@ export default function HomePage() {
         });
       });
 
-      data.completedChallenges?.forEach((completion) => {
+      // Show level up toast if applicable
+      if (data.leveledUp) {
         toast({
-          title: "Challenge Completed!",
-          description: `${completion.challenge.title}`,
+          title: "Level Up!",
+          description: `You've reached level ${data.user.level}!`,
           variant: "default",
         });
-      });
+      }
 
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
     },
@@ -193,8 +195,8 @@ export default function HomePage() {
     );
   }
 
-  // Mock user points for demonstration
-  const userPoints = 450; // This would come from the API in real implementation
+  // Calculate level progress
+  const userPoints = stats.user.xpPoints || 0;
   const currentLevel = getCurrentLevel(userPoints);
   const nextLevel = getNextLevel(userPoints);
   const progressToNextLevel = nextLevel.points === currentLevel.points ? 100 :
@@ -202,6 +204,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50/50 to-white">
+      {/* Header */}
       <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 z-50 border-b border-zinc-200/50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <motion.h1
@@ -266,6 +269,7 @@ export default function HomePage() {
         </div>
       </header>
 
+      {/* Main Content */}
       <div className="container mx-auto px-4">
         <motion.div 
           className="flex min-h-screen pt-24 pb-32 gap-6"
@@ -297,9 +301,11 @@ export default function HomePage() {
                     <span>{Math.round(progressToNextLevel)}%</span>
                   </div>
                   <div className="h-3 bg-blue-900/30 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full rounded-full bg-gradient-to-r from-blue-200 to-white transition-all duration-500"
-                      style={{ width: `${progressToNextLevel}%` }}
+                    <motion.div 
+                      className="h-full rounded-full bg-gradient-to-r from-blue-200 to-white"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${progressToNextLevel}%` }}
+                      transition={{ duration: 1, delay: 0.2 }}
                     />
                   </div>
                   <p className="text-sm text-blue-200">
@@ -340,7 +346,7 @@ export default function HomePage() {
               <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
                 <CardHeader>
                   <CardTitle className="text-2xl font-semibold tracking-tight">
-                    Your Goals
+                    Daily Goals
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -354,9 +360,11 @@ export default function HomePage() {
                           </span>
                         </div>
                         <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-blue-500 rounded-full transition-all duration-500"
-                            style={{ width: `${(goal.current / goal.target) * 100}%` }}
+                          <motion.div 
+                            className="h-full bg-blue-500 rounded-full"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${(goal.current / goal.target) * 100}%` }}
+                            transition={{ duration: 1, delay: 0.3 }}
                           />
                         </div>
                       </div>
@@ -366,19 +374,7 @@ export default function HomePage() {
               </Card>
             </motion.div>
 
-            <motion.div variants={itemAnimation}>
-              <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-semibold tracking-tight">
-                    Daily Challenges
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Challenges challenges={stats?.challenges || []} />
-                </CardContent>
-              </Card>
-            </motion.div>
-
+            {/* Streak Stats */}
             <motion.div variants={itemAnimation}>
               <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
                 <CardHeader>
@@ -392,6 +388,7 @@ export default function HomePage() {
               </Card>
             </motion.div>
 
+            {/* Achievements */}
             <motion.div variants={itemAnimation}>
               <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
                 <CardHeader>
@@ -404,37 +401,9 @@ export default function HomePage() {
                 </CardContent>
               </Card>
             </motion.div>
-
-            {/* Rewards Section */}
-            <motion.div variants={itemAnimation}>
-              <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-semibold tracking-tight">
-                    Available Rewards
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-4">
-                    {rewards.map(reward => (
-                      <div key={reward.id} className="flex items-center gap-4 p-4 border rounded-lg">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                          <reward.icon className="h-6 w-6 text-blue-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold">{reward.name}</h3>
-                          <p className="text-sm text-muted-foreground">{reward.description}</p>
-                        </div>
-                        <div className="ml-auto text-sm font-medium text-blue-600">
-                          {reward.points} points
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
           </div>
 
+          {/* Friends List Sidebar */}
           <div className="hidden lg:block w-96">
             <div className="sticky top-24">
               <FriendsList />
@@ -443,6 +412,7 @@ export default function HomePage() {
         </motion.div>
       </div>
 
+      {/* Log Session Button */}
       <motion.div
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -463,14 +433,24 @@ export default function HomePage() {
             )}
             Log Session
           </Button>
-          <LogSessionModal
-            isOpen={isSessionModalOpen}
-            onClose={() => setIsSessionModalOpen(false)}
-            onSubmit={handleSessionSubmit}
-            isPending={sessionMutation.isPending}
-          />
+          <AnimatePresence>
+            {isSessionModalOpen && (
+              <LogSessionModal
+                isOpen={isSessionModalOpen}
+                onClose={() => setIsSessionModalOpen(false)}
+                onSubmit={handleSessionSubmit}
+                isPending={sessionMutation.isPending}
+              />
+            )}
+          </AnimatePresence>
         </div>
       </motion.div>
     </div>
   );
 }
+
+const rewards = [
+  { id: 1, name: "Early Bird", description: "Complete a session before 8 AM", points: 50, icon: Clock },
+  { id: 2, name: "Streak Master", description: "Maintain a 7-day streak", points: 100, icon: Flame },
+  { id: 3, name: "Social Butterfly", description: "Join 3 group sessions", points: 75, icon: Users },
+];
