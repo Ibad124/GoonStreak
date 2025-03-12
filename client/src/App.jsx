@@ -8,6 +8,7 @@ import HomePage from "@/pages/home-page";
 import AuthPage from "@/pages/auth-page";
 import LeaderboardPage from "@/pages/leaderboard-page";
 import AdultContent from "@/pages/adult-content";
+import SocialPage from "@/pages/social-page"; // Added import
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -15,6 +16,7 @@ function Router() {
     <Switch>
       <ProtectedRoute path="/adult-content" component={AdultContent} />
       <ProtectedRoute path="/leaderboard" component={LeaderboardPage} />
+      <ProtectedRoute path="/social" component={SocialPage} /> {/* Added route */}
       <ProtectedRoute path="/" component={HomePage} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
