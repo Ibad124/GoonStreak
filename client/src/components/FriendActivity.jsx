@@ -44,14 +44,42 @@ function ActivityItem({ activity }) {
 
 export default function FriendActivity() {
   const [activeTab, setActiveTab] = useState("all");
+  console.log("FriendActivity: Rendering with activeTab:", activeTab); // Debug log
 
-  const { data: activities = [] } = useQuery({
+  const { data: activities = [], error, isLoading } = useQuery({
     queryKey: ["/api/friends/activity"],
+    onError: (error) => {
+      console.error("FriendActivity: Error fetching activities:", error);
+    },
+    onSuccess: (data) => {
+      console.log("FriendActivity: Received activities:", data);
+    },
   });
+
+  // Handle error state
+  if (error) {
+    console.error("FriendActivity: Rendering error state:", error);
+    return (
+      <Card className="p-4 text-center text-red-500">
+        Failed to load friend activities. Please try again later.
+      </Card>
+    );
+  }
+
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <Card className="p-4 text-center text-zinc-500">
+        Loading friend activities...
+      </Card>
+    );
+  }
 
   const filteredActivities = activeTab === "all" 
     ? activities 
     : activities.filter(activity => activity.type === activeTab);
+
+  console.log("FriendActivity: Filtered activities:", filteredActivities); // Debug log
 
   return (
     <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50">

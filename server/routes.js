@@ -145,9 +145,16 @@ export async function registerRoutes(app) {
 
   // Get friend activities
   app.get("/api/friends/activity", requireAuth, async (req, res) => {
+    console.log("Fetching friend activities for user:", req.user.id);
+
     const friends = await storage.getUserFriends(req.user.id);
+    console.log("Found friends:", friends);
+
     const friendIds = friends.map(f => f.friendId);
+    console.log("Friend IDs:", friendIds);
+
     const activities = await storage.getFriendActivities(friendIds);
+    console.log("Raw activities:", activities);
 
     // Get user data for each activity
     const activitiesWithUserData = await Promise.all(
@@ -160,6 +167,7 @@ export async function registerRoutes(app) {
       })
     );
 
+    console.log("Enriched activities with user data:", activitiesWithUserData);
     res.json(activitiesWithUserData);
   });
 
