@@ -8,10 +8,17 @@ import Achievements from "@/components/Achievements";
 import XPProgress from "@/components/XPProgress";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Menu, Film } from "lucide-react";
+import { Loader2, Menu, Film, Settings } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Challenges from "@/components/Challenges";
 import SessionInsights from "@/components/SessionInsights";
+import { motion } from "framer-motion";
+
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.5 }
+};
 
 export default function HomePage() {
   const { user, logoutMutation } = useAuth();
@@ -21,8 +28,6 @@ export default function HomePage() {
     queryKey: ["/api/stats"],
   });
 
-  console.log("Stats data:", stats);
-
   const sessionMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", "/api/session");
@@ -31,13 +36,11 @@ export default function HomePage() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
 
-      // Show basic session completion toast
       toast({
         title: "Session Logged",
         description: "Your streak has been updated!",
       });
 
-      // Show XP gained toast
       const xpGained = data.user.xpPoints - (stats?.user.xpPoints || 0);
       toast({
         title: "XP Gained!",
@@ -45,7 +48,6 @@ export default function HomePage() {
         variant: "default",
       });
 
-      // If user leveled up, show special toast
       if (data.leveledUp) {
         toast({
           title: "Level Up!",
@@ -54,7 +56,6 @@ export default function HomePage() {
         });
       }
 
-      // If new achievements were earned, show them
       data.newAchievements?.forEach((achievement) => {
         toast({
           title: "Achievement Unlocked!",
@@ -74,11 +75,16 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen pb-20 bg-zinc-50/50 backdrop-blur">
+    <div className="min-h-screen pb-24 bg-gradient-to-b from-blue-50/50 to-white">
       {/* Fixed Header */}
-      <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 z-50 border-b border-zinc-200/50">
-        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-          <h1 className="text-xl font-semibold tracking-tight">Hi, {user?.username}!</h1>
+      <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 z-50 border-b border-zinc-200/50">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <motion.h1 
+            className="text-xl font-semibold tracking-tight bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent"
+            {...fadeInUp}
+          >
+            Hi, {user?.username}!
+          </motion.h1>
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">
@@ -115,68 +121,87 @@ export default function HomePage() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 pt-20">
+      <main className="container mx-auto px-4 pt-24">
         <div className="space-y-6">
           {/* XP Progress */}
-          {stats && (
-            <XPProgress
-              user={stats.user}
-              nextLevelXP={stats.nextLevelXP}
-              currentLevelXP={stats.currentLevelXP}
-            />
-          )}
+          <motion.div {...fadeInUp}>
+            {stats && (
+              <XPProgress
+                user={stats.user}
+                nextLevelXP={stats.nextLevelXP}
+                currentLevelXP={stats.currentLevelXP}
+              />
+            )}
+          </motion.div>
 
           {/* Challenges Section */}
-          <Card className="backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-zinc-100/50">
-            <CardHeader>
-              <CardTitle className="text-2xl font-semibold tracking-tight">
-                Daily Challenges
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Challenges challenges={stats?.challenges || []} />
-            </CardContent>
-          </Card>
+          <motion.div {...fadeInUp} transition={{ delay: 0.1 }}>
+            <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
+              <CardHeader>
+                <CardTitle className="text-2xl font-semibold tracking-tight">
+                  Daily Challenges
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Challenges challenges={stats?.challenges || []} />
+              </CardContent>
+            </Card>
+          </motion.div>
 
           {/* Streak Stats */}
-          <Card className="backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-zinc-100/50">
-            <CardHeader>
-              <CardTitle className="text-2xl font-semibold tracking-tight">
-                Your Streak
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <StreakStats
-                stats={{
-                  user: {
-                    currentStreak: 0,
-                    longestStreak: 0,
-                    totalSessions: 0,
-                  },
-                }}
-              />
-            </CardContent>
-          </Card>
+          <motion.div {...fadeInUp} transition={{ delay: 0.2 }}>
+            <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
+              <CardHeader>
+                <CardTitle className="text-2xl font-semibold tracking-tight">
+                  Your Streak
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <StreakStats stats={{ user: stats.user }} />
+              </CardContent>
+            </Card>
+          </motion.div>
 
           {/* Achievements */}
-          <Card className="backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-zinc-100/50">
-            <CardHeader>
-              <CardTitle className="text-2xl font-semibold tracking-tight">
-                Achievements
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Achievements achievements={stats?.achievements || []} />
-            </CardContent>
-          </Card>
+          <motion.div {...fadeInUp} transition={{ delay: 0.3 }}>
+            <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
+              <CardHeader>
+                <CardTitle className="text-2xl font-semibold tracking-tight">
+                  Achievements
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Achievements achievements={stats?.achievements || []} />
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Session Insights */}
+          <motion.div {...fadeInUp} transition={{ delay: 0.4 }}>
+            <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
+              <CardHeader>
+                <CardTitle className="text-2xl font-semibold tracking-tight">
+                  Session Insights
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <SessionInsights />
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
       </main>
 
       {/* Fixed Bottom Bar with Log Session Button */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t border-zinc-200/50">
+      <motion.div 
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.5, type: "spring" }}
+        className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60 border-t border-zinc-200/50"
+      >
         <div className="container mx-auto max-w-lg">
           <Button
-            className="w-full h-14 text-lg rounded-full bg-blue-500 hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20"
+            className="w-full h-14 text-lg rounded-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transform hover:scale-[1.02] active:scale-[0.98]"
             size="lg"
             onClick={() => sessionMutation.mutate()}
             disabled={sessionMutation.isPending}
@@ -187,7 +212,7 @@ export default function HomePage() {
             Log Session
           </Button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
