@@ -7,7 +7,6 @@ import LeaderboardPage from "@/pages/leaderboard-page";
 import AdultContent from "@/pages/adult-content";
 import SocialPage from "@/pages/social-page";
 import NotFound from "@/pages/not-found";
-import QuickAccessMenu from "@/components/QuickAccessMenu";
 
 function Router() {
   return (
@@ -25,7 +24,6 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router />
-      <QuickAccessMenu />
       <Toaster />
     </QueryClientProvider>
   );
