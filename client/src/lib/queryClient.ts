@@ -7,16 +7,29 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+// Get the API base URL
+const getBaseUrl = () => {
+  return window.location.origin;
+};
+
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  // Ensure URL starts with /api
+  const apiUrl = url.startsWith('/api') ? url : `/api${url}`;
+  const fullUrl = `${getBaseUrl()}${apiUrl}`;
+
+  const res = await fetch(fullUrl, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
+    headers: {
+      ...(data ? { "Content-Type": "application/json" } : {}),
+      "Accept": "application/json",
+    },
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
+    mode: "cors",
   });
 
   await throwIfResNotOk(res);
@@ -29,8 +42,16 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
+    const url = queryKey[0] as string;
+    const apiUrl = url.startsWith('/api') ? url : `/api${url}`;
+    const fullUrl = `${getBaseUrl()}${apiUrl}`;
+
+    const res = await fetch(fullUrl, {
       credentials: "include",
+      mode: "cors",
+      headers: {
+        "Accept": "application/json",
+      },
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
