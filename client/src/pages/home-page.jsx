@@ -287,9 +287,11 @@ export default function HomePage() {
             </SheetTrigger>
             <SheetContent className="w-full sm:max-w-[450px] p-0 flex flex-col bg-white/80 backdrop-blur-xl">
               <SheetHeader className="p-4 sm:p-6 border-b">
-                <SheetTitle className="text-xl sm:text-2xl font-semibold flex items-center gap-2">
-                  <Heart className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
-                  Menu
+                <SheetTitle className="text-xl sm:text-2xl font-semibold">
+                  <div className="flex items-center gap-2">
+                    <Heart className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
+                    Menu
+                  </div>
                 </SheetTitle>
               </SheetHeader>
               <div className="flex-1 overflow-y-auto px-2 py-3 sm:p-6">
