@@ -24,6 +24,7 @@ import FriendsList from "@/components/FriendsList";
 import LogSessionModal from '@/components/LogSessionModal';
 import { useAuth } from "@/hooks/use-auth";
 import { formatDistanceToNow } from 'date-fns';
+import SessionCalendar from "@/components/SessionCalendar"; // Added import
 
 // Streak Configuration
 const STREAK_CONFIG = {
@@ -108,7 +109,6 @@ const menuItems = [
     stats: "Current: 5 days"
   }
 ];
-
 
 // Animation variants
 const containerAnimation = {
@@ -536,6 +536,15 @@ export default function HomePage() {
                 </CardContent>
               </Card>
             </motion.div>
+
+            {/* Session Calendar */}
+            <motion.div variants={itemAnimation}> {/* Added SessionCalendar */}
+              <SessionCalendar
+                sessions={stats.sessions}
+                currentStreak={stats.user.currentStreak}
+              />
+            </motion.div>
+
           </div>
 
           {/* Friends List Sidebar */}
