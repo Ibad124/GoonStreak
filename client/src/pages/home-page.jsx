@@ -3,13 +3,11 @@ import { Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import StreakStats from "@/components/StreakStats";
-import Achievements from "@/components/Achievements";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { STREAK_CONFIG } from "../../shared/schema.ts";
 import {
   Loader2,
-  Menu,
   Film,
   Users,
   Trophy,
@@ -24,10 +22,10 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { motion, AnimatePresence } from "framer-motion";
 import FriendsList from "@/components/FriendsList";
 import LogSessionModal from '@/components/LogSessionModal';
-import { useAuth } from "@/hooks/use-auth"; // Add useAuth import
-import { formatDistanceToNow } from 'date-fns'; //Import date-fns
+import { useAuth } from "@/hooks/use-auth";
+import { formatDistanceToNow } from 'date-fns';
 
-// Add these helper functions after the imports
+// Helper functions for streak milestones
 const getNextMilestone = (currentStreak) => {
   return Object.keys(STREAK_CONFIG.MULTIPLIER_MILESTONES)
     .map(Number)
@@ -43,7 +41,6 @@ const getDaysToNextMilestone = (currentStreak) => {
   const nextMilestone = getNextMilestone(currentStreak);
   return nextMilestone - currentStreak;
 };
-
 
 // Level system configuration
 const levels = [
@@ -141,7 +138,7 @@ const defaultUser = {
 
 export default function HomePage() {
   const { toast } = useToast();
-  const { user } = useAuth(); // Get authenticated user
+  const { user } = useAuth();
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
 
   // Fetch user stats and achievements with auth
@@ -241,21 +238,7 @@ export default function HomePage() {
   const progressToNextLevel = nextLevel.points === currentLevel.points ? 100 :
     ((userPoints - currentLevel.points) / (nextLevel.points - currentLevel.points)) * 100;
 
-  // Placeholder data -  Replace with actual data fetching or configuration
-  const STREAK_CONFIG = {
-    MULTIPLIER_MILESTONES: {
-      '7': 1.2,
-      '14': 1.5,
-      '21': 1.75,
-      '28': 2
-    },
-    MILESTONE_ACHIEVEMENTS: {
-      '7': 'Weekly Streak',
-      '14': 'Bi-Weekly Streak',
-      '21': 'Three-Week Streak',
-      '28': 'Monthly Streak'
-    }
-  };
+
   const nextMilestone = getNextMilestone(stats.user.currentStreak);
   const daysToNextMilestone = getDaysToNextMilestone(stats.user.currentStreak);
   const nextSessionMilestone = getNextSessionMilestone(stats.user.totalSessions);

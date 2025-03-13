@@ -2,6 +2,7 @@ import { pgTable, text, serial, integer, boolean, date } from "drizzle-orm/pg-co
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// User table definition
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
@@ -20,6 +21,7 @@ export const users = pgTable("users", {
   lastStreakReset: text("last_streak_reset"), // For grace period recovery
 });
 
+// Achievements table definition
 export const achievements = pgTable("achievements", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
@@ -29,6 +31,7 @@ export const achievements = pgTable("achievements", {
   xpAwarded: integer("xp_awarded").notNull().default(0),
 });
 
+// Schemas and types
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -39,6 +42,25 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Achievement = typeof achievements.$inferSelect;
+
+// Streak Configuration
+export const STREAK_CONFIG = {
+  GRACE_PERIOD_HOURS: 24, // Hours allowed to maintain streak if missed
+  MULTIPLIER_MILESTONES: {
+    3: 1.2,  // 20% bonus after 3 days
+    7: 1.5,  // 50% bonus after 7 days
+    14: 1.8, // 80% bonus after 14 days
+    30: 2.0, // 100% bonus after 30 days
+    60: 2.5, // 150% bonus after 60 days
+  },
+  MILESTONE_ACHIEVEMENTS: {
+    3: "Bronze Streak",
+    7: "Silver Streak",
+    14: "Gold Streak",
+    30: "Diamond Streak",
+    60: "Legendary Streak",
+  }
+} as const;
 
 // Level System Configuration
 export const LEVEL_THRESHOLDS = {
@@ -58,23 +80,4 @@ export const XP_REWARDS = {
   STREAK_MILESTONE: 30,
   ACHIEVEMENT_EARNED: 25,
   CHALLENGE_COMPLETED: 50,
-} as const;
-
-// Streak Configuration
-export const STREAK_CONFIG = {
-  GRACE_PERIOD_HOURS: 24, // Hours allowed to maintain streak if missed
-  MULTIPLIER_MILESTONES: {
-    3: 1.2,  // 20% bonus after 3 days
-    7: 1.5,  // 50% bonus after 7 days
-    14: 1.8, // 80% bonus after 14 days
-    30: 2.0, // 100% bonus after 30 days
-    60: 2.5, // 150% bonus after 60 days
-  },
-  MILESTONE_ACHIEVEMENTS: {
-    3: "Bronze Streak",
-    7: "Silver Streak",
-    14: "Gold Streak",
-    30: "Diamond Streak",
-    60: "Legendary Streak",
-  }
 } as const;
