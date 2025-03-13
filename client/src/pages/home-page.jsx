@@ -7,18 +7,18 @@ import StreakStats from "@/components/StreakStats";
 import Achievements from "@/components/Achievements";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  Loader2, 
-  Menu, 
-  Film, 
-  Users, 
-  Trophy, 
-  Flame, 
-  PlusCircle, 
-  Clock, 
-  Star, 
+import {
+  Loader2,
+  Menu,
+  Film,
+  Users,
+  Trophy,
+  Flame,
+  PlusCircle,
+  Clock,
+  Star,
   Heart,
-  Award 
+  Award
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { motion, AnimatePresence } from "framer-motion";
@@ -90,7 +90,7 @@ const itemAnimation = {
 
 const menuItemAnimation = {
   initial: { scale: 1 },
-  hover: { 
+  hover: {
     scale: 1.02,
     transition: { type: "spring", stiffness: 400, damping: 10 }
   },
@@ -139,19 +139,25 @@ export default function HomePage() {
   const sessionMutation = useMutation({
     mutationFn: async (sessionData) => {
       const res = await apiRequest("POST", "/api/session", sessionData);
+      if (!res.ok) {
+        throw new Error("Failed to log session");
+      }
       return res.json();
     },
     onSuccess: (data) => {
+      // Update stats with new user data and achievements
       queryClient.setQueryData(["/api/stats"], (oldData) => ({
         ...oldData,
         user: data.user,
-        challenges: data.challenges,
+        nextLevelXP: data.nextLevelXP,
+        currentLevelXP: data.currentLevelXP,
+        achievements: [...(oldData?.achievements || []), ...(data.newAchievements || [])]
       }));
 
       // Show success toast
       toast({
         title: "Session Logged",
-        description: "Your streak has been updated!",
+        description: "Keep up the great work!",
       });
 
       // Show achievement toasts
@@ -172,7 +178,15 @@ export default function HomePage() {
         });
       }
 
+      // Force refresh stats
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to log session",
+        variant: "destructive",
+      });
     },
   });
 
@@ -210,9 +224,9 @@ export default function HomePage() {
           </motion.h1>
           <Sheet>
             <SheetTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="icon" 
+              <Button
+                variant="outline"
+                size="icon"
                 className="rounded-full hover:scale-105 transition-transform active:scale-95"
               >
                 <Menu className="h-5 w-5" />
@@ -265,7 +279,7 @@ export default function HomePage() {
 
       {/* Main Content */}
       <div className="container mx-auto px-4">
-        <motion.div 
+        <motion.div
           className="flex min-h-screen pt-24 pb-32 gap-6"
           variants={containerAnimation}
           initial="hidden"
@@ -273,7 +287,7 @@ export default function HomePage() {
         >
           <div className="flex-1 space-y-6">
             {/* Hero Section with Level Progress */}
-            <motion.div 
+            <motion.div
               variants={itemAnimation}
               className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 text-white p-8 shadow-xl"
             >
@@ -295,7 +309,7 @@ export default function HomePage() {
                     <span>{Math.round(progressToNextLevel)}%</span>
                   </div>
                   <div className="h-3 bg-blue-900/30 rounded-full overflow-hidden">
-                    <motion.div 
+                    <motion.div
                       className="h-full rounded-full bg-gradient-to-r from-blue-200 to-white"
                       initial={{ width: 0 }}
                       animate={{ width: `${progressToNextLevel}%` }}
