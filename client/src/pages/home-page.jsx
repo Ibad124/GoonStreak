@@ -15,7 +15,8 @@ import {
   Clock,
   Star,
   Heart,
-  Award
+  Award,
+  Menu,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { motion, AnimatePresence } from "framer-motion";
