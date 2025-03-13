@@ -73,12 +73,6 @@ const menuItems = [
   }
 ];
 
-// Daily goals data
-const goals = [
-  { id: 1, title: "Daily Sessions", current: 3, target: 5, unit: "sessions" },
-  { id: 2, title: "Streak Days", current: 2, target: 7, unit: "days" },
-  { id: 3, title: "XP Earned Today", current: 80, target: 100, unit: "XP" },
-];
 
 // Animation variants
 const containerAnimation = {
@@ -341,40 +335,8 @@ export default function HomePage() {
               <div className="absolute -right-4 -bottom-4 w-32 h-32 rounded-full bg-white/5" />
             </motion.div>
 
-            {/* Goals Section */}
-            <motion.div variants={itemAnimation}>
-              <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-semibold tracking-tight">
-                    Daily Goals
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {goals.map(goal => (
-                      <div key={goal.id} className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="font-medium">{goal.title}</span>
-                          <span className="text-sm text-muted-foreground">
-                            {goal.current}/{goal.target} {goal.unit}
-                          </span>
-                        </div>
-                        <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
-                          <motion.div 
-                            className="h-full bg-blue-500 rounded-full"
-                            initial={{ width: 0 }}
-                            animate={{ width: `${(goal.current / goal.target) * 100}%` }}
-                            transition={{ duration: 1, delay: 0.3 }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
 
-            {/* Streak Stats */}
+            {/* Streak Stats - Now more prominent since we removed goals */}
             <motion.div variants={itemAnimation}>
               <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
                 <CardHeader>
