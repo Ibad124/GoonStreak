@@ -24,6 +24,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { motion, AnimatePresence } from "framer-motion";
 import FriendsList from "@/components/FriendsList";
 import LogSessionModal from '@/components/LogSessionModal';
+import { useAuth } from "@/hooks/use-auth"; // Add useAuth import
 
 // Level system configuration
 const levels = [
@@ -121,13 +122,14 @@ const defaultUser = {
 
 export default function HomePage() {
   const { toast } = useToast();
+  const { user } = useAuth(); // Get authenticated user
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
 
-  // Fetch user stats and achievements
+  // Fetch user stats and achievements with auth
   const { data: stats, isLoading } = useQuery({
     queryKey: ["/api/stats"],
     initialData: {
-      user: { username: "Guest User", xpPoints: 0 },
+      user: user || { username: "Guest User", xpPoints: 0 },
       challenges: [],
       achievements: [],
       nextLevelXP: 100,
@@ -135,12 +137,13 @@ export default function HomePage() {
     }
   });
 
-  // Session logging mutation
+  // Session logging mutation with auth
   const sessionMutation = useMutation({
     mutationFn: async (sessionData) => {
       const res = await apiRequest("POST", "/api/session", sessionData);
       if (!res.ok) {
-        throw new Error("Failed to log session");
+        const error = await res.text();
+        throw new Error(error || "Failed to log session");
       }
       return res.json();
     },
