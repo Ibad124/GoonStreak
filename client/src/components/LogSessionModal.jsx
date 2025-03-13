@@ -45,13 +45,18 @@ export default function LogSessionModal({ isOpen, onClose, onSubmit, isPending }
   };
 
   const handleSubmit = () => {
+    const minutes = mode === "timer" ? Math.floor(time / 60) : parseInt(duration);
+    if (minutes <= 0) return;
+
     const sessionData = {
-      duration: mode === "timer" ? Math.floor(time / 60) : parseInt(duration),
+      duration: minutes,
       intensity,
       mood,
-      timestamp: new Date(),
+      timestamp: new Date().toISOString()
     };
+
     onSubmit(sessionData);
+    resetForm();
   };
 
   const resetForm = () => {
