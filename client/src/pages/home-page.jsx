@@ -25,6 +25,25 @@ import { motion, AnimatePresence } from "framer-motion";
 import FriendsList from "@/components/FriendsList";
 import LogSessionModal from '@/components/LogSessionModal';
 import { useAuth } from "@/hooks/use-auth"; // Add useAuth import
+import { formatDistanceToNow } from 'date-fns'; //Import date-fns
+
+// Add these helper functions after the imports
+const getNextMilestone = (currentStreak) => {
+  return Object.keys(STREAK_CONFIG.MULTIPLIER_MILESTONES)
+    .map(Number)
+    .find(days => days > currentStreak) || currentStreak;
+};
+
+const getNextSessionMilestone = (totalSessions) => {
+  const milestones = [10, 25, 50, 100, 250, 500, 1000];
+  return milestones.find(m => m > totalSessions) || totalSessions;
+};
+
+const getDaysToNextMilestone = (currentStreak) => {
+  const nextMilestone = getNextMilestone(currentStreak);
+  return nextMilestone - currentStreak;
+};
+
 
 // Level system configuration
 const levels = [
@@ -222,6 +241,26 @@ export default function HomePage() {
   const progressToNextLevel = nextLevel.points === currentLevel.points ? 100 :
     ((userPoints - currentLevel.points) / (nextLevel.points - currentLevel.points)) * 100;
 
+  // Placeholder data -  Replace with actual data fetching or configuration
+  const STREAK_CONFIG = {
+    MULTIPLIER_MILESTONES: {
+      '7': 1.2,
+      '14': 1.5,
+      '21': 1.75,
+      '28': 2
+    },
+    MILESTONE_ACHIEVEMENTS: {
+      '7': 'Weekly Streak',
+      '14': 'Bi-Weekly Streak',
+      '21': 'Three-Week Streak',
+      '28': 'Monthly Streak'
+    }
+  };
+  const nextMilestone = getNextMilestone(stats.user.currentStreak);
+  const daysToNextMilestone = getDaysToNextMilestone(stats.user.currentStreak);
+  const nextSessionMilestone = getNextSessionMilestone(stats.user.totalSessions);
+
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50/50 to-white">
       {/* Header */}
@@ -341,14 +380,14 @@ export default function HomePage() {
                         userPoints >= level.points
                           ? 'bg-white/20 backdrop-blur'
                           : 'bg-blue-900/20'
-                      }`}
+                        }`}
                     >
                       <Award className={`h-4 w-4 mx-auto mb-1 ${
                         userPoints >= level.points ? 'text-white' : 'text-blue-300/50'
-                      }`} />
+                        }`} />
                       <div className={`text-xs font-medium ${
                         userPoints >= level.points ? 'text-white' : 'text-blue-300/50'
-                      }`}>
+                        }`}>
                         {level.badge}
                       </div>
                     </div>
@@ -376,21 +415,122 @@ export default function HomePage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <StreakStats stats={stats} />
+                  <div className="grid grid-cols-3 gap-4 mb-6">
+                    <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl">
+                      <div className="text-3xl font-bold text-blue-600">{stats.user.currentStreak}</div>
+                      <div className="text-sm text-muted-foreground mt-1">Current Streak</div>
+                    </div>
+                    <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl">
+                      <div className="text-3xl font-bold text-blue-600">{stats.user.longestStreak}</div>
+                      <div className="text-sm text-muted-foreground mt-1">Best Streak</div>
+                    </div>
+                    <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-xl">
+                      <div className="text-3xl font-bold text-blue-600">{stats.user.todaySessions}</div>
+                      <div className="text-sm text-muted-foreground mt-1">Today's Sessions</div>
+                    </div>
+                  </div>
+
+                  {/* Next Streak Milestone */}
+                  {stats.user.currentStreak > 0 && (
+                    <div className="space-y-2 p-4 bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-xl">
+                      <div className="flex justify-between items-center">
+                        <div className="space-y-1">
+                          <h4 className="font-medium">Next Streak Milestone</h4>
+                          {Object.entries(STREAK_CONFIG.MULTIPLIER_MILESTONES).filter(([days]) =>
+                            parseInt(days) > stats.user.currentStreak
+                          ).map(([days, multiplier]) => (
+                            <p key={days} className="text-sm text-muted-foreground">
+                              {STREAK_CONFIG.MILESTONE_ACHIEVEMENTS[days]} at {days} days
+                              <span className="text-purple-600 ml-2">
+                                ({Math.round((multiplier - 1) * 100)}% bonus)
+                              </span>
+                            </p>
+                          ))}
+                        </div>
+                        <Star className="h-8 w-8 text-purple-500" />
+                      </div>
+                      <div className="h-2 bg-purple-200 rounded-full overflow-hidden">
+                        <motion.div
+                          className="h-full bg-purple-500"
+                          initial={{ width: 0 }}
+                          animate={{
+                            width: `${(stats.user.currentStreak / nextMilestone) * 100}%`
+                          }}
+                          transition={{ duration: 1 }}
+                        />
+                      </div>
+                      <p className="text-xs text-center text-muted-foreground">
+                        {daysToNextMilestone} days until next milestone
+                      </p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </motion.div>
 
-            {/* Achievements */}
+            {/* Achievements with Progress */}
             <motion.div variants={itemAnimation}>
               <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
                 <CardHeader>
-                  <CardTitle className="text-2xl font-semibold tracking-tight">
+                  <CardTitle className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+                    <Trophy className="h-6 w-6 text-yellow-500" />
                     Achievements
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Achievements achievements={stats?.achievements || []} />
+                  <div className="grid gap-4">
+                    {/* Session Milestone Progress */}
+                    <div className="p-4 border rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <h3 className="font-semibold">Session Master</h3>
+                          <p className="text-sm text-muted-foreground">Complete daily sessions</p>
+                        </div>
+                        <Film className="h-6 w-6 text-blue-500" />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span>Progress to next milestone</span>
+                          <span>{stats.user.totalSessions} / {nextSessionMilestone}</span>
+                        </div>
+                        <div className="h-2 bg-blue-100 rounded-full overflow-hidden">
+                          <motion.div
+                            className="h-full bg-blue-500"
+                            initial={{ width: 0 }}
+                            animate={{
+                              width: `${(stats.user.totalSessions / nextSessionMilestone) * 100}%`
+                            }}
+                            transition={{ duration: 1 }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Recent Achievements */}
+                    <div className="grid gap-2">
+                      {stats.achievements.slice(0, 3).map((achievement) => (
+                        <motion.div
+                          key={achievement.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className="flex items-center gap-3 p-3 bg-gradient-to-br from-yellow-50 to-yellow-100/50 rounded-lg"
+                        >
+                          <div className="p-2 bg-yellow-500/10 rounded-lg">
+                            <Trophy className="h-4 w-4 text-yellow-500" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{achievement.description}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {formatDistanceToNow(new Date(achievement.earnedAt), { addSuffix: true })}
+                            </p>
+                          </div>
+                          <div className="ml-auto text-sm font-medium text-yellow-600">
+                            +{achievement.xpAwarded} XP
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
