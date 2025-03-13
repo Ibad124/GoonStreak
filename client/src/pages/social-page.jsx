@@ -23,7 +23,6 @@ import {
 import FriendsList from "@/components/FriendsList";
 import FriendActivity from "@/components/FriendActivity";
 import { motion } from "framer-motion";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -50,7 +49,6 @@ const recommendedFriends = [
 ];
 
 export default function SocialPage() {
-  const [isCreateRoomOpen, setIsCreateRoomOpen] = useState(false);
   const [selectedBackground, setSelectedBackground] = useState(backgrounds[0]);
   const { toast } = useToast();
 
@@ -59,7 +57,7 @@ export default function SocialPage() {
       title: "Creating Room",
       description: "Setting up your circle session...",
     });
-    setIsCreateRoomOpen(false);
+    //setIsCreateRoomOpen(false); // Removed because isCreateRoomOpen is no longer used
   };
 
   return (
@@ -75,93 +73,76 @@ export default function SocialPage() {
             </Link>
             <h1 className="text-xl font-semibold">Social Hub</h1>
           </div>
-          <div className="flex items-center gap-2">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="rounded-full md:hidden">
-                  <Users className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[300px] p-0">
-                <SheetHeader className="p-4 bg-gradient-to-br from-blue-600 to-blue-800 text-white">
-                  <SheetTitle className="text-xl font-bold text-white">Friends</SheetTitle>
-                </SheetHeader>
-                <div className="p-4">
-                  <FriendsList />
+          <Drawer>
+            <DrawerTrigger asChild>
+              <Button className="rounded-full">
+                <Video className="h-4 w-4 mr-2" />
+                Start Circle
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent>
+              <DrawerHeader>
+                <DrawerTitle>Create Circle Session</DrawerTitle>
+              </DrawerHeader>
+              <div className="p-4 space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Session Name</label>
+                  <input 
+                    type="text" 
+                    placeholder="Enter session name..."
+                    className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </div>
-              </SheetContent>
-            </Sheet>
-            <Drawer>
-              <DrawerTrigger asChild>
-                <Button className="rounded-full">
-                  <Video className="h-4 w-4 mr-2" />
-                  Start Circle
-                </Button>
-              </DrawerTrigger>
-              <DrawerContent>
-                <DrawerHeader>
-                  <DrawerTitle>Create Circle Session</DrawerTitle>
-                </DrawerHeader>
-                <div className="p-4 space-y-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Session Name</label>
-                    <input 
-                      type="text" 
-                      placeholder="Enter session name..."
-                      className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Room Background</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {backgrounds.map(bg => (
-                        <Button
-                          key={bg.id}
-                          variant={selectedBackground.id === bg.id ? "default" : "outline"}
-                          className="h-20"
-                          onClick={() => setSelectedBackground(bg)}
-                        >
-                          <Image className="h-6 w-6 mr-2" />
-                          {bg.name}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Invite Friends</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-2">
-                        <UserPlus className="h-6 w-6" />
-                        <span className="text-xs">Add Friend</span>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Room Background</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {backgrounds.map(bg => (
+                      <Button
+                        key={bg.id}
+                        variant={selectedBackground.id === bg.id ? "default" : "outline"}
+                        className="h-20"
+                        onClick={() => setSelectedBackground(bg)}
+                      >
+                        <Image className="h-6 w-6 mr-2" />
+                        {bg.name}
                       </Button>
-                    </div>
+                    ))}
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Session Settings</label>
-                    <Card>
-                      <CardContent className="p-4 space-y-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Settings className="h-4 w-4" />
-                            <span className="text-sm">Private Session</span>
-                          </div>
-                          <Button variant="ghost" size="sm">
-                            Configure
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                  <Button 
-                    className="w-full" 
-                    onClick={handleStartRoom}
-                  >
-                    Start Session
-                  </Button>
                 </div>
-              </DrawerContent>
-            </Drawer>
-          </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Invite Friends</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-2">
+                      <UserPlus className="h-6 w-6" />
+                      <span className="text-xs">Add Friend</span>
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Session Settings</label>
+                  <Card>
+                    <CardContent className="p-4 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Settings className="h-4 w-4" />
+                          <span className="text-sm">Private Session</span>
+                        </div>
+                        <Button variant="ghost" size="sm">
+                          Configure
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+                <Button 
+                  className="w-full" 
+                  onClick={handleStartRoom}
+                >
+                  Start Session
+                </Button>
+              </div>
+            </DrawerContent>
+          </Drawer>
         </div>
       </header>
 
@@ -174,7 +155,7 @@ export default function SocialPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="hidden lg:block"
+              className="lg:block"
             >
               <Card className="backdrop-blur bg-white/80 border-zinc-200/50">
                 <CardHeader>
