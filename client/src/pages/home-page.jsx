@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { STREAK_CONFIG } from "../../shared/schema.ts";
 import {
   Loader2,
   Film,
@@ -24,6 +23,25 @@ import FriendsList from "@/components/FriendsList";
 import LogSessionModal from '@/components/LogSessionModal';
 import { useAuth } from "@/hooks/use-auth";
 import { formatDistanceToNow } from 'date-fns';
+
+// Streak Configuration
+const STREAK_CONFIG = {
+  GRACE_PERIOD_HOURS: 24,
+  MULTIPLIER_MILESTONES: {
+    3: 1.2,  // 20% bonus after 3 days
+    7: 1.5,  // 50% bonus after 7 days
+    14: 1.8, // 80% bonus after 14 days
+    30: 2.0, // 100% bonus after 30 days
+    60: 2.5, // 150% bonus after 60 days
+  },
+  MILESTONE_ACHIEVEMENTS: {
+    3: "Bronze Streak",
+    7: "Silver Streak",
+    14: "Gold Streak",
+    30: "Diamond Streak",
+    60: "Legendary Streak",
+  }
+};
 
 // Helper functions for streak milestones
 const getNextMilestone = (currentStreak) => {
