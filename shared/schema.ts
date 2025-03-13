@@ -16,6 +16,8 @@ export const users = pgTable("users", {
   xpPoints: integer("xp_points").notNull().default(0),
   level: integer("level").notNull().default(1),
   currentBadge: text("current_badge").notNull().default("Novice"),
+  streakMultiplier: integer("streak_multiplier").notNull().default(1),
+  lastStreakReset: text("last_streak_reset"), // For grace period recovery
 });
 
 export const achievements = pgTable("achievements", {
@@ -56,4 +58,23 @@ export const XP_REWARDS = {
   STREAK_MILESTONE: 30,
   ACHIEVEMENT_EARNED: 25,
   CHALLENGE_COMPLETED: 50,
+} as const;
+
+// Streak Configuration
+export const STREAK_CONFIG = {
+  GRACE_PERIOD_HOURS: 24, // Hours allowed to maintain streak if missed
+  MULTIPLIER_MILESTONES: {
+    3: 1.2,  // 20% bonus after 3 days
+    7: 1.5,  // 50% bonus after 7 days
+    14: 1.8, // 80% bonus after 14 days
+    30: 2.0, // 100% bonus after 30 days
+    60: 2.5, // 150% bonus after 60 days
+  },
+  MILESTONE_ACHIEVEMENTS: {
+    3: "Bronze Streak",
+    7: "Silver Streak",
+    14: "Gold Streak",
+    30: "Diamond Streak",
+    60: "Legendary Streak",
+  }
 } as const;

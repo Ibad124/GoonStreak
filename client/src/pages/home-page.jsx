@@ -157,10 +157,19 @@ export default function HomePage() {
         achievements: [...(oldData?.achievements || []), ...(data.newAchievements || [])]
       }));
 
-      // Show success toast
+      // Show success toast with XP information
       toast({
         title: "Session Logged",
-        description: "Keep up the great work!",
+        description: (
+          <div className="space-y-1">
+            <p>+{data.xpAwarded} XP earned!</p>
+            {data.multiplierApplied && (
+              <p className="text-sm text-blue-600">
+                {Math.round((data.multiplierApplied - 1) * 100)}% streak bonus applied!
+              </p>
+            )}
+          </div>
+        ),
       });
 
       // Show achievement toasts
@@ -357,8 +366,13 @@ export default function HomePage() {
             <motion.div variants={itemAnimation}>
               <Card className="overflow-hidden backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
                 <CardHeader>
-                  <CardTitle className="text-2xl font-semibold tracking-tight">
+                  <CardTitle className="text-2xl font-semibold tracking-tight flex items-center justify-between">
                     Your Streak
+                    {stats.user.streakMultiplier > 1 && (
+                      <span className="text-sm font-medium text-blue-600 bg-blue-100 px-3 py-1 rounded-full">
+                        {Math.round((stats.user.streakMultiplier - 1) * 100)}% XP Bonus
+                      </span>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
