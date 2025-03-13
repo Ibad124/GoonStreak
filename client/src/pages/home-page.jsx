@@ -286,14 +286,14 @@ export default function HomePage() {
               </Button>
             </SheetTrigger>
             <SheetContent className="w-full sm:max-w-[450px] p-0 flex flex-col bg-white/80 backdrop-blur-xl">
-              <SheetHeader className="p-6 border-b">
-                <SheetTitle className="text-2xl font-semibold flex items-center gap-2">
-                  <Heart className="h-6 w-6 text-blue-500" />
+              <SheetHeader className="p-4 sm:p-6 border-b">
+                <SheetTitle className="text-xl sm:text-2xl font-semibold flex items-center gap-2">
+                  <Heart className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
                   Menu
                 </SheetTitle>
               </SheetHeader>
-              <div className="flex-1 overflow-y-auto p-4 sm:p-6">
-                <div className="grid gap-4">
+              <div className="flex-1 overflow-y-auto px-2 py-3 sm:p-6">
+                <div className="grid gap-2 sm:gap-4">
                   {menuItems.map((item) => (
                     <Link key={item.href} href={item.href}>
                       <motion.div
@@ -304,17 +304,17 @@ export default function HomePage() {
                       >
                         <Button
                           variant="ghost"
-                          className="w-full h-auto p-4 flex flex-col items-start gap-3 group relative overflow-hidden bg-white/50 hover:bg-white/80 transition-all duration-300"
+                          className="w-full min-h-[4rem] p-3 sm:p-4 flex flex-col items-start gap-2 sm:gap-3 group relative overflow-hidden bg-white/50 hover:bg-white/80 transition-all duration-300 active:scale-[0.98] touch-manipulation"
                         >
                           <div className="flex items-center gap-3 w-full">
-                            <div className="p-2.5 rounded-xl bg-gradient-to-br from-white to-white/80 shadow-lg">
+                            <div className="p-2 sm:p-2.5 rounded-xl bg-gradient-to-br from-white to-white/80 shadow-sm">
                               <item.icon className="h-5 w-5 text-blue-500" />
                             </div>
-                            <div className="flex-1">
-                              <div className="font-medium text-base text-left">{item.title}</div>
-                              <div className="text-sm text-muted-foreground mt-0.5">{item.description}</div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-base text-left truncate">{item.title}</div>
+                              <div className="text-sm text-muted-foreground mt-0.5 line-clamp-2">{item.description}</div>
                             </div>
-                            <div className="text-xs font-medium text-blue-500 opacity-60">
+                            <div className="text-xs font-medium text-blue-500 opacity-60 shrink-0 pl-2">
                               {item.stats}
                             </div>
                           </div>
