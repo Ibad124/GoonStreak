@@ -285,44 +285,43 @@ export default function HomePage() {
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent className="w-full sm:max-w-[450px] p-0 flex flex-col">
-              <SheetHeader className="p-6 bg-gradient-to-br from-blue-600 to-blue-800 text-white shrink-0">
-                <SheetTitle className="text-2xl font-bold text-white flex items-center gap-2">
-                  <Heart className="h-6 w-6" />
-                  Main Menu
+            <SheetContent className="w-full sm:max-w-[450px] p-0 flex flex-col bg-white/80 backdrop-blur-xl">
+              <SheetHeader className="p-6 border-b">
+                <SheetTitle className="text-2xl font-semibold flex items-center gap-2">
+                  <Heart className="h-6 w-6 text-blue-500" />
+                  Menu
                 </SheetTitle>
-                <p className="text-blue-100 mt-2">Explore features and connect with others</p>
               </SheetHeader>
-              <div className="flex-1 overflow-y-auto">
-                <div className="p-4 sm:p-6 space-y-4">
-                  <div className="grid gap-3">
-                    {menuItems.map((item) => (
-                      <Link key={item.href} href={item.href}>
-                        <motion.div
-                          variants={menuItemAnimation}
-                          initial="initial"
-                          whileHover="hover"
-                          whileTap="tap"
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+                <div className="grid gap-4">
+                  {menuItems.map((item) => (
+                    <Link key={item.href} href={item.href}>
+                      <motion.div
+                        variants={menuItemAnimation}
+                        initial="initial"
+                        whileHover="hover"
+                        whileTap="tap"
+                      >
+                        <Button
+                          variant="ghost"
+                          className="w-full h-auto p-4 flex flex-col items-start gap-3 group relative overflow-hidden bg-white/50 hover:bg-white/80 transition-all duration-300"
                         >
-                          <Button
-                            variant="outline"
-                            className="w-full h-auto p-4 flex flex-col items-start gap-3 group relative overflow-hidden"
-                          >
-                            <div className={`${item.color} p-3 rounded-xl shadow-lg group-hover:shadow-xl transition-shadow`}>
-                              <item.icon className="h-6 w-6 text-white" />
+                          <div className="flex items-center gap-3 w-full">
+                            <div className="p-2.5 rounded-xl bg-gradient-to-br from-white to-white/80 shadow-lg">
+                              <item.icon className="h-5 w-5 text-blue-500" />
                             </div>
-                            <div className="text-left w-full">
-                              <div className="font-semibold text-lg flex items-center justify-between">
-                                {item.title}
-                                <span className="text-xs font-medium text-blue-600">{item.stats}</span>
-                              </div>
-                              <div className="text-sm text-muted-foreground mt-1">{item.description}</div>
+                            <div className="flex-1">
+                              <div className="font-medium text-base text-left">{item.title}</div>
+                              <div className="text-sm text-muted-foreground mt-0.5">{item.description}</div>
                             </div>
-                          </Button>
-                        </motion.div>
-                      </Link>
-                    ))}
-                  </div>
+                            <div className="text-xs font-medium text-blue-500 opacity-60">
+                              {item.stats}
+                            </div>
+                          </div>
+                        </Button>
+                      </motion.div>
+                    </Link>
+                  ))}
                 </div>
               </div>
             </SheetContent>
