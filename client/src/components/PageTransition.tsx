@@ -83,7 +83,11 @@ export const PageTransition = ({
           variants={transitionVariants}
           onAnimationComplete={(definition) => {
             if (definition === "exit") {
-              setTimeout(onComplete, 100);
+              setTimeout(() => {
+                onComplete();
+                // Navigate to home page after transition completes
+                window.location.href = '/';
+              }, 100);
             }
           }}
         >
