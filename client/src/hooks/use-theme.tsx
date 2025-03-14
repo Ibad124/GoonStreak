@@ -1,10 +1,12 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
-type ThemeStyle = "default" | "solo" | "competitive" | "hardcore";
+export type ThemeStyle = "default" | "solo" | "competitive" | "hardcore";
 
-interface ThemePreferences {
+export interface ThemePreferences {
   goonStyle: ThemeStyle;
   timePreference: string;
   intensityLevel: string;
@@ -13,31 +15,62 @@ interface ThemePreferences {
 
 interface ThemeContextType {
   preferences: ThemePreferences;
-  updatePreferences: (prefs: Partial<ThemePreferences>) => void;
+  updatePreferences: (prefs: Partial<ThemePreferences>) => Promise<void>;
 }
+
+const DEFAULT_PREFERENCES: ThemePreferences = {
+  goonStyle: "default",
+  timePreference: "",
+  intensityLevel: "",
+  socialMode: "",
+};
 
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [preferences, setPreferences] = useState<ThemePreferences>({
-    goonStyle: "default",
-    timePreference: "",
-    intensityLevel: "",
-    socialMode: "",
+  const { toast } = useToast();
+  const [preferences, setPreferences] = useState<ThemePreferences>(DEFAULT_PREFERENCES);
+
+  // Fetch preferences query
+  const { data: preferencesData } = useQuery({
+    queryKey: ["/api/user/preferences"],
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    gcTime: 1000 * 60 * 60, // Keep in cache for 1 hour
   });
 
-  // Use React Query to manage preferences data
-  const { data } = useQuery({
-    queryKey: ["/api/user/preferences"],
+  // Update preferences mutation
+  const updatePreferencesMutation = useMutation({
+    mutationFn: async (newPrefs: Partial<ThemePreferences>) => {
+      const res = await apiRequest("POST", "/api/user/preferences", newPrefs);
+      return res.json();
+    },
     onSuccess: (data) => {
-      if (data) {
-        setPreferences(prev => ({ ...prev, ...data }));
-      }
+      queryClient.setQueryData(["/api/user/preferences"], data);
+      setPreferences(prev => ({ ...prev, ...data }));
+      toast({
+        title: "Preferences Updated",
+        description: "Your theme preferences have been saved.",
+        variant: "default",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error Saving Preferences",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
-  const updatePreferences = (prefs: Partial<ThemePreferences>) => {
-    setPreferences(prev => ({ ...prev, ...prefs }));
+  // Update local state when data changes
+  useEffect(() => {
+    if (preferencesData) {
+      setPreferences(prev => ({ ...prev, ...preferencesData }));
+    }
+  }, [preferencesData]);
+
+  const updatePreferences = async (prefs: Partial<ThemePreferences>) => {
+    await updatePreferencesMutation.mutateAsync(prefs);
   };
 
   return (
