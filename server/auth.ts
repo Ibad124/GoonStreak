@@ -28,6 +28,20 @@ async function comparePasswords(supplied: string, stored: string) {
   return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
+export const authMiddleware = (req, res, next) => {
+  console.log("Session:", req.session);
+  if (!req.session || !req.session.userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  const user = storage.users.find(u => u.id === req.session.userId);
+  if (!user) {
+    return res.status(401).json({ error: "User not found" });
+  }
+  req.user = user;
+  next();
+};
+
+
 export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET!,
@@ -86,8 +100,7 @@ export function setupAuth(app: Express) {
     });
   });
 
-  app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+  app.get("/api/user", authMiddleware, (req, res) => {
     res.json(req.user);
   });
 }
