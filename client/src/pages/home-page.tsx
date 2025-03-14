@@ -79,20 +79,21 @@ export default function HomePage() {
       toast({
         title: "Session Logged",
         description: messages.sessionLogged,
+        variant: "sexy",
       });
 
       const xpGained = data.user.xpPoints - (stats?.user.xpPoints || 0);
       toast({
         title: "XP Gained!",
         description: `${messages.xpGained}+${xpGained} XP`,
-        variant: "default",
+        variant: "sexy",
       });
 
       if (data.leveledUp) {
         toast({
           title: "Level Up!",
           description: `${messages.levelUp}${data.user.title}!`,
-          variant: "default",
+          variant: "sexy",
         });
       }
 
@@ -100,7 +101,7 @@ export default function HomePage() {
         toast({
           title: "Achievement Unlocked!",
           description: achievement.description,
-          variant: "default",
+          variant: "sexy",
         });
       });
 
@@ -110,65 +111,73 @@ export default function HomePage() {
 
   if (isLoading || !stats) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-border" />
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-900 to-pink-900">
+        <Loader2 className="h-8 w-8 animate-spin text-pink-500" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pb-20 relative overflow-hidden bg-gradient-to-br from-zinc-50 to-blue-50">
+    <div className="min-h-screen pb-20 relative overflow-hidden bg-gradient-to-br from-purple-900 to-pink-900">
+      {/* Animated background patterns */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoNDUpIj48cGF0aCBkPSJNLTEwIDMwbDIwLTIwTTAgNDBsMjAtMjBNMTAgNTBsMjAtMjAiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4xIiBzdHJva2Utd2lkdGg9IjIiLz48L3BhdHRlcm4+PC9kZWZzPjxwYXRoIGZpbGw9InVybCgjYSkiIGQ9Ik0wIDBoMjAwdjIwMEgweiIvPjwvc3ZnPg==')]" />
+      </div>
+
       <motion.header 
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 z-50 border-b border-zinc-200/50"
+        className="fixed top-0 left-0 right-0 bg-black/20 backdrop-blur-lg z-50 border-b border-white/10"
       >
-        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               className="flex items-center gap-1"
             >
-              <Star className="h-5 w-5 text-yellow-500" />
-              <span className="font-semibold tracking-tight text-xl">
+              <Star className="h-5 w-5 text-pink-500" />
+              <span className="font-bold tracking-tight text-xl bg-gradient-to-r from-pink-500 to-purple-500 text-transparent bg-clip-text">
                 {user?.username}
               </span>
             </motion.div>
             <motion.div
               initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              className="text-sm text-zinc-500"
+              className="text-sm text-pink-300"
             >
               • Level {stats.user.level}
             </motion.div>
           </div>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
+              <Button variant="ghost" size="icon" className="rounded-full text-pink-300 hover:text-pink-200">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent>
+            <SheetContent className="bg-gradient-to-br from-purple-900 to-pink-900 border-white/10">
               <div className="space-y-4 mt-8">
                 <Link href="/adult-content">
                   <Button
                     variant="outline"
-                    className="w-full rounded-full flex items-center"
+                    className="w-full rounded-full flex items-center bg-white/5 border-white/10 text-pink-300 hover:bg-white/10"
                   >
                     <Film className="h-4 w-4 mr-2" />
                     Adult Content
                   </Button>
                 </Link>
                 <Link href="/leaderboard">
-                  <Button variant="outline" className="w-full rounded-full flex items-center">
+                  <Button 
+                    variant="outline" 
+                    className="w-full rounded-full flex items-center bg-white/5 border-white/10 text-pink-300 hover:bg-white/10"
+                  >
                     <Trophy className="h-4 w-4 mr-2" />
                     Leaderboard
                   </Button>
                 </Link>
                 <Button
                   variant="destructive"
-                  className="w-full rounded-full"
+                  className="w-full rounded-full bg-pink-900/50 hover:bg-pink-900/80"
                   onClick={() => logoutMutation.mutate()}
                 >
                   Logout
@@ -179,7 +188,7 @@ export default function HomePage() {
         </div>
       </motion.header>
 
-      <main className="container mx-auto px-4 pt-20">
+      <main className="container mx-auto px-4 pt-24">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-4 space-y-6">
             <motion.div
@@ -201,10 +210,10 @@ export default function HomePage() {
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
             >
-              <Card className="overflow-hidden bg-white/80 backdrop-blur border-zinc-200/50 shadow-xl shadow-blue-900/5 hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300">
+              <Card className="overflow-hidden bg-black/20 backdrop-blur border-white/10 hover:bg-black/30 transition-all duration-300">
                 <CardHeader>
-                  <CardTitle className="text-2xl font-semibold tracking-tight flex items-center gap-2">
-                    <Flame className="h-6 w-6 text-orange-500" />
+                  <CardTitle className="text-2xl font-bold tracking-tight flex items-center gap-2 text-pink-300">
+                    <Flame className="h-6 w-6 text-pink-500" />
                     Your Streak
                   </CardTitle>
                 </CardHeader>
@@ -221,10 +230,10 @@ export default function HomePage() {
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
-              <Card className="overflow-hidden bg-white/80 backdrop-blur border-zinc-200/50 shadow-xl shadow-blue-900/5 hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300">
+              <Card className="overflow-hidden bg-black/20 backdrop-blur border-white/10 hover:bg-black/30 transition-all duration-300">
                 <CardHeader>
-                  <CardTitle className="text-2xl font-semibold tracking-tight flex items-center gap-2">
-                    <Trophy className="h-6 w-6 text-yellow-500" />
+                  <CardTitle className="text-2xl font-bold tracking-tight flex items-center gap-2 text-pink-300">
+                    <Trophy className="h-6 w-6 text-pink-500" />
                     Daily Challenges
                   </CardTitle>
                 </CardHeader>
@@ -239,14 +248,14 @@ export default function HomePage() {
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.4 }}
             >
-              <Card className="overflow-hidden bg-white/80 backdrop-blur border-zinc-200/50 shadow-xl shadow-blue-900/5 hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300">
+              <Card className="overflow-hidden bg-black/20 backdrop-blur border-white/10 hover:bg-black/30 transition-all duration-300">
                 <CardHeader>
-                  <CardTitle className="text-2xl font-semibold tracking-tight flex items-center gap-2">
-                    <Star className="h-6 w-6 text-yellow-500" />
+                  <CardTitle className="text-2xl font-bold tracking-tight flex items-center gap-2 text-pink-300">
+                    <Star className="h-6 w-6 text-pink-500" />
                     Achievements
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="text-pink-100">
                   <Achievements 
                     achievements={stats?.achievements || []} 
                     stats={{
@@ -271,11 +280,11 @@ export default function HomePage() {
       <motion.div
         initial={{ y: 100 }}
         animate={{ y: 0 }}
-        className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-t border-zinc-200/50"
+        className="fixed bottom-0 left-0 right-0 p-4 bg-black/20 backdrop-blur border-t border-white/10"
       >
         <div className="container mx-auto max-w-lg">
           <Button
-            className="w-full h-14 text-lg rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600 transition-all duration-300 shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 font-semibold tracking-wide"
+            className="w-full h-14 text-lg rounded-full bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 hover:from-pink-600 hover:via-purple-600 hover:to-pink-600 transition-all duration-300 shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/30 font-bold tracking-wide text-white"
             size="lg"
             onClick={() => setIsSessionModalOpen(true)}
           >
