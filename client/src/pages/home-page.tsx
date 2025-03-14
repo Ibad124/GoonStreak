@@ -366,7 +366,7 @@ export default function HomePage() {
                 transition={{ delay: 0.2 }}
                 whileHover={{ scale: 1.02 }}
               >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur-xl ${style.border} hover:bg-black/20 transition-all duration-500 shadow-xl hover:shadow-2xl shadow-black/10 hover:shadow-black/20`}>
+                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur-2xl ${style.border} hover:bg-black/30 transition-all duration-700 shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:shadow-[0_32px_64px_rgba(0,0,0,0.25)] rounded-xl hover:scale-[1.02] group`}>
                   <CardHeader>
                     <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
                       <Flame className={`${style.accent}`} />
@@ -385,7 +385,7 @@ export default function HomePage() {
                 transition={{ delay: 0.3 }}
                 whileHover={{ scale: 1.02 }}
               >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur-xl ${style.border} hover:bg-black/20 transition-all duration-500 shadow-xl hover:shadow-2xl shadow-black/10 hover:shadow-black/20`}>
+                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur-2xl ${style.border} hover:bg-black/30 transition-all duration-700 shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:shadow-[0_32px_64px_rgba(0,0,0,0.25)] rounded-xl hover:scale-[1.02] group`}>
                   <CardHeader>
                     <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
                       <Clock className={`${style.accent}`} />
@@ -413,7 +413,7 @@ export default function HomePage() {
                 whileTap={{ scale: 0.98 }}
               >
                 <Card
-                  className={`overflow-hidden ${style.cardBg} backdrop-blur-xl ${style.border} hover:bg-black/20 transition-all duration-500 shadow-xl hover:shadow-2xl shadow-black/10 hover:shadow-black/20 cursor-pointer group`}
+                  className={`overflow-hidden ${style.cardBg} backdrop-blur-2xl ${style.border} hover:bg-black/30 transition-all duration-700 shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:shadow-[0_32px_64px_rgba(0,0,0,0.25)] rounded-xl hover:scale-[1.02] group cursor-pointer group`}
                   onClick={() => setIsGoonRoomOpen(true)}
                 >
                   <CardHeader>
@@ -442,7 +442,7 @@ export default function HomePage() {
                 transition={{ delay: 0.3 }}
                 whileHover={{ scale: 1.02 }}
               >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur-xl ${style.border} hover:bg-black/20 transition-all duration-500 shadow-xl hover:shadow-2xl shadow-black/10 hover:shadow-black/20`}>
+                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur-2xl ${style.border} hover:bg-black/30 transition-all duration-700 shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:shadow-[0_32px_64px_rgba(0,0,0,0.25)] rounded-xl hover:scale-[1.02] group`}>
                   <CardHeader>
                     <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
                       <Target className={`${style.accent}`} />
@@ -461,7 +461,7 @@ export default function HomePage() {
                 transition={{ delay: 0.4 }}
                 whileHover={{ scale: 1.02 }}
               >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur-xl ${style.border} hover:bg-black/20 transition-all duration-500 shadow-xl hover:shadow-2xl shadow-black/10 hover:shadow-black/20`}>
+                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur-2xl ${style.border} hover:bg-black/30 transition-all duration-700 shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:shadow-[0_32px_64px_rgba(0,0,0,0.25)] rounded-xl hover:scale-[1.02] group`}>
                   <CardHeader>
                     <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
                       <Trophy className={`${style.accent}`} />
@@ -487,7 +487,7 @@ export default function HomePage() {
                   transition={{ delay: 0.5 }}
                   whileHover={{ scale: 1.02 }}
                 >
-                  <Card className={`overflow-hidden ${style.cardBg} backdrop-blur-xl ${style.border} hover:bg-black/20 transition-all duration-500 shadow-xl hover:shadow-2xl shadow-black/10 hover:shadow-black/20`}>
+                  <Card className={`overflow-hidden ${style.cardBg} backdrop-blur-2xl ${style.border} hover:bg-black/30 transition-all duration-700 shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:shadow-[0_32px_64px_rgba(0,0,0,0.25)] rounded-xl hover:scale-[1.02] group`}>
                     <CardHeader>
                       <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
                         <Users className={`${style.accent}`} />
