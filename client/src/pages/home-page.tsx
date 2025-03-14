@@ -76,13 +76,11 @@ export default function HomePage() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
 
-      // Show basic session completion toast
       toast({
         title: "Session Logged",
         description: messages.sessionLogged,
       });
 
-      // Show XP gained toast
       const xpGained = data.user.xpPoints - (stats?.user.xpPoints || 0);
       toast({
         title: "XP Gained!",
@@ -90,7 +88,6 @@ export default function HomePage() {
         variant: "default",
       });
 
-      // If user leveled up, show special toast
       if (data.leveledUp) {
         toast({
           title: "Level Up!",
@@ -99,7 +96,6 @@ export default function HomePage() {
         });
       }
 
-      // If new achievements were earned, show them
       data.newAchievements?.forEach((achievement) => {
         toast({
           title: "Achievement Unlocked!",
@@ -121,9 +117,12 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen pb-20 relative overflow-hidden">
-      {/* Fixed Header */}
-      <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 z-50 border-b border-zinc-200/50">
+    <div className="min-h-screen pb-20 relative overflow-hidden bg-gradient-to-br from-zinc-50 to-blue-50">
+      <motion.header 
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 z-50 border-b border-zinc-200/50"
+      >
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <motion.div
@@ -178,34 +177,31 @@ export default function HomePage() {
             </SheetContent>
           </Sheet>
         </div>
-      </header>
+      </motion.header>
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 pt-20">
-        <div className="space-y-6">
-          {/* Level Progress */}
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-          >
-            {stats && (
-              <LevelProgress
-                user={stats.user}
-                nextLevelXP={stats.nextLevelXP}
-                currentLevelXP={stats.currentLevelXP}
-              />
-            )}
-          </motion.div>
-
-          {/* Two Column Layout for Streaks and Challenges */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Streak Stats */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-4 space-y-6">
             <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+            >
+              {stats && (
+                <LevelProgress
+                  user={stats.user}
+                  nextLevelXP={stats.nextLevelXP}
+                  currentLevelXP={stats.currentLevelXP}
+                />
+              )}
+            </motion.div>
+
+            <motion.div
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
             >
-              <Card className="backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-zinc-100/50 hover:shadow-xl hover:shadow-zinc-100/50 transition-shadow h-full">
+              <Card className="overflow-hidden bg-white/80 backdrop-blur border-zinc-200/50 shadow-xl shadow-blue-900/5 hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300">
                 <CardHeader>
                   <CardTitle className="text-2xl font-semibold tracking-tight flex items-center gap-2">
                     <Flame className="h-6 w-6 text-orange-500" />
@@ -217,14 +213,15 @@ export default function HomePage() {
                 </CardContent>
               </Card>
             </motion.div>
+          </div>
 
-            {/* Challenges Section */}
+          <div className="lg:col-span-8 space-y-6">
             <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.1 }}
+              initial={{ x: 20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
             >
-              <Card className="backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-zinc-100/50 hover:shadow-xl hover:shadow-zinc-100/50 transition-shadow h-full">
+              <Card className="overflow-hidden bg-white/80 backdrop-blur border-zinc-200/50 shadow-xl shadow-blue-900/5 hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300">
                 <CardHeader>
                   <CardTitle className="text-2xl font-semibold tracking-tight flex items-center gap-2">
                     <Trophy className="h-6 w-6 text-yellow-500" />
@@ -236,36 +233,34 @@ export default function HomePage() {
                 </CardContent>
               </Card>
             </motion.div>
-          </div>
 
-          {/* Achievements */}
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            <Card className="backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-zinc-100/50 hover:shadow-xl hover:shadow-zinc-100/50 transition-shadow">
-              <CardHeader>
-                <CardTitle className="text-2xl font-semibold tracking-tight flex items-center gap-2">
-                  <Star className="h-6 w-6 text-yellow-500" />
-                  Achievements
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Achievements 
-                  achievements={stats?.achievements || []} 
-                  stats={{
-                    currentStreak: stats?.user?.currentStreak || 0,
-                    totalSessions: stats?.user?.totalSessions || 0
-                  }}
-                />
-              </CardContent>
-            </Card>
-          </motion.div>
+            <motion.div
+              initial={{ x: 20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Card className="overflow-hidden bg-white/80 backdrop-blur border-zinc-200/50 shadow-xl shadow-blue-900/5 hover:shadow-2xl hover:shadow-blue-900/10 transition-all duration-300">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+                    <Star className="h-6 w-6 text-yellow-500" />
+                    Achievements
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Achievements 
+                    achievements={stats?.achievements || []} 
+                    stats={{
+                      currentStreak: stats?.user?.currentStreak || 0,
+                      totalSessions: stats?.user?.totalSessions || 0
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
         </div>
       </main>
 
-      {/* Log Session Modal */}
       <LogSessionModal
         isOpen={isSessionModalOpen}
         onClose={() => setIsSessionModalOpen(false)}
@@ -273,7 +268,6 @@ export default function HomePage() {
         isPending={sessionMutation.isPending}
       />
 
-      {/* Fixed Bottom Bar with Log Session Button */}
       <motion.div
         initial={{ y: 100 }}
         animate={{ y: 0 }}
@@ -281,12 +275,18 @@ export default function HomePage() {
       >
         <div className="container mx-auto max-w-lg">
           <Button
-            className="w-full h-14 text-lg rounded-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30"
+            className="w-full h-14 text-lg rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 hover:from-blue-600 hover:via-indigo-600 hover:to-purple-600 transition-all duration-300 shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 font-semibold tracking-wide"
             size="lg"
             onClick={() => setIsSessionModalOpen(true)}
           >
-            <Flame className="h-6 w-6 mr-2" />
-            Log Session
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2"
+            >
+              <Flame className="h-6 w-6" />
+              Log Session
+            </motion.div>
           </Button>
         </div>
       </motion.div>

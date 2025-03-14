@@ -16,7 +16,7 @@ interface LevelProgressProps {
 
 export default function LevelProgress({ user, nextLevelXP, currentLevelXP }: LevelProgressProps) {
   const progress = ((user.xpPoints - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
-  const nextTitle = LEVEL_THRESHOLDS[user.level + 1]?.title || "Max Level";
+  const nextTitle = LEVEL_THRESHOLDS[(user.level + 1) as keyof typeof LEVEL_THRESHOLDS]?.title || "Max Level";
 
   return (
     <motion.div
