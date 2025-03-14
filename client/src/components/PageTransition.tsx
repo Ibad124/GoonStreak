@@ -85,7 +85,11 @@ export const PageTransition = ({
             if (definition === "exit") {
               setTimeout(() => {
                 onComplete();
-                import('wouter').then(({ navigate }) => navigate('/'));
+                // Import navigate from wouter and use it for navigation
+                import('wouter').then(module => {
+                  const navigate = module.default[1];
+                  navigate('/');
+                });
               }, 100);
             }
           }}
