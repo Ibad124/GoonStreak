@@ -535,13 +535,13 @@ const OnboardingPage = () => {
       socialMode
     }, {
       onSuccess: () => {
-        window.location.href = "/";
+        setLocation("/");
       }
     });
   };
 
   const handleTransitionComplete = () => {
-    window.location.href = "/";
+    setLocation("/");
   };
 
   return (
