@@ -1,9 +1,10 @@
-
 import React from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
+import { useTheme } from "@/hooks/use-theme";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BackgroundEffects } from "@/components/BackgroundEffects";
 import StreakStats from "@/components/StreakStats";
 import Achievements from "@/components/Achievements";
 import XPProgress from "@/components/XPProgress";
@@ -25,15 +26,39 @@ interface StatsData {
   achievements: any[];
 }
 
+const characterMessages = {
+  solo: {
+    sessionLogged: "STREAK RECORDED. POWER LEVEL INCREASING... 🤖",
+    levelUp: "SYSTEM UPGRADE COMPLETE. NEW RANK ACHIEVED: ",
+    xpGained: "EXPERIENCE POINTS ACQUIRED: ",
+  },
+  competitive: {
+    sessionLogged: "Great job, streaker! Keep that momentum going! 💖",
+    levelUp: "OMG! You just leveled up to ",
+    xpGained: "You earned ",
+  },
+  hardcore: {
+    sessionLogged: "Your dedication pleases me... Your streak grows stronger. 😈",
+    levelUp: "Your power rises... You have ascended to ",
+    xpGained: "Dark energy acquired: ",
+  },
+  default: {
+    sessionLogged: "Session logged successfully!",
+    levelUp: "Level up! You're now ",
+    xpGained: "XP gained: ",
+  }
+};
+
 export default function HomePage() {
   const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
+  const { preferences } = useTheme();
 
   const { data: stats, isLoading } = useQuery<StatsData>({
     queryKey: ["/api/stats"],
   });
 
-  console.log("Stats data:", stats);
+  const messages = characterMessages[preferences.goonStyle] || characterMessages.default;
 
   const sessionMutation = useMutation({
     mutationFn: async () => {
@@ -46,14 +71,14 @@ export default function HomePage() {
       // Show basic session completion toast
       toast({
         title: "Session Logged",
-        description: "Your streak has been updated!",
+        description: messages.sessionLogged,
       });
 
       // Show XP gained toast
       const xpGained = data.user.xpPoints - (stats?.user.xpPoints || 0);
       toast({
         title: "XP Gained!",
-        description: `+${xpGained} XP`,
+        description: `${messages.xpGained}+${xpGained} XP`,
         variant: "default",
       });
 
@@ -61,7 +86,7 @@ export default function HomePage() {
       if (data.leveledUp) {
         toast({
           title: "Level Up!",
-          description: `Congratulations! You're now ${data.user.title}!`,
+          description: `${messages.levelUp}${data.user.title}!`,
           variant: "default",
         });
       }
@@ -86,7 +111,9 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen pb-20 bg-zinc-50/50 backdrop-blur">
+    <div className="min-h-screen pb-20 relative overflow-hidden">
+      <BackgroundEffects style={preferences.goonStyle} />
+
       {/* Fixed Header */}
       <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 z-50 border-b border-zinc-200/50">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
@@ -160,15 +187,7 @@ export default function HomePage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <StreakStats
-                stats={{
-                  user: {
-                    currentStreak: 0,
-                    longestStreak: 0,
-                    totalSessions: 0,
-                  },
-                }}
-              />
+              <StreakStats stats={stats} />
             </CardContent>
           </Card>
 
