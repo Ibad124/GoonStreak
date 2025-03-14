@@ -1,3 +1,4 @@
+
 import { pgTable, text, serial, integer, boolean, date, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -19,6 +20,7 @@ export const users = pgTable("users", {
   currentBadge: text("current_badge").notNull().default("Novice"),
   streakMultiplier: integer("streak_multiplier").notNull().default(1),
   lastStreakReset: text("last_streak_reset"),
+  socialMode: text("social_mode").notNull().default("solo"),
 });
 
 // Friend system tables
@@ -68,15 +70,23 @@ export const XP_REWARDS = {
   CHALLENGE_COMPLETED: 50,
 };
 
+// Character Styles Configuration
+export const CHARACTER_STYLES = {
+  solo: "default",
+  competitive: "friendly",
+  hardcore: "intense"
+} as const;
+
 // Schemas and types
 export const insertUserSchema = createInsertSchema(users);
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Achievement = typeof achievements.$inferSelect;
+export type CharacterStyle = keyof typeof CHARACTER_STYLES;
 
-// Streak Configuration (Retained from original)
+// Streak Configuration
 export const STREAK_CONFIG = {
-  GRACE_PERIOD_HOURS: 24, // Hours allowed to maintain streak if missed
+  GRACE_PERIOD_HOURS: 24,
   MULTIPLIER_MILESTONES: {
     3: 1.2,  // 20% bonus after 3 days
     7: 1.5,  // 50% bonus after 7 days
@@ -87,7 +97,7 @@ export const STREAK_CONFIG = {
   MILESTONE_ACHIEVEMENTS: {
     3: "Bronze Streak",
     7: "Silver Streak",
-    14: "Gold Streak",
+    14: "Gold Streak", 
     30: "Diamond Streak",
     60: "Legendary Streak",
   }
