@@ -1,0 +1,65 @@
+⚡️ Sign-Up Process: Best Flow & Features
+We'll break it into 4-5 quick, fun onboarding screens before the user lands on the Goal Setting Page.
+
+🌟 Step 1: Account Creation (Fast & Flexible)
+📌 Options to sign up:
+
+🔑 Quick Start (Anonymous Mode) → No email, just jump in!
+📧 Sign Up with Email (Standard option)
+🟦 Sign Up with Google/Apple/Facebook
+🔒 Create a Username (Unique identity for leaderboards & social features)
+💡 Why?
+
+Anonymous Mode makes it easy for new users to try the app.
+Social Login makes onboarding seamless.
+Usernames personalize the experience & allow leaderboard tracking.
+🎨 Step 2: Personalization (Make it Feel Like THEIRS)
+📌 Ask fun questions with emoji-based buttons (No boring forms!):
+
+❓ How do you goon?
+
+🤫 "I go solo, just tracking my progress."
+🏆 "I love competing with friends!"
+🔥 "I want to break records & hit insane streaks!"
+❓ Choose Your Goon Name (pre-filled suggestions available)
+✅ Example: “GoonMaster3000” or “StreakKing”
+
+💡 Why?
+
+Makes the app feel personal & fun from the start.
+Helps the app customize notifications & challenges.
+📊 Step 3: Gamification Setup (Optional, But Fun!)
+“What’s your goal?” (Pick one or set custom goal)
+
+🔥 Casual (Just tracking progress)
+🏆 Competitive (Beat friends & rank up)
+🚀 Extreme Streaker (Longest streaks possible)
+✅ XP & Badges Preview: Show them what they can unlock!
+
+💡 Why?
+
+This adds motivation from Day 1.
+Helps tailor notifications & challenge recommendations.
+👥 Step 4: Social Setup (Optional)
+"Want to see how you compare to others?"
+
+👤 Solo Mode – No leaderboards, just personal stats.
+🏆 Friends Mode – Compete against friends!
+🌍 Global Leaderboard – See top streakers worldwide.
+📌 If they choose Friends Mode:
+
+📩 Invite Friends (Skip or Share Link)
+💡 Why?
+
+Gives privacy options but encourages competition.
+Users feel in control over social interactions.
+🔥 Step 5: Final Confirmation → GOAL SETTING SCREEN
+👏 “You’re all set! Time to goon responsibly.”
+
+🎯 Direct them to the Goal-Setting Page
+Confetti Animation 🎉
+1-Tap Start Button → "Start My Streak!"
+💡 Why?
+
+Ends with hype & motivation.
+Makes them want to log their first session.

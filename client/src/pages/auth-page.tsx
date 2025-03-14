@@ -89,7 +89,7 @@ export default function AuthPage() {
   });
 
   if (user) {
-    return <Redirect to="/onboarding/goals" />;
+    return <Redirect to="/onboarding" />;
   }
 
   return (
