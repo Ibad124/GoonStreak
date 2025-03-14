@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, Film, Trophy, Star, Flame, Clock, Users, Target, Sparkles } from "lucide-react";
+import { Loader2, Menu, Film, Trophy, Star, Flame, Clock, Users, Target, Sparkles } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import StreakStats from "@/components/StreakStats";
@@ -17,71 +17,89 @@ import LogSessionModal from "@/components/LogSessionModal";
 import Challenges from "@/components/Challenges";
 import { GoonRoom } from "@/components/GoonRoom";
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { 
-    opacity: 1,
-    transition: { 
-      staggerChildren: 0.1,
-      delayChildren: 0.3
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: { 
-    y: 0, 
-    opacity: 1,
-    transition: { 
-      type: "spring",
-      stiffness: 100,
-      damping: 15
-    }
-  }
-};
-
 const themeStyles = {
   default: {
-    background: "from-indigo-900 via-purple-900 to-violet-900",
-    headerBg: "bg-black/40",
-    cardBg: "bg-black/40",
-    text: "text-white",
-    accent: "text-purple-400",
-    button: "from-purple-500 to-violet-600",
-    border: "border-white/10",
-    greeting: "Track your progress, build momentum, and unlock your full potential.",
-    subGreeting: "with our elegant tracking system."
+    background: "from-zinc-50 to-blue-50",
+    headerBg: "bg-white/80",
+    cardBg: "bg-white/80",
+    text: "text-zinc-900",
+    accent: "text-blue-500",
+    button: "from-blue-500 to-blue-600",
+    border: "border-zinc-200/50",
+    greeting: "Ready to conquer today? 🌟"
   },
   solo: {
-    background: "from-slate-900 via-cyan-900 to-blue-900",
-    headerBg: "bg-black/40",
-    cardBg: "bg-black/40",
-    text: "text-cyan-50",
-    accent: "text-cyan-400",
-    button: "from-cyan-600 to-blue-600",
+    background: "from-slate-900 to-zinc-900",
+    headerBg: "bg-black/20",
+    cardBg: "bg-black/20",
+    text: "text-zinc-100",
+    accent: "text-emerald-500",
+    button: "from-emerald-500 to-emerald-600",
     border: "border-white/10",
     greeting: "SYSTEMS ONLINE. READY FOR TRAINING. 🤖"
   },
   competitive: {
-    background: "from-rose-900 via-pink-900 to-fuchsia-900",
-    headerBg: "bg-black/40",
-    cardBg: "bg-black/40",
-    text: "text-pink-50",
-    accent: "text-pink-400",
-    button: "from-rose-600 to-pink-600",
+    background: "from-purple-900 to-pink-900",
+    headerBg: "bg-black/20",
+    cardBg: "bg-black/20",
+    text: "text-pink-100",
+    accent: "text-pink-500",
+    button: "from-pink-500 to-purple-500",
     border: "border-white/10",
     greeting: "Time to crush those goals! 🔥"
   },
   hardcore: {
-    background: "from-red-950 via-purple-950 to-black",
-    headerBg: "bg-black/40",
-    cardBg: "bg-black/40",
-    text: "text-red-50",
-    accent: "text-red-400",
-    button: "from-red-600 to-purple-600",
+    background: "from-red-950 to-black",
+    headerBg: "bg-black/20",
+    cardBg: "bg-black/20",
+    text: "text-red-100",
+    accent: "text-red-500",
+    button: "from-red-500 to-red-600",
     border: "border-white/10",
     greeting: "Embrace the darkness within... 😈"
+  }
+};
+
+const characterMessages = {
+  solo: {
+    sessionLogged: "STREAK RECORDED. POWER LEVEL INCREASING... 🤖",
+    levelUp: "SYSTEM UPGRADE COMPLETE. NEW RANK ACHIEVED: ",
+    xpGained: "EXPERIENCE POINTS ACQUIRED: ",
+    timeMessage: {
+      morning: "OPTIMAL PERFORMANCE WINDOW DETECTED",
+      afternoon: "PEAK EFFICIENCY TIME APPROACHING",
+      night: "DARK MODE OPERATIONS ENGAGED"
+    }
+  },
+  competitive: {
+    sessionLogged: "Great job, superstar! Keep that momentum going! 💖",
+    levelUp: "OMG! You just leveled up to ",
+    xpGained: "You earned ",
+    timeMessage: {
+      morning: "Rise and shine, champion!",
+      afternoon: "Peak performance time!",
+      night: "Night mode activated!"
+    }
+  },
+  hardcore: {
+    sessionLogged: "Your dedication pleases me... Your streak grows stronger. 😈",
+    levelUp: "Your power rises... You have ascended to ",
+    xpGained: "Dark energy acquired: ",
+    timeMessage: {
+      morning: "The dawn brings new power...",
+      afternoon: "Your strength peaks...",
+      night: "Darkness empowers you..."
+    }
+  },
+  default: {
+    sessionLogged: "Session logged successfully! ✨",
+    levelUp: "Level up! You're now ",
+    xpGained: "XP gained: ",
+    timeMessage: {
+      morning: "Good morning!",
+      afternoon: "Good afternoon!",
+      evening: "Good evening!"
+    }
   }
 };
 
@@ -98,25 +116,8 @@ export default function HomePage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+      <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-border" />
-        <p className="text-muted-foreground">Checking authentication...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <Card className="w-[90%] max-w-md">
-          <CardContent className="pt-6">
-            <h2 className="text-xl font-bold text-destructive mb-2">Unable to load data</h2>
-            <p className="text-sm text-muted-foreground">Please try logging in again.</p>
-            <Button className="mt-4 w-full" asChild>
-              <Link href="/auth">Go to Login</Link>
-            </Button>
-          </CardContent>
-        </Card>
       </div>
     );
   }
@@ -134,6 +135,7 @@ export default function HomePage() {
     );
   }
 
+  const messages = characterMessages[preferences.goonStyle] || characterMessages.default;
   const style = themeStyles[preferences.goonStyle] || themeStyles.default;
 
   const sessionMutation = useMutation({
@@ -143,12 +145,45 @@ export default function HomePage() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+
+      const showToastSequence = async () => {
+        toast({
+          title: "Session Logged",
+          description: messages.sessionLogged,
+          variant: "default",
+        });
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        const xpGained = data.user.xpPoints - (stats?.user.xpPoints || 0);
+        toast({
+          title: "XP Gained!",
+          description: `${messages.xpGained}+${xpGained} XP`,
+          variant: "default",
+        });
+
+        if (data.leveledUp) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+          toast({
+            title: "Level Up!",
+            description: `${messages.levelUp}${data.user.title}!`,
+            variant: "default",
+          });
+        }
+
+        data.newAchievements?.forEach((achievement, index) => {
+          setTimeout(() => {
+            toast({
+              title: "Achievement Unlocked!",
+              description: achievement.description,
+              variant: "default",
+            });
+          }, 500 * (index + 1));
+        });
+      };
+
+      showToastSequence();
       setIsSessionModalOpen(false);
-      toast({
-        title: "Session Logged!",
-        description: "Great work! Keep up the momentum!",
-        variant: "default",
-      });
     },
   });
 
@@ -160,214 +195,298 @@ export default function HomePage() {
     );
   }
 
+  const getTimeMessage = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return messages.timeMessage.morning;
+    if (hour < 18) return messages.timeMessage.afternoon;
+    return messages.timeMessage.night;
+  };
+
   return (
     <>
-      <div className={`min-h-screen relative bg-gradient-to-br ${style.background}`}>
-        {/* Background Pattern */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <motion.div 
-            className="absolute inset-0 opacity-30"
-            animate={{
-              scale: [1, 1.1, 1],
-              rotate: [0, 5, 0],
-            }}
-            transition={{ duration: 20, repeat: Infinity }}
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]" />
-          </motion.div>
+      <div className={`min-h-screen pb-24 relative overflow-hidden bg-gradient-to-br ${style.background}`}>
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoNDUpIj48cGF0aCBkPSJNLTEwIDMwbDIwLTIwTTAgNDBsMjAtMjBNMTAgNTBsMjAtMjAiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4xIiBzdHJva2Utd2lkdGg9IjIiLz48L3BhdHRlcm4+PC9kZWZzPjxwYXRoIGZpbGw9InVybCgjYSkiIGQ9Ik0wIDBoMjAwdjIwMEgweiIvPjwvc3ZnPg==')]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
         </div>
 
-        {/* Header */}
         <motion.header
           initial={{ y: -100 }}
           animate={{ y: 0 }}
-          className={`fixed top-0 left-0 right-0 ${style.headerBg} backdrop-blur-xl z-50 border-b ${style.border}`}
+          className={`fixed top-0 left-0 right-0 ${style.headerBg} backdrop-blur-lg z-50 border-b ${style.border}`}
         >
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 className="flex items-center gap-2"
               >
                 <Star className={`h-5 w-5 ${style.accent}`} />
-                <span className="text-xl font-bold">QuantumFlow</span>
+                <span className={`font-bold tracking-tight text-lg md:text-xl truncate bg-gradient-to-r ${style.button} text-transparent bg-clip-text`}>
+                  {user?.username}
+                </span>
+              </motion.div>
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                className={`${style.text} text-sm md:text-base flex items-center gap-1`}
+              >
+                • Level {stats.user.level}
               </motion.div>
             </div>
 
-            <div className="flex items-center gap-4">
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="flex items-center gap-2"
-              >
-                <Button variant="ghost" size="icon">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
                   <Menu className={`h-5 w-5 ${style.text}`} />
                 </Button>
-              </motion.div>
-            </div>
+              </SheetTrigger>
+              <SheetContent className={`bg-gradient-to-br ${style.background} ${style.border}`}>
+                <nav className="space-y-4 mt-8">
+                  <Link href="/social">
+                    <Button
+                      variant="outline"
+                      className={`w-full rounded-full flex items-center justify-start gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
+                    >
+                      <Users className="h-4 w-4" />
+                      Social Hub
+                    </Button>
+                  </Link>
+                  <Link href="/adult-content">
+                    <Button
+                      variant="outline"
+                      className={`w-full rounded-full flex items-center justify-start gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
+                    >
+                      <Film className="h-4 w-4" />
+                      Adult Content
+                    </Button>
+                  </Link>
+                  <Link href="/leaderboard">
+                    <Button
+                      variant="outline"
+                      className={`w-full rounded-full flex items-center justify-start gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
+                    >
+                      <Trophy className="h-4 w-4" />
+                      Leaderboard
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="destructive"
+                    className="w-full rounded-full bg-pink-900/50 hover:bg-pink-900/80"
+                    onClick={() => logoutMutation.mutate()}
+                  >
+                    Logout
+                  </Button>
+                </nav>
+              </SheetContent>
+            </Sheet>
           </div>
         </motion.header>
 
-        {/* Main Content */}
-        <motion.main
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="container mx-auto px-4 pt-24 pb-20"
-        >
-          {/* Hero Section */}
-          <motion.div variants={itemVariants}>
-            <div className="text-center mb-12">
-              <motion.h1 
-                variants={itemVariants}
-                className="text-4xl md:text-5xl font-bold text-white mb-4"
-              >
-                Elevate Your Daily Practice
-              </motion.h1>
-              <motion.p
-                variants={itemVariants}
-                transition={{ delay: 0.1 }}
-                className="text-lg text-purple-200/80"
-              >
-                {style.greeting} {style.subGreeting}
-              </motion.p>
-            </div>
-          </motion.div>
-
-          {/* Stats Grid */}
-          <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            <motion.div
-              variants={itemVariants}
-              transition={{ delay: 0.2 }}
-              className={`p-6 rounded-2xl ${style.cardBg} backdrop-blur border ${style.border}`}
-            >
-              <div className="text-sm text-purple-300 mb-2">Current Streak</div>
-              <div className="text-3xl font-bold text-white mb-1">
-                {stats?.user?.currentStreak || 0} days
-              </div>
-              <div className="text-sm text-purple-300">
-                +3 from last week
-              </div>
-            </motion.div>
-
-            <motion.div
-              variants={itemVariants}
-              transition={{ delay: 0.3 }}
-              className={`p-6 rounded-2xl ${style.cardBg} backdrop-blur border ${style.border}`}
-            >
-              <div className="text-sm text-purple-300 mb-2">Total Practice</div>
-              <div className="text-3xl font-bold text-white mb-1">
-                {stats?.totalHours || 39} hours
-              </div>
-              <div className="text-sm text-purple-300">
-                {stats?.todayMinutes || 39} minutes today
-              </div>
-            </motion.div>
-
-            <motion.div
-              variants={itemVariants}
-              transition={{ delay: 0.4 }}
-              className={`p-6 rounded-2xl ${style.cardBg} backdrop-blur border ${style.border}`}
-            >
-              <div className="text-sm text-purple-300 mb-2">Level Progress</div>
-              <div className="text-3xl font-bold text-white mb-1">
-                {Math.round((stats?.currentLevelXP / stats?.nextLevelXP) * 100)}%
-              </div>
-              <div className="text-sm text-purple-300">
-                {stats?.currentLevelXP || 7450}/{stats?.nextLevelXP || 10000} XP
-              </div>
-            </motion.div>
-          </motion.div>
-
-          {/* Daily Challenges */}
-          <motion.div
-            variants={itemVariants}
-            transition={{ delay: 0.5 }}
-            className={`p-6 rounded-2xl ${style.cardBg} backdrop-blur border ${style.border} mb-12`}
-          >
-            <h2 className="text-xl font-bold text-white mb-6">Daily Challenges</h2>
-            <div className="space-y-6">
-              <div>
-                <div className="flex justify-between text-sm text-purple-300 mb-2">
-                  <span>7-Day Challenge</span>
-                  <span>5/7</span>
-                </div>
-                <div className="h-2 bg-purple-900 rounded-full overflow-hidden">
-                  <div className="h-full bg-purple-500 rounded-full" style={{ width: '71%' }} />
-                </div>
-                <div className="text-sm text-purple-300 mt-2">
-                  Complete at least 15 minutes of practice each day for 7 days straight.
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between text-sm text-purple-300 mb-2">
-                  <span>Power Hour</span>
-                  <span>45/60</span>
-                </div>
-                <div className="h-2 bg-purple-900 rounded-full overflow-hidden">
-                  <div className="h-full bg-purple-500 rounded-full" style={{ width: '75%' }} />
-                </div>
-                <div className="text-sm text-purple-300 mt-2">
-                  Complete a full 60-minute session without interruptions.
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Streak Calendar */}
-          <motion.div
-            variants={itemVariants}
-            transition={{ delay: 0.6 }}
-            className={`p-6 rounded-2xl ${style.cardBg} backdrop-blur border ${style.border}`}
-          >
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-white">Streak Calendar</h2>
-              <div className="flex gap-2 text-sm">
-                <span className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-purple-500" /> Active
-                </span>
-                <span className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-purple-900" /> Inactive
-                </span>
-              </div>
-            </div>
-            <div className="grid grid-cols-5 gap-3">
-              {Array.from({ length: 20 }).map((_, i) => (
-                <div
-                  key={i}
-                  className={`aspect-square rounded-lg ${
-                    Math.random() > 0.3 ? 'bg-purple-500' : 'bg-purple-900'
-                  }`}
-                />
-              ))}
-            </div>
-          </motion.div>
-        </motion.main>
-
-        {/* Action Button */}
         <motion.div
-          variants={itemVariants}
-          className="fixed bottom-6 left-0 right-0 flex justify-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="container mx-auto px-4 pt-24 pb-6"
         >
-          <Button
-            className={`
-              h-14 px-8 rounded-full text-lg font-medium
-              bg-gradient-to-r from-purple-500 to-violet-600
-              hover:from-purple-600 hover:to-violet-700
-              transition-all duration-300
-              shadow-lg shadow-purple-900/50
-              flex items-center gap-2
-            `}
-            onClick={() => setIsSessionModalOpen(true)}
-          >
-            <Sparkles className="h-5 w-5" />
-            Start New Session
-          </Button>
+          <div className={`${style.cardBg} backdrop-blur rounded-2xl p-6 md:p-8 ${style.border} hover:shadow-lg transition-all duration-300`}>
+            <div className="flex items-start md:items-center gap-4 flex-col md:flex-row">
+              <div className={`p-4 rounded-2xl bg-gradient-to-br ${style.button} shadow-lg relative overflow-hidden group`}>
+                <Clock className="h-6 w-6 md:h-8 md:w-8 text-white relative z-10" />
+                <motion.div
+                  className="absolute inset-0 bg-white/20"
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: [1, 1.5, 1], opacity: [0, 0.5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <motion.h2
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  className={`text-xl md:text-3xl font-bold ${style.text} mb-2`}
+                >
+                  {getTimeMessage()}
+                </motion.h2>
+                <motion.p
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                  className={`${style.text} opacity-80 text-sm md:text-base`}
+                >
+                  {style.greeting}
+                </motion.p>
+              </div>
+            </div>
+          </div>
         </motion.div>
 
-        {/* Modals */}
+        <main className="container mx-auto px-4 pt-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
+            <div className="lg:col-span-4 space-y-4 md:space-y-6">
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.1 }}
+              >
+                {stats && (
+                  <LevelProgress
+                    user={stats.user}
+                    nextLevelXP={stats.nextLevelXP}
+                    currentLevelXP={stats.currentLevelXP}
+                    style={preferences.goonStyle}
+                  />
+                )}
+              </motion.div>
+
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
+                  <CardHeader>
+                    <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
+                      <Flame className={`${style.accent}`} />
+                      Your Streak
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <StreakStats stats={stats} />
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
+                  <CardHeader>
+                    <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
+                      <Clock className={`${style.accent}`} />
+                      Power Hours
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className={`text-lg ${style.text}`}>
+                      {preferences.timePreference === "morning" && "Early Bird 🌅"}
+                      {preferences.timePreference === "afternoon" && "Midday Warrior ☀️"}
+                      {preferences.timePreference === "night" && "Night Owl 🌙"}
+                    </div>
+                    <p className={`${style.text} opacity-80 mt-2`}>
+                      Your optimal performance time
+                    </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Card
+                  className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 cursor-pointer group`}
+                  onClick={() => setIsGoonRoomOpen(true)}
+                >
+                  <CardHeader>
+                    <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
+                      <Users className={`${style.accent} group-hover:scale-110 transition-transform`} />
+                      Live Sessions
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className={`${style.text} opacity-80`}>
+                      {preferences.socialMode === "solo"
+                        ? "Join a private training session"
+                        : preferences.socialMode === "competitive"
+                        ? "Compete in live challenges!"
+                        : "Enter the darkness together..."}
+                    </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
+
+            <div className="lg:col-span-8 space-y-4 md:space-y-6">
+              <motion.div
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
+                  <CardHeader>
+                    <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
+                      <Target className={`${style.accent}`} />
+                      Daily Challenges
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Challenges challenges={stats?.challenges || []} />
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                whileHover={{ scale: 1.02 }}
+              >
+                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
+                  <CardHeader>
+                    <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
+                      <Trophy className={`${style.accent}`} />
+                      Achievements
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Achievements
+                      achievements={stats?.achievements || []}
+                      stats={{
+                        currentStreak: stats?.user?.currentStreak || 0,
+                        totalSessions: stats?.user?.totalSessions || 0
+                      }}
+                    />
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {preferences.socialMode !== "solo" && (
+                <motion.div
+                  initial={{ x: 20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
+                    <CardHeader>
+                      <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
+                        <Users className={`${style.accent}`} />
+                        {preferences.socialMode === "friends" ? "Friend Activity" : "Global Leaders"}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className={`${style.text} opacity-80`}>
+                        {preferences.socialMode === "friends"
+                          ? "Stay motivated with your friends!"
+                          : "Compete with the best worldwide!"}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+            </div>
+          </div>
+        </main>
+
         <LogSessionModal
           isOpen={isSessionModalOpen}
           onClose={() => setIsSessionModalOpen(false)}
@@ -379,6 +498,42 @@ export default function HomePage() {
           isOpen={isGoonRoomOpen}
           onClose={() => setIsGoonRoomOpen(false)}
         />
+
+        <motion.div
+          initial={{ y: 100 }}
+          animate={{ y: 0 }}
+          className={`fixed bottom-0 left-0 right-0 p-4 ${style.headerBg} backdrop-blur border-t ${style.border}`}
+        >
+          <div className="container mx-auto max-w-lg">
+            <Button
+              className={`
+                w-full h-12 md:h-14 text-base md:text-lg rounded-full 
+                bg-gradient-to-r ${style.button} 
+                hover:brightness-110 transition-all duration-300 
+                shadow-lg shadow-current/20 hover:shadow-xl hover:shadow-current/30 
+                font-bold tracking-wide text-white transform hover:scale-[1.02]
+                relative overflow-hidden group
+              `}
+              size="lg"
+              onClick={() => setIsSessionModalOpen(true)}
+            >
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center gap-2 justify-center relative z-10"
+              >
+                <Sparkles className="h-5 w-5 md:h-6 md:w-6" />
+                <span className="relative">
+                  {preferences.goonStyle === "solo" ? "LOG TRAINING SESSION" :
+                    preferences.goonStyle === "competitive" ? "Record Your Victory!" :
+                      preferences.goonStyle === "hardcore" ? "Embrace The Darkness..." :
+                        "Log Session"}
+                </span>
+              </motion.div>
+              <div className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+            </Button>
+          </div>
+        </motion.div>
       </div>
     </>
   );
