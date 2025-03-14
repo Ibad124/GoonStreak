@@ -15,7 +15,6 @@ export default function SessionCalendar({ sessions = [], currentStreak }) {
   };
 
   const dayContent = (date) => {
-    const isToday = isSameDay(date, today);
     const hasSessionOnDay = hasSession(date);
     const isCurrentMonth = date.getMonth() === today.getMonth();
 
@@ -32,9 +31,8 @@ export default function SessionCalendar({ sessions = [], currentStreak }) {
           className={`
             w-10 h-10 rounded-xl flex items-center justify-center
             transition-all duration-300 relative group
-            ${isToday ? 'ring-2 ring-primary ring-offset-2' : ''}
             ${hasSessionOnDay 
-              ? 'bg-gradient-to-br from-primary to-primary/90 text-white' 
+              ? 'bg-gradient-to-br from-primary to-primary/90 text-white shadow-lg' 
               : 'hover:bg-primary/5'}
           `}
           whileHover={!hasSessionOnDay ? { scale: 1.1 } : {}}
@@ -146,8 +144,8 @@ export default function SessionCalendar({ sessions = [], currentStreak }) {
             row: "flex w-full mt-2",
             cell: "relative p-0 text-center text-sm focus-within:relative focus-within:z-20",
             day: "h-10 w-10 p-0 font-normal",
-            day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-            day_today: "bg-accent text-accent-foreground",
+            day_selected: "bg-transparent",
+            day_today: "bg-transparent",
             day_outside: "opacity-50",
             day_disabled: "text-muted-foreground opacity-50",
             day_hidden: "invisible",
