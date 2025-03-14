@@ -492,10 +492,6 @@ export default function OnboardingPage() {
   const [, setLocation] = useLocation();
   const { user } = useAuth();
 
-  const userForm = useForm({
-    resolver: zodResolver(insertUserSchema),
-  });
-
   const savePreferencesMutation = useMutation({
     mutationFn: async (preferences: any) => {
       const res = await apiRequest("POST", "/api/user/preferences", preferences);
@@ -528,7 +524,8 @@ export default function OnboardingPage() {
   };
 
   const handleTransitionComplete = () => {
-    setLocation("/");
+    // Force navigation to home page
+    window.location.href = "/";
   };
 
   return (
