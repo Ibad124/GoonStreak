@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, date } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, date, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -18,7 +18,24 @@ export const users = pgTable("users", {
   level: integer("level").notNull().default(1),
   currentBadge: text("current_badge").notNull().default("Novice"),
   streakMultiplier: integer("streak_multiplier").notNull().default(1),
-  lastStreakReset: text("last_streak_reset"), // For grace period recovery
+  lastStreakReset: text("last_streak_reset"),
+});
+
+// Friend system tables
+export const friendRequests = pgTable("friend_requests", {
+  id: serial("id").primaryKey(),
+  senderId: integer("sender_id").notNull(),
+  receiverId: integer("receiver_id").notNull(),
+  status: text("status").notNull().default("pending"),
+  sentAt: timestamp("sent_at").notNull(),
+  respondedAt: timestamp("responded_at"),
+});
+
+export const friendships = pgTable("friendships", {
+  id: serial("id").primaryKey(),
+  user1Id: integer("user1_id").notNull(),
+  user2Id: integer("user2_id").notNull(),
+  createdAt: timestamp("created_at").notNull(),
 });
 
 // Achievements table definition
@@ -31,19 +48,33 @@ export const achievements = pgTable("achievements", {
   xpAwarded: integer("xp_awarded").notNull().default(0),
 });
 
-// Schemas and types
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-  isAnonymous: true,
-  showOnLeaderboard: true,
-});
+// Level System Configuration
+export const LEVEL_THRESHOLDS = {
+  1: { points: 0, title: "Novice Streaker" },
+  2: { points: 100, title: "Apprentice Streaker" },
+  3: { points: 300, title: "Intermediate Streaker" },
+  4: { points: 600, title: "Advanced Streaker" },
+  5: { points: 1000, title: "Expert Streaker" },
+  6: { points: 2000, title: "Master Streaker" },
+  7: { points: 5000, title: "Grandmaster Streaker" },
+  8: { points: 10000, title: "Legendary Streaker" }
+};
 
+// XP Rewards Configuration
+export const XP_REWARDS = {
+  SESSION_COMPLETE: 15,
+  STREAK_MILESTONE: 30,
+  ACHIEVEMENT_EARNED: 25,
+  CHALLENGE_COMPLETED: 50,
+};
+
+// Schemas and types
+export const insertUserSchema = createInsertSchema(users);
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Achievement = typeof achievements.$inferSelect;
 
-// Streak Configuration
+// Streak Configuration (Retained from original)
 export const STREAK_CONFIG = {
   GRACE_PERIOD_HOURS: 24, // Hours allowed to maintain streak if missed
   MULTIPLIER_MILESTONES: {
@@ -60,24 +91,4 @@ export const STREAK_CONFIG = {
     30: "Diamond Streak",
     60: "Legendary Streak",
   }
-} as const;
-
-// Level System Configuration
-export const LEVEL_THRESHOLDS = {
-  1: { points: 0, badge: "Novice" },
-  2: { points: 100, badge: "Apprentice" },
-  3: { points: 300, badge: "Intermediate" },
-  4: { points: 600, badge: "Advanced" },
-  5: { points: 1000, badge: "Expert" },
-  6: { points: 2000, badge: "Master" },
-  7: { points: 5000, badge: "Grandmaster" },
-  8: { points: 10000, badge: "Legend" }
-} as const;
-
-// XP Rewards for different actions
-export const XP_REWARDS = {
-  SESSION_COMPLETE: 15,
-  STREAK_MILESTONE: 30,
-  ACHIEVEMENT_EARNED: 25,
-  CHALLENGE_COMPLETED: 50,
 } as const;
