@@ -3,13 +3,15 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { UserPlus, Check, X, Search, Circle } from "lucide-react";
+import { UserPlus, Check, X, Search, Circle, Trophy, Clock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import FriendActivity from "./FriendActivity";
 
+// FriendRequestCard component remains the same
 function FriendRequestCard({ request, onAccept, onReject }) {
   const { otherUser } = request;
 
@@ -55,6 +57,7 @@ function FriendRequestCard({ request, onAccept, onReject }) {
   );
 }
 
+// Enhanced FriendCard component
 function FriendCard({ friend }) {
   const isOnlineIndicator = friend.isOnline ? "bg-green-500" : "bg-zinc-300";
   const lastActive = friend.lastActive
@@ -80,13 +83,26 @@ function FriendCard({ friend }) {
         />
         <div>
           <h3 className="font-medium">{friend.username}</h3>
-          <p className="text-sm text-muted-foreground">
-            {friend.status || `Last active ${lastActive}`}
-          </p>
+          <div className="text-sm text-muted-foreground flex items-center gap-2">
+            {friend.status ? (
+              <>
+                <Clock className="h-3 w-3" />
+                {friend.status}
+              </>
+            ) : (
+              <>
+                <Circle className="h-3 w-3" />
+                Last active {lastActive}
+              </>
+            )}
+          </div>
         </div>
       </div>
       <div className="text-right">
-        <div className="text-sm font-medium">{friend.title}</div>
+        <div className="text-sm font-medium flex items-center gap-1">
+          <Trophy className="h-3 w-3 text-amber-500" />
+          {friend.title}
+        </div>
         <div className="text-xs text-muted-foreground flex items-center gap-1">
           <Circle className="h-3 w-3 fill-current" />
           {friend.currentStreak} day streak
@@ -96,27 +112,20 @@ function FriendCard({ friend }) {
   );
 }
 
-export default function FriendsList() {
+// New component for searching and adding friends
+function AddFriendDialog() {
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
 
-  const { data: friends = [] } = useQuery({
-    queryKey: ["/api/friends"],
-    refetchInterval: 30000, // Refresh every 30 seconds
+  const { data: searchResults = [] } = useQuery({
+    queryKey: ["/api/users/search", searchQuery],
+    enabled: searchQuery.length >= 3,
   });
-
-  const { data: requests = [] } = useQuery({
-    queryKey: ["/api/friends/requests"],
-  });
-
-  const pendingRequests = requests.filter(
-    (request) => request.status === "pending"
-  );
 
   const sendRequestMutation = useMutation({
-    mutationFn: async (receiverId) => {
+    mutationFn: async (userId) => {
       const res = await apiRequest("POST", "/api/friends/request", {
-        receiverId,
+        receiverId: userId,
       });
       return res.json();
     },
@@ -135,6 +144,72 @@ export default function FriendsList() {
       });
     },
   });
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon">
+          <UserPlus className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add Friend</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 mt-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search users..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <div className="space-y-2">
+            {searchResults.map((user) => (
+              <motion.div
+                key={user.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center justify-between p-3 rounded-lg border"
+              >
+                <div>
+                  <div className="font-medium">{user.username}</div>
+                  <div className="text-sm text-muted-foreground">{user.title}</div>
+                </div>
+                <Button
+                  size="sm"
+                  disabled={sendRequestMutation.isPending}
+                  onClick={() => sendRequestMutation.mutate(user.id)}
+                >
+                  Add Friend
+                </Button>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export default function FriendsList() {
+  const [friendSearchQuery, setFriendSearchQuery] = useState("");
+  const { toast } = useToast();
+
+  const { data: friends = [] } = useQuery({
+    queryKey: ["/api/friends"],
+    refetchInterval: 30000, // Refresh every 30 seconds
+  });
+
+  const { data: requests = [] } = useQuery({
+    queryKey: ["/api/friends/requests"],
+  });
+
+  const pendingRequests = requests.filter(
+    (request) => request.status === "pending"
+  );
 
   const respondToRequestMutation = useMutation({
     mutationFn: async ({ requestId, status }) => {
@@ -209,15 +284,18 @@ export default function FriendsList() {
       {/* Friends List Section */}
       <Card className="backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-blue-900/5">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">Friends</CardTitle>
+          <CardTitle className="text-lg font-semibold flex items-center justify-between">
+            <span>Friends</span>
+            <AddFriendDialog />
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search friends..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={friendSearchQuery}
+              onChange={(e) => setFriendSearchQuery(e.target.value)}
               className="pl-9 rounded-full"
             />
           </div>
@@ -229,7 +307,7 @@ export default function FriendsList() {
               .filter((friend) =>
                 friend.username
                   .toLowerCase()
-                  .includes(searchQuery.toLowerCase())
+                  .includes(friendSearchQuery.toLowerCase())
               )
               .map((friend) => (
                 <FriendCard key={friend.friendshipId} friend={friend} />

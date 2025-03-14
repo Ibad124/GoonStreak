@@ -10,19 +10,16 @@ import {
   ChevronLeft, 
   Video, 
   Users,
-  UserPlus,
-  Settings,
-  MessageSquare,
   Trophy,
-  Share2,
-  Image,
-  UserCheck,
-  Search,
+  MessageSquare,
   Timer,
-  Sparkles
+  Sparkles,
+  Target
 } from "lucide-react";
 import FriendsList from "@/components/FriendsList";
 import FriendActivity from "@/components/FriendActivity";
+import SocialAchievements from "@/components/SocialAchievements";
+import SocialChallenges from "@/components/SocialChallenges";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { GoonRoom } from "@/components/GoonRoom";
@@ -60,6 +57,7 @@ export default function SocialPage() {
   const { toast } = useToast();
   const [isGoonRoomOpen, setIsGoonRoomOpen] = useState(false);
   const style = themeStyles[preferences?.goonStyle || "default"];
+  const [activeTab, setActiveTab] = useState("activity");
 
   const { data: activeRooms = [], isLoading: isLoadingRooms } = useQuery({
     queryKey: ["/api/rooms/active"],
@@ -105,7 +103,7 @@ export default function SocialPage() {
       {/* Main Content */}
       <main className="container mx-auto px-4 pt-20 pb-32">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Friends and Activity */}
+          {/* Left Column - Friends List */}
           <div className="space-y-6">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -115,9 +113,6 @@ export default function SocialPage() {
                 <CardHeader>
                   <CardTitle className={`flex items-center justify-between ${style.text}`}>
                     <span>Friends</span>
-                    <Button variant="ghost" size="icon">
-                      <UserPlus className="h-4 w-4" />
-                    </Button>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -129,76 +124,112 @@ export default function SocialPage() {
 
           {/* Center and Right Columns */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Active Rooms Section */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <Card className={`${style.cardBg} backdrop-blur ${style.border}`}>
-                <CardHeader>
-                  <CardTitle className={`${style.text}`}>Active Sessions</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {isLoadingRooms ? (
-                    <div className="text-center py-8">
-                      <Timer className="h-8 w-8 animate-spin mx-auto mb-4" />
-                      <p className={`${style.text}`}>Loading active sessions...</p>
-                    </div>
-                  ) : activeRooms.length > 0 ? (
-                    <div className="grid gap-4">
-                      {activeRooms.map((room) => (
-                        <motion.div
-                          key={room.id}
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          className={`p-4 rounded-lg border ${style.border} ${style.cardBg}`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h3 className={`font-semibold ${style.text}`}>{room.name}</h3>
-                              <p className={`text-sm opacity-80 ${style.text}`}>
-                                {room.participants} participants • {room.duration}
-                              </p>
-                            </div>
-                            <Button 
-                              onClick={() => setIsGoonRoomOpen(true)}
-                              className="rounded-full"
-                            >
-                              <Sparkles className="h-4 w-4 mr-2" />
-                              Join Session
-                            </Button>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <Video className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p className={`${style.text}`}>No active sessions</p>
-                      <p className={`text-sm mt-2 opacity-80 ${style.text}`}>
-                        Start a session to connect with others!
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid grid-cols-4">
+                <TabsTrigger value="activity" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Activity
+                </TabsTrigger>
+                <TabsTrigger value="rooms" className="flex items-center gap-2">
+                  <Video className="h-4 w-4" />
+                  Rooms
+                </TabsTrigger>
+                <TabsTrigger value="challenges" className="flex items-center gap-2">
+                  <Target className="h-4 w-4" />
+                  Challenges
+                </TabsTrigger>
+                <TabsTrigger value="achievements" className="flex items-center gap-2">
+                  <Trophy className="h-4 w-4" />
+                  Achievements
+                </TabsTrigger>
+              </TabsList>
 
-            {/* Activity Feed */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <Card className={`${style.cardBg} backdrop-blur ${style.border}`}>
-                <CardHeader>
-                  <CardTitle className={`${style.text}`}>Friend Activity</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <FriendActivity />
-                </CardContent>
-              </Card>
-            </motion.div>
+              <div className="mt-6">
+                <TabsContent value="activity">
+                  <Card className={`${style.cardBg} backdrop-blur ${style.border}`}>
+                    <CardHeader>
+                      <CardTitle className={`${style.text}`}>Friend Activity</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <FriendActivity />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="rooms">
+                  <Card className={`${style.cardBg} backdrop-blur ${style.border}`}>
+                    <CardHeader>
+                      <CardTitle className={`${style.text}`}>Active Sessions</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {isLoadingRooms ? (
+                        <div className="text-center py-8">
+                          <Timer className="h-8 w-8 animate-spin mx-auto mb-4" />
+                          <p className={`${style.text}`}>Loading active sessions...</p>
+                        </div>
+                      ) : activeRooms.length > 0 ? (
+                        <div className="grid gap-4">
+                          {activeRooms.map((room) => (
+                            <motion.div
+                              key={room.id}
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              className={`p-4 rounded-lg border ${style.border} ${style.cardBg}`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <h3 className={`font-semibold ${style.text}`}>{room.name}</h3>
+                                  <p className={`text-sm opacity-80 ${style.text}`}>
+                                    {room.participants} participants • {room.duration}
+                                  </p>
+                                </div>
+                                <Button 
+                                  onClick={() => setIsGoonRoomOpen(true)}
+                                  className="rounded-full"
+                                >
+                                  <Sparkles className="h-4 w-4 mr-2" />
+                                  Join Session
+                                </Button>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <Video className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                          <p className={`${style.text}`}>No active sessions</p>
+                          <p className={`text-sm mt-2 opacity-80 ${style.text}`}>
+                            Start a session to connect with others!
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="challenges">
+                  <Card className={`${style.cardBg} backdrop-blur ${style.border}`}>
+                    <CardHeader>
+                      <CardTitle className={`${style.text}`}>Group Challenges</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <SocialChallenges />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="achievements">
+                  <Card className={`${style.cardBg} backdrop-blur ${style.border}`}>
+                    <CardHeader>
+                      <CardTitle className={`${style.text}`}>Social Achievements</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <SocialAchievements />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </div>
+            </Tabs>
           </div>
         </div>
       </main>
