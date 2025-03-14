@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/hooks/use-theme";
 import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
 
 interface PageTransitionProps {
   children: React.ReactNode;
@@ -59,6 +60,7 @@ export const PageTransition = ({
 }: PageTransitionProps) => {
   const { preferences } = useTheme();
   const style = preferences.goonStyle || "default";
+  const [, setLocation] = useLocation();
 
   const getBackgroundStyle = () => {
     switch (style) {
@@ -86,11 +88,6 @@ export const PageTransition = ({
             if (definition === "exit") {
               setTimeout(() => {
                 onComplete();
-                // Import navigate from wouter and use it for navigation
-                import('wouter').then(module => {
-                  const navigate = module.default[1];
-                  navigate('/');
-                });
               }, 100);
             }
           }}
@@ -116,14 +113,20 @@ export const PageTransition = ({
               whileTap={{ scale: 0.95 }}
             >
               <Button 
-                className="mt-4 px-6 py-2 bg-gradient-to-r from-white/20 to-white/30 hover:from-white/30 hover:to-white/40 text-white font-medium rounded-full shadow-lg shadow-black/20 backdrop-blur"
-                onClick={() => {
-                  import('wouter').then(({ useLocation }) => {
-                    const [_, navigate] = useLocation();
-                    navigate('/');
-                  });
-                }}
+                className="mt-4 relative group overflow-hidden rounded-full bg-white/10 hover:bg-white/20 text-white font-medium shadow-lg shadow-black/20 backdrop-blur px-8 py-3 border border-white/30"
+                onClick={() => setLocation("/")}
               >
+                <motion.span 
+                  className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0"
+                  animate={{
+                    x: ["0%", "200%"]
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "linear"
+                  }}
+                />
                 <span className="relative flex items-center gap-2">
                   Skip Animation
                   <motion.div
