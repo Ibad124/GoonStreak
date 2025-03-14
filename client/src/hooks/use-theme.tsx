@@ -31,7 +31,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const [preferences, setPreferences] = useState<ThemePreferences>(DEFAULT_PREFERENCES);
 
-  // Fetch preferences query
+  // Fetch user preferences
   const { data: preferencesData } = useQuery({
     queryKey: ["/api/user/preferences"],
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
@@ -42,6 +42,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const updatePreferencesMutation = useMutation({
     mutationFn: async (newPrefs: Partial<ThemePreferences>) => {
       const res = await apiRequest("POST", "/api/user/preferences", newPrefs);
+      if (!res.ok) {
+        throw new Error("Failed to update preferences");
+      }
       return res.json();
     },
     onSuccess: (data) => {
@@ -59,6 +62,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         description: error.message,
         variant: "destructive",
       });
+      throw error; // Re-throw to be caught by the caller
     },
   });
 
