@@ -23,12 +23,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const [preferences, setPreferences] = useState<ThemePreferences>(DEFAULT_PREFERENCES);
 
-  const { data: preferencesData } = useQuery<ThemePreferences>({
+  // Fetch initial preferences
+  useQuery({
     queryKey: ["/api/user/preferences"],
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    gcTime: 1000 * 60 * 60, // Keep in cache for 1 hour
     retry: 3,
-    onSuccess: (data) => {
+    onSuccess: (data: ThemePreferences | undefined) => {
       if (data) {
         setPreferences(prev => ({ ...prev, ...data }));
       }
@@ -36,49 +35,39 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     onError: () => {
       toast({
         title: "Error Loading Preferences",
-        description: "Your preferences could not be loaded. Using default settings.",
+        description: "Using default settings.",
         variant: "destructive",
       });
     }
   });
 
+  // Update preferences mutation
   const updatePreferencesMutation = useMutation({
     mutationFn: async (newPrefs: Partial<ThemePreferences>) => {
       try {
-        const res = await apiRequest("POST", "/api/user/preferences", newPrefs);
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.message || "Failed to save preferences");
-        }
-
-        // Ensure we have all required fields with proper types
-        const updatedPrefs: ThemePreferences = {
+        // Combine existing preferences with new ones
+        const updatedPrefs = {
           ...preferences,
-          ...data,
-          goonStyle: data.goonStyle || preferences.goonStyle,
-          timePreference: data.timePreference || preferences.timePreference,
-          intensityLevel: data.intensityLevel || preferences.intensityLevel,
-          socialMode: data.socialMode || preferences.socialMode,
+          ...newPrefs,
         };
 
-        return updatedPrefs;
+        const res = await apiRequest("POST", "/api/user/preferences", updatedPrefs);
+        if (!res.ok) {
+          const error = await res.json();
+          throw new Error(error.message || "Failed to save preferences");
+        }
+        const data = await res.json();
+        return data as ThemePreferences;
       } catch (error) {
-        console.error("Preference update error:", error);
+        console.error("Failed to update preferences:", error);
         throw error;
       }
     },
     onSuccess: (data) => {
       queryClient.setQueryData(["/api/user/preferences"], data);
       setPreferences(data);
-      toast({
-        title: "Preferences Updated",
-        description: "Your theme preferences have been saved.",
-        variant: "default",
-      });
     },
     onError: (error: Error) => {
-      console.error("Failed to update preferences:", error);
       toast({
         title: "Error Saving Preferences",
         description: error.message || "Failed to save preferences. Please try again.",

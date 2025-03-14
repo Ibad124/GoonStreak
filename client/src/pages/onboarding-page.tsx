@@ -531,17 +531,25 @@ const OnboardingPage = () => {
 
   const handleComplete = useCallback(async () => {
     try {
-      const preferences: Partial<ThemePreferences> = {
+      // Create a complete preferences object
+      const preferences: ThemePreferences = {
         goonStyle,
         timePreference,
         intensityLevel,
         socialMode,
       };
+
+      // Save preferences
       await savePreferencesMutation.mutateAsync(preferences);
     } catch (error) {
       console.error("Failed to complete onboarding:", error);
+      toast({
+        title: "Error Saving Preferences",
+        description: "Please try again. If the problem persists, refresh the page.",
+        variant: "destructive",
+      });
     }
-  }, [goonStyle, timePreference, intensityLevel, socialMode, savePreferencesMutation]);
+  }, [goonStyle, timePreference, intensityLevel, socialMode, savePreferencesMutation, toast]);
 
   const handleTransitionComplete = useCallback(() => {
     // Navigate to home page after transition completes
@@ -895,7 +903,7 @@ const OnboardingPage = () => {
                       className={`p-6 cursor-pointer transition-all duration-300 ${
                         socialMode === pref.id
                           ? "ring-2 ring-primary ring-offset-2"
-                          : "hover:shadow-lg"
+                                                    : "hover:shadow-lg"
                       }`}
                       onClick={() => setSocialMode(pref.id)}
                     >
