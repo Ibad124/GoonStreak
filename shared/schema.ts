@@ -1,5 +1,4 @@
-
-import { pgTable, text, serial, integer, boolean, date, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, date, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -77,12 +76,59 @@ export const CHARACTER_STYLES = {
   hardcore: "intense"
 } as const;
 
-// Schemas and types
-export const insertUserSchema = createInsertSchema(users);
-export type InsertUser = z.infer<typeof insertUserSchema>;
+// Goal types
+export const GOAL_TYPES = {
+  STREAK: "streak",
+  SESSION_COUNT: "session_count",
+  XP_MILESTONE: "xp_milestone",
+  ACHIEVEMENT: "achievement",
+  CHALLENGE: "challenge",
+} as const;
+
+// Widget types
+export const WIDGET_TYPES = {
+  STREAK_TRACKER: "streak_tracker",
+  GOAL_PROGRESS: "goal_progress",
+  ACHIEVEMENT_SHOWCASE: "achievement_showcase",
+  CHALLENGE_BOARD: "challenge_board",
+  SOCIAL_FEED: "social_feed",
+  PERSONAL_STATS: "personal_stats",
+} as const;
+
+// Goals table
+export const goals = pgTable("goals", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  type: text("type").notNull(),
+  target: integer("target").notNull(),
+  current: integer("current").notNull().default(0),
+  deadline: timestamp("deadline"),
+  completed: boolean("completed").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at"),
+  settings: jsonb("settings"),
+});
+
+// Widget preferences table
+export const widgetPreferences = pgTable("widget_preferences", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  layout: jsonb("layout").notNull(), // Stores widget positions and sizes
+  visibleWidgets: text("visible_widgets").array().notNull(),
+  settings: jsonb("settings"), // Per-widget settings
+  updatedAt: timestamp("updated_at"),
+});
+
+// Types
+export type GoalType = keyof typeof GOAL_TYPES;
+export type WidgetType = keyof typeof WIDGET_TYPES;
+export type Goal = typeof goals.$inferSelect;
+export type InsertGoal = typeof goals.$inferInsert;
+export type WidgetPreference = typeof widgetPreferences.$inferSelect;
 export type User = typeof users.$inferSelect;
 export type Achievement = typeof achievements.$inferSelect;
 export type CharacterStyle = keyof typeof CHARACTER_STYLES;
+
 
 // Streak Configuration
 export const STREAK_CONFIG = {
@@ -97,8 +143,54 @@ export const STREAK_CONFIG = {
   MILESTONE_ACHIEVEMENTS: {
     3: "Bronze Streak",
     7: "Silver Streak",
-    14: "Gold Streak", 
+    14: "Gold Streak",
     30: "Diamond Streak",
     60: "Legendary Streak",
   }
+} as const;
+
+// Schemas and types
+export const insertUserSchema = createInsertSchema(users);
+export const insertGoalSchema = createInsertSchema(goals);
+export const insertWidgetPreferenceSchema = createInsertSchema(widgetPreferences);
+
+
+// Widget configuration
+export const WIDGET_CONFIG = {
+  [WIDGET_TYPES.STREAK_TRACKER]: {
+    minHeight: 2,
+    maxHeight: 4,
+    defaultSize: { w: 2, h: 2 },
+    refreshInterval: 300000, // 5 minutes
+  },
+  [WIDGET_TYPES.GOAL_PROGRESS]: {
+    minHeight: 2,
+    maxHeight: 6,
+    defaultSize: { w: 4, h: 3 },
+    refreshInterval: 60000, // 1 minute
+  },
+  [WIDGET_TYPES.ACHIEVEMENT_SHOWCASE]: {
+    minHeight: 2,
+    maxHeight: 4,
+    defaultSize: { w: 2, h: 2 },
+    refreshInterval: 300000,
+  },
+  [WIDGET_TYPES.CHALLENGE_BOARD]: {
+    minHeight: 3,
+    maxHeight: 6,
+    defaultSize: { w: 4, h: 4 },
+    refreshInterval: 300000,
+  },
+  [WIDGET_TYPES.SOCIAL_FEED]: {
+    minHeight: 4,
+    maxHeight: 8,
+    defaultSize: { w: 3, h: 6 },
+    refreshInterval: 60000,
+  },
+  [WIDGET_TYPES.PERSONAL_STATS]: {
+    minHeight: 2,
+    maxHeight: 4,
+    defaultSize: { w: 2, h: 2 },
+    refreshInterval: 300000,
+  },
 } as const;
