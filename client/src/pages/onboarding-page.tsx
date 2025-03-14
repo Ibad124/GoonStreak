@@ -169,46 +169,6 @@ const BackgroundEffects = ({ style = "default" }) => {
   );
 };
 
-// Guide character variants
-const characterVariants = {
-  default: {
-    color: "from-blue-400 to-purple-500",
-    messages: {
-      welcome: "Hey there! Let's get to know you better! 👋",
-      timePreference: "When do you feel most energized? Pick your power hours! ⚡",
-      intensity: "How hard do you want to push yourself? Choose your intensity! 💪",
-      social: "Last step! Let's figure out your social style! 🌟",
-    }
-  },
-  solo: {
-    color: "from-red-500 to-orange-600",
-    messages: {
-      welcome: "GREETINGS, MORTAL. I AM GOONBOT 9000. YOU HAVE CHOSEN THE PATH OF SOLITUDE. INITIALIZING TRAINING PROTOCOL... 🤖",
-      timePreference: "ANALYZING OPTIMAL PERFORMANCE WINDOWS. SELECT YOUR PRIME OPERATION HOURS! ⚡",
-      intensity: "CALIBRATING CHALLENGE PARAMETERS. SET YOUR POWER LEVEL! 💪",
-      social: "CONFIGURING SOCIAL PROTOCOLS. DETERMINE YOUR INTERACTION MATRIX! 🔧",
-    }
-  },
-  competitive: {
-    color: "from-pink-400 to-purple-500",
-    messages: {
-      welcome: "Heya streaker! I'm Goonette, and I'm super excited to be your streak buddy! Let's make this fun! 💖",
-      timePreference: "When are you at your absolute best? Choose your power hours! ✨",
-      intensity: "Time to spice things up! How challenging should we make this? 🔥",
-      social: "Last but not least, let's see how social you wanna be! No pressure! 😘",
-    }
-  },
-  hardcore: {
-    color: "from-purple-900 to-red-900",
-    messages: {
-      welcome: "Ah, a seeker of ultimate power enters my domain. I am The Temptress, and I shall guide your journey... 😈",
-      timePreference: "Choose the hours when your power peaks, mortal. Choose wisely... ⏳",
-      intensity: "Now, show me how far you're willing to go. What intensity beckons you? 🔥",
-      social: "The final choice awaits. How shall others witness your ascension? 👑",
-    }
-  }
-};
-
 // Enhanced GuideCharacter component
 const GuideCharacter = ({ emotion = "happy", style = "default" }) => {
   const variant = characterVariants[style];
@@ -539,8 +499,23 @@ const OnboardingPage = () => {
         socialMode,
       };
 
-      // Save preferences
-      await savePreferencesMutation.mutateAsync(preferences);
+      // Save preferences and handle navigation
+      await savePreferencesMutation.mutateAsync(preferences, {
+        onSuccess: () => {
+          setShowTransition(true);
+          setTimeout(() => {
+            setLocation("/home");
+          }, 1000);
+        },
+        onError: (error) => {
+          console.error("Failed to save preferences:", error);
+          toast({
+            title: "Error Saving Preferences",
+            description: "Please try again. If the problem persists, refresh the page.",
+            variant: "destructive",
+          });
+        }
+      });
     } catch (error) {
       console.error("Failed to complete onboarding:", error);
       toast({
@@ -549,11 +524,10 @@ const OnboardingPage = () => {
         variant: "destructive",
       });
     }
-  }, [goonStyle, timePreference, intensityLevel, socialMode, savePreferencesMutation, toast]);
+  }, [goonStyle, timePreference, intensityLevel, socialMode, savePreferencesMutation, toast, setLocation]);
 
   const handleTransitionComplete = useCallback(() => {
-    // Navigate to home page after transition completes
-    setLocation("/");
+    setLocation("/home");
   }, [setLocation]);
 
   useEffect(() => {
@@ -954,7 +928,7 @@ const OnboardingPage = () => {
                       <motion.div
                         animate={{ x: [0, 5, 0] }}
                         transition={{ duration: 1, repeat: Infinity }}
-                      >
+                      >>
                         <ArrowRight className="ml-2 h-5 w-5" />
                       </motion.div>
                     </>
