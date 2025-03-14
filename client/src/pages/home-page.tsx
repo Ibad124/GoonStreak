@@ -15,6 +15,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Challenges from "@/components/Challenges";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
+import { GoonRoom } from "@/components/GoonRoom";
 
 const themeStyles = {
   default: {
@@ -107,6 +108,7 @@ export default function HomePage() {
   const { toast } = useToast();
   const { preferences } = useTheme();
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
+  const [isGoonRoomOpen, setIsGoonRoomOpen] = useState(false);
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ["/api/stats"],
@@ -123,16 +125,13 @@ export default function HomePage() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
 
-      // Show sequence of toasts with animation
       const showToastSequence = async () => {
-        // Session logged toast
         toast({
           title: "Session Logged",
           description: messages.sessionLogged,
           variant: "default",
         });
 
-        // Wait a bit before showing XP toast
         await new Promise(resolve => setTimeout(resolve, 500));
 
         const xpGained = data.user.xpPoints - (stats?.user.xpPoints || 0);
@@ -142,7 +141,6 @@ export default function HomePage() {
           variant: "default",
         });
 
-        // Level up toast if applicable
         if (data.leveledUp) {
           await new Promise(resolve => setTimeout(resolve, 500));
           toast({
@@ -152,7 +150,6 @@ export default function HomePage() {
           });
         }
 
-        // Show achievements with delay
         data.newAchievements?.forEach((achievement, index) => {
           setTimeout(() => {
             toast({
@@ -177,7 +174,6 @@ export default function HomePage() {
     );
   }
 
-  // Get time-based message
   const getTimeMessage = () => {
     const hour = new Date().getHours();
     if (hour < 12) return messages.timeMessage.morning;
@@ -188,13 +184,11 @@ export default function HomePage() {
   return (
     <>
       <div className={`min-h-screen pb-20 relative overflow-hidden bg-gradient-to-br ${style.background}`}>
-        {/* Background Pattern */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoNDUpIj48cGF0aCBkPSJNLTEwIDMwbDIwLTIwTTAgNDBsMjAtMjBNMTAgNTBsMjAtMjAiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4xIiBzdHJva2Utd2lkdGg9IjIiLz48L3BhdHRlcm4+PC9kZWZzPjxwYXRoIGZpbGw9InVybCgjYSkiIGQ9Ik0wIDBoMjAwdjIwMEgweiIvPjwvc3ZnPg==')]" />
         </div>
 
-        {/* Header */}
-        <motion.header 
+        <motion.header
           initial={{ y: -100 }}
           animate={{ y: 0 }}
           className={`fixed top-0 left-0 right-0 ${style.headerBg} backdrop-blur-lg z-50 border-b ${style.border}`}
@@ -220,7 +214,6 @@ export default function HomePage() {
               </motion.div>
             </div>
 
-            {/* Menu Sheet */}
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className={`rounded-full ${style.text} hover:${style.accent}`}>
@@ -239,8 +232,8 @@ export default function HomePage() {
                     </Button>
                   </Link>
                   <Link href="/leaderboard">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className={`w-full rounded-full flex items-center bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
                     >
                       <Trophy className="h-4 w-4 mr-2" />
@@ -260,7 +253,6 @@ export default function HomePage() {
           </div>
         </motion.header>
 
-        {/* Welcome Banner */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -279,10 +271,8 @@ export default function HomePage() {
           </div>
         </motion.div>
 
-        {/* Main Content */}
         <main className="container mx-auto px-4 pt-4">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Left Column */}
             <div className="lg:col-span-4 space-y-6">
               <motion.div
                 initial={{ x: -20, opacity: 0 }}
@@ -317,7 +307,6 @@ export default function HomePage() {
                 </Card>
               </motion.div>
 
-              {/* Time Preference Card */}
               <motion.div
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
@@ -342,9 +331,34 @@ export default function HomePage() {
                   </CardContent>
                 </Card>
               </motion.div>
+
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.4 }}
+              >
+                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 cursor-pointer`}
+                  onClick={() => setIsGoonRoomOpen(true)}
+                >
+                  <CardHeader>
+                    <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
+                      <Users className={`${style.accent}`} />
+                      Live Sessions
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className={`${style.text} opacity-80`}>
+                      {preferences.socialMode === "solo"
+                        ? "Join a private training session"
+                        : preferences.socialMode === "competitive"
+                        ? "Compete in live challenges!"
+                        : "Enter the darkness together..."}
+                    </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
             </div>
 
-            {/* Right Column */}
             <div className="lg:col-span-8 space-y-6">
               <motion.div
                 initial={{ x: 20, opacity: 0 }}
@@ -377,8 +391,8 @@ export default function HomePage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className={style.text}>
-                    <Achievements 
-                      achievements={stats?.achievements || []} 
+                    <Achievements
+                      achievements={stats?.achievements || []}
                       stats={{
                         currentStreak: stats?.user?.currentStreak || 0,
                         totalSessions: stats?.user?.totalSessions || 0
@@ -388,7 +402,6 @@ export default function HomePage() {
                 </Card>
               </motion.div>
 
-              {/* Social Card */}
               {preferences.socialMode !== "solo" && (
                 <motion.div
                   initial={{ x: 20, opacity: 0 }}
@@ -404,8 +417,8 @@ export default function HomePage() {
                     </CardHeader>
                     <CardContent>
                       <p className={`${style.text} opacity-80`}>
-                        {preferences.socialMode === "friends" 
-                          ? "Stay motivated with your friends!" 
+                        {preferences.socialMode === "friends"
+                          ? "Stay motivated with your friends!"
                           : "Compete with the best worldwide!"}
                       </p>
                     </CardContent>
@@ -416,7 +429,6 @@ export default function HomePage() {
           </div>
         </main>
 
-        {/* Session Modal */}
         <LogSessionModal
           isOpen={isSessionModalOpen}
           onClose={() => setIsSessionModalOpen(false)}
@@ -424,7 +436,11 @@ export default function HomePage() {
           isPending={sessionMutation.isPending}
         />
 
-        {/* Bottom Action Bar */}
+        <GoonRoom
+          isOpen={isGoonRoomOpen}
+          onClose={() => setIsGoonRoomOpen(false)}
+        />
+
         <motion.div
           initial={{ y: 100 }}
           animate={{ y: 0 }}
@@ -443,9 +459,9 @@ export default function HomePage() {
               >
                 <Sparkles className="h-6 w-6" />
                 {preferences.goonStyle === "solo" ? "LOG TRAINING SESSION" :
-                 preferences.goonStyle === "competitive" ? "Record Your Victory!" :
-                 preferences.goonStyle === "hardcore" ? "Embrace The Darkness..." :
-                 "Log Session"}
+                  preferences.goonStyle === "competitive" ? "Record Your Victory!" :
+                    preferences.goonStyle === "hardcore" ? "Embrace The Darkness..." :
+                      "Log Session"}
               </motion.div>
             </Button>
           </div>

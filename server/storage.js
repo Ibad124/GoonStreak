@@ -31,6 +31,14 @@ export class MemStorage {
     this.activities = new Map();
     this.activityId = 1;
 
+    // Add new storage for rooms
+    this.rooms = new Map();
+    this.roomParticipants = new Map();
+    this.roomMessages = new Map();
+    this.roomId = 1;
+    this.roomParticipantId = 1;
+    this.roomMessageId = 1;
+
     // Add test users
     this.createUser({
       username: "GoonMaster",
@@ -651,6 +659,87 @@ export class MemStorage {
         new Date(activity.timestamp) > threeDaysAgo
       )
       .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  }
+
+  // Room-related methods
+  async createRoom(data) {
+    const room = {
+      id: this.roomId++,
+      ...data,
+      createdAt: new Date(),
+      endedAt: null,
+    };
+    this.rooms.set(room.id, room);
+    return room;
+  }
+
+  async getRoom(id) {
+    return this.rooms.get(id);
+  }
+
+  async getActiveRooms() {
+    return Array.from(this.rooms.values())
+      .filter(room => !room.endedAt)
+      .sort((a, b) => b.createdAt - a.createdAt);
+  }
+
+  async addRoomParticipant(data) {
+    const participant = {
+      id: this.roomParticipantId++,
+      ...data,
+      joinedAt: new Date(),
+      leftAt: null,
+    };
+    this.roomParticipants.set(participant.id, participant);
+    return participant;
+  }
+
+  async getRoomParticipants(roomId) {
+    return Array.from(this.roomParticipants.values())
+      .filter(p => p.roomId === roomId && !p.leftAt);
+  }
+
+  async addRoomMessage(data) {
+    const message = {
+      id: this.roomMessageId++,
+      ...data,
+      sentAt: new Date(),
+    };
+    this.roomMessages.set(message.id, message);
+    return message;
+  }
+
+  async getRoomMessages(roomId) {
+    return Array.from(this.roomMessages.values())
+      .filter(m => m.roomId === roomId)
+      .sort((a, b) => a.sentAt - b.sentAt);
+  }
+
+  async endRoom(roomId) {
+    const room = await this.getRoom(roomId);
+    if (room) {
+      room.endedAt = new Date();
+      this.rooms.set(roomId, room);
+
+      // Mark all participants as left
+      const participants = await this.getRoomParticipants(roomId);
+      participants.forEach(p => {
+        p.leftAt = new Date();
+        this.roomParticipants.set(p.id, p);
+      });
+    }
+    return room;
+  }
+
+  async updateRoomParticipantStatus(roomId, userId, status) {
+    const participant = Array.from(this.roomParticipants.values())
+      .find(p => p.roomId === roomId && p.userId === userId && !p.leftAt);
+
+    if (participant) {
+      participant.status = status;
+      this.roomParticipants.set(participant.id, participant);
+    }
+    return participant;
   }
 }
 

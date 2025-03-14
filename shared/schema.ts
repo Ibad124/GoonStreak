@@ -1,4 +1,3 @@
-
 import { pgTable, text, serial, integer, boolean, date, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -68,6 +67,8 @@ export const XP_REWARDS = {
   STREAK_MILESTONE: 30,
   ACHIEVEMENT_EARNED: 25,
   CHALLENGE_COMPLETED: 50,
+  ROOM_HOST: 10,
+  ROOM_PARTICIPATION: 5,
 };
 
 // Character Styles Configuration
@@ -77,12 +78,66 @@ export const CHARACTER_STYLES = {
   hardcore: "intense"
 } as const;
 
-// Schemas and types
-export const insertUserSchema = createInsertSchema(users);
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
-export type Achievement = typeof achievements.$inferSelect;
-export type CharacterStyle = keyof typeof CHARACTER_STYLES;
+// New tables for real-time features
+export const rooms = pgTable("rooms", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  hostId: integer("host_id").notNull(),
+  isPrivate: boolean("is_private").notNull().default(true),
+  password: text("password"),
+  maxParticipants: integer("max_participants").notNull().default(10),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  endedAt: timestamp("ended_at"),
+  settings: text("settings").notNull(), // JSON string of room settings
+});
+
+export const roomParticipants = pgTable("room_participants", {
+  id: serial("id").primaryKey(),
+  roomId: integer("room_id").notNull(),
+  userId: integer("user_id").notNull(),
+  joinedAt: timestamp("joined_at").notNull().defaultNow(),
+  leftAt: timestamp("left_at"),
+  role: text("role").notNull().default("participant"), // host, participant
+  status: text("status").notNull().default("active"), // active, away, busy
+});
+
+export const roomMessages = pgTable("room_messages", {
+  id: serial("id").primaryKey(),
+  roomId: integer("room_id").notNull(),
+  userId: integer("user_id").notNull(),
+  type: text("type").notNull(), // text, emoji, gif, reaction, system
+  content: text("content").notNull(),
+  sentAt: timestamp("sent_at").notNull().defaultNow(),
+});
+
+// Schemas for WebSocket messages
+export const roomEventSchema = z.object({
+  type: z.enum([
+    "JOIN_ROOM",
+    "LEAVE_ROOM",
+    "SEND_MESSAGE",
+    "REACTION",
+    "TIMER_START",
+    "TIMER_STOP",
+    "TIMER_SYNC",
+    "STATUS_UPDATE",
+  ]),
+  roomId: z.number(),
+  payload: z.any(),
+  timestamp: z.date(),
+});
+
+// Extended schemas for room creation and management
+export const createRoomSchema = createInsertSchema(rooms).extend({
+  password: z.string().optional(),
+  settings: z.object({
+    allowVoice: z.boolean().default(false),
+    allowReactions: z.boolean().default(true),
+    timerDuration: z.number().optional(),
+    isAnonymous: z.boolean().default(false),
+    allowGifs: z.boolean().default(true),
+  }),
+});
 
 // Streak Configuration
 export const STREAK_CONFIG = {
@@ -102,3 +157,15 @@ export const STREAK_CONFIG = {
     60: "Legendary Streak",
   }
 } as const;
+
+// Schemas and types
+export const insertUserSchema = createInsertSchema(users);
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
+export type Achievement = typeof achievements.$inferSelect;
+export type CharacterStyle = keyof typeof CHARACTER_STYLES;
+export type Room = typeof rooms.$inferSelect;
+export type RoomParticipant = typeof roomParticipants.$inferSelect;
+export type RoomMessage = typeof roomMessages.$inferSelect;
+export type RoomEvent = z.infer<typeof roomEventSchema>;
+export type CreateRoom = z.infer<typeof createRoomSchema>;
