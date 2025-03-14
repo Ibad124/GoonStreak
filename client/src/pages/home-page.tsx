@@ -98,8 +98,25 @@ export default function HomePage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-border" />
+        <p className="text-muted-foreground">Checking authentication...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <Card className="w-[90%] max-w-md">
+          <CardContent className="pt-6">
+            <h2 className="text-xl font-bold text-destructive mb-2">Unable to load data</h2>
+            <p className="text-sm text-muted-foreground">Please try logging in again.</p>
+            <Button className="mt-4 w-full" asChild>
+              <Link href="/auth">Go to Login</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
