@@ -11,11 +11,20 @@ import { User, Users, Trophy, Target, ArrowRight, ArrowLeft, Sparkles, Ghost, Cr
 import { PageTransition } from "@/components/PageTransition";
 import type { ThemeStyle, ThemePreferences } from "@/types/theme";
 
-// Enhanced typing animation for messages
-const TypedMessage = ({ text }: { text: string }) => {
-  const [displayText, setDisplayText] = React.useState("");
+interface TypedMessageProps {
+  text: string;
+}
 
-  React.useEffect(() => {
+// Enhanced typing animation for messages
+const TypedMessage: React.FC<TypedMessageProps> = ({ text = "" }) => {
+  const [displayText, setDisplayText] = useState("");
+
+  useEffect(() => {
+    if (!text) {
+      setDisplayText("");
+      return;
+    }
+
     let index = 0;
     setDisplayText("");
 
@@ -885,7 +894,8 @@ const OnboardingPage = () => {
                     <Card
                       className={`p-6 cursor-pointer transition-all duration-300 ${
                         socialMode === pref.id
-                          ? "ring-2 ring-primary ring-offset-2"                          : "hover:shadow-lg"
+                          ? "ring-2 ring-primary ring-offset-2"
+                          : "hover:shadow-lg"
                       }`}
                       onClick={() => setSocialMode(pref.id)}
                     >
