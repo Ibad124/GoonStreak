@@ -32,6 +32,7 @@ export function GoonRoom({ isOpen, onClose }: GoonRoomProps) {
   const [timerActive, setTimerActive] = useState(false);
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [messageInput, setMessageInput] = useState("");
+  const [wsError, setWsError] = useState<string | null>(null);
 
   const style = preferences.goonStyle || "default";
 
@@ -68,14 +69,17 @@ export function GoonRoom({ isOpen, onClose }: GoonRoomProps) {
 
   // WebSocket setup
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !user) return;
 
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}`;
+    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    console.log('Connecting to WebSocket:', wsUrl);
+
     const socket = new WebSocket(wsUrl);
 
     socket.onopen = () => {
       console.log("WebSocket connected");
+      setWsError(null);
       toast({
         title: "Connected to room server",
         description: "Ready to start or join a session!",
@@ -83,12 +87,17 @@ export function GoonRoom({ isOpen, onClose }: GoonRoomProps) {
     };
 
     socket.onmessage = (event) => {
-      const message: WebSocketMessage = JSON.parse(event.data);
-      handleWebSocketMessage(message);
+      try {
+        const message: WebSocketMessage = JSON.parse(event.data);
+        handleWebSocketMessage(message);
+      } catch (error) {
+        console.error('Failed to parse WebSocket message:', error);
+      }
     };
 
     socket.onerror = (error) => {
       console.error("WebSocket error:", error);
+      setWsError("Failed to connect to room server");
       toast({
         title: "Connection Error",
         description: "Failed to connect to room server",
@@ -102,7 +111,7 @@ export function GoonRoom({ isOpen, onClose }: GoonRoomProps) {
       socket.close();
       setWs(null);
     };
-  }, [isOpen]);
+  }, [isOpen, user]);
 
   // Timer logic
   useEffect(() => {
@@ -199,68 +208,82 @@ export function GoonRoom({ isOpen, onClose }: GoonRoomProps) {
             </CardHeader>
 
             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Timer and Controls */}
-              <div className="space-y-4">
-                <div className={`text-4xl font-mono text-center ${themeStyles.text}`}>
-                  {formatTime(timeElapsed)}
-                </div>
-                <div className="flex justify-center gap-2">
+              {wsError ? (
+                <div className="col-span-3 text-center p-6">
+                  <p className={`${themeStyles.text} text-lg`}>{wsError}</p>
                   <Button
-                    className={`bg-gradient-to-br ${themeStyles.button} text-white`}
-                    onClick={toggleTimer}
+                    onClick={() => window.location.reload()}
+                    className={`mt-4 bg-gradient-to-br ${themeStyles.button} text-white`}
                   >
-                    {timerActive ? <Pause className="h-4 w-4 mr-2" /> : <Play className="h-4 w-4 mr-2" />}
-                    {timerActive ? "Pause" : "Start"}
+                    Retry Connection
                   </Button>
                 </div>
-              </div>
-
-              {/* Participants */}
-              <div className={`${themeStyles.text} space-y-2`}>
-                <div className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  <h3 className="font-semibold">Participants</h3>
-                </div>
-                <div className="space-y-1">
-                  {participants.map((participant, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-green-500" />
-                      <span>User {participant.userId}</span>
+              ) : (
+                <>
+                  {/* Timer and Controls */}
+                  <div className="space-y-4">
+                    <div className={`text-4xl font-mono text-center ${themeStyles.text}`}>
+                      {formatTime(timeElapsed)}
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Chat */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 mb-2">
-                  <MessageCircle className={`h-5 w-5 ${themeStyles.text}`} />
-                  <h3 className={`font-semibold ${themeStyles.text}`}>Chat</h3>
-                </div>
-                <div className="h-[200px] overflow-y-auto space-y-2 mb-2">
-                  {messages.map((message, i) => (
-                    <div key={i} className={`${themeStyles.text} text-sm`}>
-                      <span className="font-semibold">User {message.userId}:</span>
-                      <span className="ml-2">{message.content}</span>
+                    <div className="flex justify-center gap-2">
+                      <Button
+                        className={`bg-gradient-to-br ${themeStyles.button} text-white`}
+                        onClick={toggleTimer}
+                      >
+                        {timerActive ? <Pause className="h-4 w-4 mr-2" /> : <Play className="h-4 w-4 mr-2" />}
+                        {timerActive ? "Pause" : "Start"}
+                      </Button>
                     </div>
-                  ))}
-                </div>
-                <div className="flex gap-2">
-                  <Input
-                    value={messageInput}
-                    onChange={(e) => setMessageInput(e.target.value)}
-                    placeholder="Type a message..."
-                    className="flex-1"
-                    onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                  />
-                  <Button
-                    onClick={sendMessage}
-                    className={`bg-gradient-to-br ${themeStyles.button} text-white`}
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
+                  </div>
+
+                  {/* Participants */}
+                  <div className={`${themeStyles.text} space-y-2`}>
+                    <div className="flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      <h3 className="font-semibold">Participants</h3>
+                    </div>
+                    <div className="space-y-1">
+                      {participants.map((participant, i) => (
+                        <div key={i} className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-green-500" />
+                          <span>User {participant.userId}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Chat */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 mb-2">
+                      <MessageCircle className={`h-5 w-5 ${themeStyles.text}`} />
+                      <h3 className={`font-semibold ${themeStyles.text}`}>Chat</h3>
+                    </div>
+                    <div className="h-[200px] overflow-y-auto space-y-2 mb-2">
+                      {messages.map((message, i) => (
+                        <div key={i} className={`${themeStyles.text} text-sm`}>
+                          <span className="font-semibold">User {message.userId}:</span>
+                          <span className="ml-2">{message.content}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <Input
+                        value={messageInput}
+                        onChange={(e) => setMessageInput(e.target.value)}
+                        placeholder="Type a message..."
+                        className="flex-1"
+                        onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                      />
+                      <Button
+                        onClick={sendMessage}
+                        className={`bg-gradient-to-br ${themeStyles.button} text-white`}
+                      >
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </motion.div>

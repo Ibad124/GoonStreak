@@ -39,27 +39,26 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  let wsHandler: WebSocketHandler | undefined;
+  const server = await registerRoutes(app);
 
+  // Add error handling middleware before setting up websocket
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
-
+    console.error("Server error:", err);
     res.status(status).json({ message });
-    throw err;
   });
 
-  const server = await registerRoutes(app);
+  // Initialize WebSocket handler before Vite setup
+  const wsHandler = new WebSocketHandler(server);
+  log("WebSocket server initialized");
 
+  // Setup Vite last since it adds catch-all routes
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
-
-  // Initialize WebSocket handler after Vite setup
-  wsHandler = new WebSocketHandler(server);
-  log("WebSocket server initialized");
 
   const port = 5000;
   server.listen({
@@ -67,7 +66,7 @@ app.use((req, res, next) => {
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
-    log(`serving on port ${port}`);
+    log(`Server running on port ${port}`);
   });
 
   // Graceful shutdown

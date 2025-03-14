@@ -15,13 +15,32 @@ export class WebSocketHandler {
   private heartbeatInterval: NodeJS.Timeout;
 
   constructor(server: Server) {
-    this.wss = new WebSocketServer({ server, path: "/ws" });
+    console.log("Initializing WebSocket server...");
+    this.wss = new WebSocketServer({ 
+      server, 
+      path: "/ws",
+      verifyClient: this.verifyClient.bind(this)
+    });
     this.setupWebSocketServer();
     this.heartbeatInterval = setInterval(() => this.checkConnections(), 30000);
+    console.log("WebSocket server initialization complete");
+  }
+
+  private verifyClient(info: { origin: string; req: any; }, callback: (verified: boolean, code?: number, message?: string) => void) {
+    console.log("Verifying WebSocket client connection...");
+    const cookie = info.req.headers.cookie;
+    if (!cookie) {
+      console.log("WebSocket connection rejected: No session cookie");
+      callback(false, 401, "Unauthorized");
+      return;
+    }
+    // Allow the connection for now, we'll validate the user when they try to join a room
+    callback(true);
   }
 
   private setupWebSocketServer() {
-    this.wss.on('connection', (ws: WebSocket) => {
+    this.wss.on('connection', (ws: WebSocket, req: any) => {
+      console.log("New WebSocket connection established");
       const extWs = ws as ExtendedWebSocket;
       extWs.isAlive = true;
 
@@ -31,6 +50,7 @@ export class WebSocketHandler {
 
       extWs.on('message', async (data: string) => {
         try {
+          console.log("Received WebSocket message:", data);
           const event: RoomEvent = JSON.parse(data);
           await this.handleEvent(extWs, event);
         } catch (error) {
@@ -43,14 +63,24 @@ export class WebSocketHandler {
       });
 
       extWs.on('close', () => {
+        console.log("WebSocket connection closed");
         if (extWs.roomId) {
           this.leaveRoom(extWs);
         }
       });
+
+      extWs.on('error', (error) => {
+        console.error("WebSocket error:", error);
+      });
+    });
+
+    this.wss.on('error', (error) => {
+      console.error("WebSocket server error:", error);
     });
   }
 
   private async handleEvent(ws: ExtendedWebSocket, event: RoomEvent) {
+    console.log("Handling WebSocket event:", event.type);
     switch (event.type) {
       case 'JOIN_ROOM':
         await this.joinRoom(ws, event.roomId, event.payload);
@@ -82,6 +112,7 @@ export class WebSocketHandler {
   }
 
   private async joinRoom(ws: ExtendedWebSocket, roomId: number, payload: any) {
+    console.log("Attempting to join room:", roomId);
     const room = await storage.getRoom(roomId);
     if (!room) {
       ws.send(JSON.stringify({ 
@@ -107,6 +138,8 @@ export class WebSocketHandler {
     ws.roomId = roomId;
     ws.userId = payload.userId;
 
+    console.log(`User ${ws.userId} joined room ${roomId}`);
+
     // Broadcast join event
     this.broadcastToRoom(roomId, {
       type: 'USER_JOINED',
@@ -130,11 +163,14 @@ export class WebSocketHandler {
   private async leaveRoom(ws: ExtendedWebSocket) {
     if (!ws.roomId) return;
 
+    console.log(`User ${ws.userId} leaving room ${ws.roomId}`);
+
     const roomParticipants = this.rooms.get(ws.roomId);
     if (roomParticipants) {
       roomParticipants.delete(ws);
       if (roomParticipants.size === 0) {
         this.rooms.delete(ws.roomId);
+        console.log(`Room ${ws.roomId} closed - no participants remaining`);
       }
     }
 
@@ -150,6 +186,7 @@ export class WebSocketHandler {
   }
 
   private async broadcastToRoom(roomId: number, message: any) {
+    console.log(`Broadcasting to room ${roomId}:`, message.type);
     const roomParticipants = this.rooms.get(roomId);
     if (!roomParticipants) return;
 
@@ -163,6 +200,7 @@ export class WebSocketHandler {
 
   private async handleTimerStart(ws: ExtendedWebSocket, event: RoomEvent) {
     if (!ws.roomId) return;
+    console.log(`Timer started in room ${ws.roomId} by user ${ws.userId}`);
 
     await this.broadcastToRoom(ws.roomId, {
       type: 'TIMER_STARTED',
@@ -176,6 +214,7 @@ export class WebSocketHandler {
 
   private async handleTimerStop(ws: ExtendedWebSocket, event: RoomEvent) {
     if (!ws.roomId) return;
+    console.log(`Timer stopped in room ${ws.roomId} by user ${ws.userId}`);
 
     await this.broadcastToRoom(ws.roomId, {
       type: 'TIMER_STOPPED',
@@ -188,6 +227,7 @@ export class WebSocketHandler {
 
   private async updateParticipantStatus(ws: ExtendedWebSocket, status: string) {
     if (!ws.roomId) return;
+    console.log(`User ${ws.userId} updated status to ${status} in room ${ws.roomId}`);
 
     await this.broadcastToRoom(ws.roomId, {
       type: 'STATUS_UPDATED',
@@ -203,6 +243,7 @@ export class WebSocketHandler {
     this.wss.clients.forEach((ws: WebSocket) => {
       const extWs = ws as ExtendedWebSocket;
       if (!extWs.isAlive) {
+        console.log(`Terminating inactive connection for user ${extWs.userId}`);
         if (extWs.roomId) {
           this.leaveRoom(extWs);
         }
@@ -215,6 +256,7 @@ export class WebSocketHandler {
   }
 
   public shutdown() {
+    console.log("Shutting down WebSocket server...");
     clearInterval(this.heartbeatInterval);
     this.wss.close();
   }

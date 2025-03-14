@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
@@ -110,9 +110,32 @@ export default function HomePage() {
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
   const [isGoonRoomOpen, setIsGoonRoomOpen] = useState(false);
 
-  const { data: stats, isLoading } = useQuery({
+  const { data: stats, isLoading, error } = useQuery({
     queryKey: ["/api/stats"],
   });
+
+  // If not authenticated, return early
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-border" />
+      </div>
+    );
+  }
+
+  // If there's an error, show error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card>
+          <CardContent className="pt-6">
+            <h2 className="text-xl font-bold text-destructive">Error loading data</h2>
+            <p className="text-sm text-muted-foreground mt-2">Please refresh the page to try again.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const messages = characterMessages[preferences.goonStyle] || characterMessages.default;
   const style = themeStyles[preferences.goonStyle] || themeStyles.default;
