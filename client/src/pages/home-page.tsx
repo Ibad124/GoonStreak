@@ -26,7 +26,8 @@ const themeStyles = {
     accent: "text-blue-500",
     button: "from-blue-500 to-blue-600",
     border: "border-zinc-200/50",
-    greeting: "Ready to conquer today? 🌟"
+    greeting: "Ready to conquer today? 🌟",
+    cardHover: "hover:shadow-blue-500/10"
   },
   solo: {
     background: "from-slate-900 to-zinc-900",
@@ -36,7 +37,8 @@ const themeStyles = {
     accent: "text-emerald-500",
     button: "from-emerald-500 to-emerald-600",
     border: "border-white/10",
-    greeting: "SYSTEMS ONLINE. READY FOR TRAINING. 🤖"
+    greeting: "SYSTEMS ONLINE. READY FOR TRAINING. 🤖",
+    cardHover: "hover:shadow-emerald-500/20"
   },
   competitive: {
     background: "from-purple-900 to-pink-900",
@@ -46,7 +48,8 @@ const themeStyles = {
     accent: "text-pink-500",
     button: "from-pink-500 to-purple-500",
     border: "border-white/10",
-    greeting: "Time to crush those goals! 🔥"
+    greeting: "Time to crush those goals! 🔥",
+    cardHover: "hover:shadow-pink-500/20"
   },
   hardcore: {
     background: "from-red-950 to-black",
@@ -56,7 +59,8 @@ const themeStyles = {
     accent: "text-red-500",
     button: "from-red-500 to-red-600",
     border: "border-white/10",
-    greeting: "Embrace the darkness within... 😈"
+    greeting: "Embrace the darkness within... 😈",
+    cardHover: "hover:shadow-red-500/20"
   }
 };
 
@@ -245,7 +249,7 @@ export default function HomePage() {
                 </Button>
               </SheetTrigger>
               <SheetContent className={`bg-gradient-to-br ${style.background} ${style.border}`}>
-                <div className="space-y-4 mt-8">
+                <nav className="space-y-4 mt-8">
                   <Link href="/social">
                     <Button
                       variant="outline"
@@ -275,12 +279,12 @@ export default function HomePage() {
                   </Link>
                   <Button
                     variant="destructive"
-                    className={`w-full rounded-full bg-pink-900/50 hover:bg-pink-900/80`}
+                    className="w-full rounded-full bg-pink-900/50 hover:bg-pink-900/80"
                     onClick={() => logoutMutation.mutate()}
                   >
                     Logout
                   </Button>
-                </div>
+                </nav>
               </SheetContent>
             </Sheet>
           </div>
@@ -291,7 +295,7 @@ export default function HomePage() {
           animate={{ opacity: 1, y: 0 }}
           className="container mx-auto px-4 pt-24 pb-6"
         >
-          <div className={`${style.cardBg} backdrop-blur rounded-2xl p-6 md:p-8 ${style.border} hover:shadow-lg transition-all duration-300 transform hover:scale-[1.01]`}>
+          <div className={`${style.cardBg} backdrop-blur rounded-2xl p-6 md:p-8 ${style.border} ${style.cardHover}`}>
             <div className="flex items-start md:items-center gap-4 flex-col md:flex-row">
               <div className={`p-4 rounded-2xl bg-gradient-to-br ${style.button} shadow-lg relative overflow-hidden group`}>
                 <Clock className="h-6 w-6 md:h-8 md:w-8 text-white relative z-10" />
@@ -320,7 +324,7 @@ export default function HomePage() {
 
         <main className="container mx-auto px-4 pt-4">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
-            <div className="lg:col-span-4 space-y-6">
+            <div className="lg:col-span-4 space-y-4 md:space-y-6">
               <motion.div
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
@@ -341,7 +345,7 @@ export default function HomePage() {
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
               >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 transform hover:scale-[1.02]`}>
+                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 transform hover:scale-[1.02] ${style.cardHover}`}>
                   <CardHeader>
                     <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
                       <Flame className={`${style.accent}`} />
@@ -359,7 +363,7 @@ export default function HomePage() {
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
               >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 transform hover:scale-[1.02]`}>
+                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 transform hover:scale-[1.02] ${style.cardHover}`}>
                   <CardHeader>
                     <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
                       <Clock className={`${style.accent}`} />
@@ -383,8 +387,11 @@ export default function HomePage() {
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 transform hover:scale-[1.02] cursor-pointer`}
+                <Card 
+                  className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 cursor-pointer ${style.cardHover}`}
                   onClick={() => setIsGoonRoomOpen(true)}
                 >
                   <CardHeader>
@@ -406,13 +413,13 @@ export default function HomePage() {
               </motion.div>
             </div>
 
-            <div className="lg:col-span-8 space-y-6">
+            <div className="lg:col-span-8 space-y-4 md:space-y-6">
               <motion.div
                 initial={{ x: 20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
               >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 transform hover:scale-[1.02]`}>
+                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 transform hover:scale-[1.02] ${style.cardHover}`}>
                   <CardHeader>
                     <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
                       <Target className={`${style.accent}`} />
@@ -430,16 +437,16 @@ export default function HomePage() {
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}
               >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 transform hover:scale-[1.02]`}>
+                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 transform hover:scale-[1.02] ${style.cardHover}`}>
                   <CardHeader>
                     <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
                       <Trophy className={`${style.accent}`} />
                       Achievements
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className={style.text}>
-                    <Achievements
-                      achievements={stats?.achievements || []}
+                  <CardContent>
+                    <Achievements 
+                      achievements={stats?.achievements || []} 
                       stats={{
                         currentStreak: stats?.user?.currentStreak || 0,
                         totalSessions: stats?.user?.totalSessions || 0
@@ -455,7 +462,7 @@ export default function HomePage() {
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 0.5 }}
                 >
-                  <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 transform hover:scale-[1.02]`}>
+                  <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 transform hover:scale-[1.02] ${style.cardHover}`}>
                     <CardHeader>
                       <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
                         <Users className={`${style.accent}`} />
