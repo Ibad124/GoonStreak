@@ -480,7 +480,20 @@ const getGuideMessage = (step: number, goonStyle: string) => {
   }
 };
 
-export default function OnboardingPage() {
+const getFinalButtonText = (style: string) => {
+  switch(style) {
+    case 'solo':
+      return "INITIALIZE GOONING PROTOCOL... 🤖";
+    case 'competitive':
+      return "Let's Get This Party Started! 💖";
+    case 'hardcore':
+      return "Embrace Your Dark Destiny... 😈";
+    default:
+      return "Begin Your Journey! 🚀";
+  }
+};
+
+const OnboardingPage = () => {
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(0);
   const [goonStyle, setGoonStyle] = useState("");
@@ -524,7 +537,7 @@ export default function OnboardingPage() {
   };
 
   const handleTransitionComplete = () => {
-    // Force navigation to home page
+    // Use window.location.href for a full page refresh to ensure clean state
     window.location.href = "/";
   };
 
@@ -536,14 +549,30 @@ export default function OnboardingPage() {
         isVisible={showTransition}
         onComplete={handleTransitionComplete}
       >
-        <motion.p
-          className="text-3xl font-bold text-white text-center"
+        <motion.div 
+          className="text-center space-y-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1 }}
         >
-          Your journey begins now...
-        </motion.p>
+          <motion.p className="text-4xl font-bold text-white">
+            {goonStyle === 'solo' ? "SYSTEMS ACTIVATED" :
+             goonStyle === 'competitive' ? "Ready to Rock!" :
+             goonStyle === 'hardcore' ? "Darkness Embraces You..." :
+             "Your Journey Begins!"}
+          </motion.p>
+          <motion.p 
+            className="text-xl text-white/80"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.5 }}
+          >
+            {goonStyle === 'solo' ? "PREPARING TRAINING PROTOCOLS..." :
+             goonStyle === 'competitive' ? "Time to show them what you've got!" :
+             goonStyle === 'hardcore' ? "Your ascension awaits..." :
+             "Let's make some magic happen!"}
+          </motion.p>
+        </motion.div>
       </PageTransition>
 
       <div className="max-w-4xl mx-auto relative py-12 px-4">
@@ -881,9 +910,8 @@ export default function OnboardingPage() {
                   onClick={handleBack}
                   className="group"
                 >
-                  <ArrowLeft className="mr-2 h-5 w-5 transition-transform group-hover:-translate-x-1" />
-                  Back
-                </Button>
+                  <ArrowLeft className="mr-2 h-5 w-5 transition-transform group-hover:-translatex-1" />
+                  Back                </Button>
                 <Button
                   size="lg"
                   onClick={handleComplete}
@@ -899,7 +927,7 @@ export default function OnboardingPage() {
                     </motion.div>
                   ) : (
                     <>
-                      Continue to Goal Setting
+                      {getFinalButtonText(goonStyle)}
                       <motion.div
                         animate={{ x: [0, 5, 0] }}
                         transition={{ duration: 1, repeat: Infinity }}
@@ -916,4 +944,6 @@ export default function OnboardingPage() {
       </div>
     </div>
   );
-}
+};
+
+export default OnboardingPage;
