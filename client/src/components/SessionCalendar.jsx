@@ -15,6 +15,7 @@ export default function SessionCalendar({ sessions = [], currentStreak }) {
   };
 
   const dayContent = (date) => {
+    const isToday = isSameDay(date, today);
     const hasSessionOnDay = hasSession(date);
     const isCurrentMonth = date.getMonth() === today.getMonth();
 
@@ -31,8 +32,9 @@ export default function SessionCalendar({ sessions = [], currentStreak }) {
           className={`
             w-10 h-10 rounded-xl flex items-center justify-center
             transition-all duration-300 relative group
+            ${isToday ? 'ring-2 ring-primary ring-offset-2' : ''}
             ${hasSessionOnDay 
-              ? 'bg-gradient-to-br from-primary to-primary/90 text-white shadow-lg' 
+              ? 'bg-gradient-to-br from-primary to-primary/90 text-white shadow-lg hover:shadow-xl' 
               : 'hover:bg-primary/5'}
           `}
           whileHover={!hasSessionOnDay ? { scale: 1.1 } : {}}
@@ -60,13 +62,20 @@ export default function SessionCalendar({ sessions = [], currentStreak }) {
             </AnimatePresence>
           )}
 
-          {/* Hover effect for session days */}
+          {/* Pulse effect for session days */}
           {hasSessionOnDay && (
             <motion.div
               className="absolute inset-0 bg-white/20 rounded-xl"
               initial={false}
-              whileHover={{ opacity: [0, 0.2, 0] }}
-              transition={{ duration: 1, repeat: Infinity }}
+              animate={{ 
+                scale: [1, 1.05, 1],
+                opacity: [0, 0.2, 0] 
+              }}
+              transition={{ 
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
             />
           )}
         </motion.div>
@@ -99,7 +108,7 @@ export default function SessionCalendar({ sessions = [], currentStreak }) {
               <span>{currentStreak} Day Streak</span>
               {currentStreak >= 7 && (
                 <motion.div
-                  className="absolute inset-0 bg-white/10"
+                  className="absolute inset-0 bg-white/10 rounded-lg"
                   animate={{
                     opacity: [0, 0.2, 0],
                     scale: [1, 1.05, 1],
