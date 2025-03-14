@@ -245,6 +245,15 @@ export default function HomePage() {
               </SheetTrigger>
               <SheetContent className={`bg-gradient-to-br ${style.background} ${style.border}`}>
                 <div className="space-y-4 mt-8">
+                  <Link href="/social">
+                    <Button
+                      variant="outline"
+                      className={`w-full rounded-full flex items-center bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
+                    >
+                      <Users className="h-4 w-4 mr-2" />
+                      Social Hub
+                    </Button>
+                  </Link>
                   <Link href="/adult-content">
                     <Button
                       variant="outline"
