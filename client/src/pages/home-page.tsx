@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Link } from "wouter";
-import { motion } from "framer-motion";
-import { Loader2, Menu, Film, Trophy, Star, Flame, Clock, Users, Target, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Menu, Film, Trophy, Star, Flame, Clock, Users, Target, Sparkles } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import StreakStats from "@/components/StreakStats";
@@ -19,14 +19,15 @@ import { GoonRoom } from "@/components/GoonRoom";
 
 const themeStyles = {
   default: {
-    background: "from-zinc-900 via-indigo-900 to-purple-900",
+    background: "from-indigo-900 via-purple-900 to-violet-900",
     headerBg: "bg-black/40",
     cardBg: "bg-black/40",
     text: "text-white",
-    accent: "text-indigo-400",
-    button: "from-indigo-600 to-purple-600",
+    accent: "text-purple-400",
+    button: "from-purple-500 to-violet-600",
     border: "border-white/10",
-    greeting: "Ready to push your limits? 🌟"
+    greeting: "Track your progress, build momentum, and unlock your full potential.",
+    subGreeting: "with our elegant tracking system."
   },
   solo: {
     background: "from-slate-900 via-cyan-900 to-blue-900",
@@ -204,7 +205,8 @@ export default function HomePage() {
 
   return (
     <>
-      <div className={`min-h-screen pb-24 relative bg-gradient-to-br ${style.background}`}>
+      <div className={`min-h-screen relative bg-gradient-to-br ${style.background}`}>
+        {/* Background Pattern */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <motion.div 
             className="absolute inset-0 opacity-30"
@@ -216,298 +218,200 @@ export default function HomePage() {
           >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]" />
           </motion.div>
-          <motion.div
-            className="absolute -top-1/2 -left-1/2 w-full h-full opacity-20"
-            animate={{
-              rotate: [0, 360],
-            }}
-            transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-          >
-            <div className="w-full h-full bg-[conic-gradient(from_0deg,transparent,rgba(255,255,255,0.1),transparent)]" />
-          </motion.div>
         </div>
 
+        {/* Header */}
         <motion.header
           initial={{ y: -100 }}
           animate={{ y: 0 }}
           className={`fixed top-0 left-0 right-0 ${style.headerBg} backdrop-blur-xl z-50 border-b ${style.border}`}
         >
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center gap-2">
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 className="flex items-center gap-2"
               >
                 <Star className={`h-5 w-5 ${style.accent}`} />
-                <span className={`font-bold tracking-tight text-lg md:text-xl truncate bg-gradient-to-r ${style.button} text-transparent bg-clip-text`}>
-                  {user?.username}
-                </span>
-              </motion.div>
-              <motion.div
-                initial={{ x: -20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                className={`${style.text} text-sm md:text-base flex items-center gap-1`}
-              >
-                • Level {stats.user.level}
+                <span className="text-xl font-bold">QuantumFlow</span>
               </motion.div>
             </div>
 
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
+            <div className="flex items-center gap-4">
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="flex items-center gap-2"
+              >
+                <Button variant="ghost" size="icon">
                   <Menu className={`h-5 w-5 ${style.text}`} />
                 </Button>
-              </SheetTrigger>
-              <SheetContent className={`bg-gradient-to-br ${style.background} ${style.border}`}>
-                <nav className="space-y-4 mt-8">
-                  <Link href="/social">
-                    <Button
-                      variant="outline"
-                      className={`w-full rounded-full flex items-center justify-start gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
-                    >
-                      <Users className="h-4 w-4" />
-                      Social Hub
-                    </Button>
-                  </Link>
-                  <Link href="/adult-content">
-                    <Button
-                      variant="outline"
-                      className={`w-full rounded-full flex items-center justify-start gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
-                    >
-                      <Film className="h-4 w-4" />
-                      Adult Content
-                    </Button>
-                  </Link>
-                  <Link href="/leaderboard">
-                    <Button
-                      variant="outline"
-                      className={`w-full rounded-full flex items-center justify-start gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
-                    >
-                      <Trophy className="h-4 w-4" />
-                      Leaderboard
-                    </Button>
-                  </Link>
-                  <Button
-                    variant="destructive"
-                    className="w-full rounded-full bg-pink-900/50 hover:bg-pink-900/80"
-                    onClick={() => logoutMutation.mutate()}
-                  >
-                    Logout
-                  </Button>
-                </nav>
-              </SheetContent>
-            </Sheet>
+              </motion.div>
+            </div>
           </div>
         </motion.header>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="container mx-auto px-4 pt-24 pb-6"
-        >
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            className={`${style.cardBg} backdrop-blur-xl rounded-3xl p-8 ${style.border} shadow-2xl shadow-black/20 relative overflow-hidden group`}
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="flex items-start md:items-center gap-6 relative z-10">
-              <div className={`p-5 rounded-2xl bg-gradient-to-br ${style.button} shadow-lg relative overflow-hidden group`}>
-                <Clock className="h-8 w-8 md:h-10 md:w-10 text-white relative z-10" />
-                <motion.div
-                  className="absolute inset-0 bg-white/20"
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: [1, 1.5, 1], opacity: [0, 0.5, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                />
+        {/* Main Content */}
+        <main className="container mx-auto px-4 pt-24 pb-20">
+          {/* Hero Section */}
+          <div className="text-center mb-12">
+            <motion.h1 
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="text-4xl md:text-5xl font-bold text-white mb-4"
+            >
+              Elevate Your Daily Practice
+            </motion.h1>
+            <motion.p
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className="text-lg text-purple-200/80"
+            >
+              {style.greeting} {style.subGreeting}
+            </motion.p>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className={`p-6 rounded-2xl ${style.cardBg} backdrop-blur border ${style.border}`}
+            >
+              <div className="text-sm text-purple-300 mb-2">Current Streak</div>
+              <div className="text-3xl font-bold text-white mb-1">
+                {stats?.user?.currentStreak || 0} days
               </div>
-              <div className="flex-1 min-w-0">
-                <motion.h2
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  className={`text-2xl md:text-4xl font-bold ${style.text} mb-3`}
-                >
-                  {getTimeMessage()}
-                </motion.h2>
-                <motion.p
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.1 }}
-                  className={`${style.text} opacity-80 text-lg md:text-xl font-medium`}
-                >
-                  {style.greeting}
-                </motion.p>
+              <div className="text-sm text-purple-300">
+                +{stats?.streakChange || 3} from last week
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              className={`p-6 rounded-2xl ${style.cardBg} backdrop-blur border ${style.border}`}
+            >
+              <div className="text-sm text-purple-300 mb-2">Total Practice</div>
+              <div className="text-3xl font-bold text-white mb-1">
+                {stats?.user?.totalHours || 39} hours
+              </div>
+              <div className="text-sm text-purple-300">
+                {stats?.todayMinutes || 39} minutes today
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className={`p-6 rounded-2xl ${style.cardBg} backdrop-blur border ${style.border}`}
+            >
+              <div className="text-sm text-purple-300 mb-2">Level Progress</div>
+              <div className="text-3xl font-bold text-white mb-1">
+                {Math.round((stats?.currentLevelXP / stats?.nextLevelXP) * 100)}%
+              </div>
+              <div className="text-sm text-purple-300">
+                {stats?.currentLevelXP || 7450}/{stats?.nextLevelXP || 10000} XP
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Daily Challenges */}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className={`p-6 rounded-2xl ${style.cardBg} backdrop-blur border ${style.border} mb-12`}
+          >
+            <h2 className="text-xl font-bold text-white mb-6">Daily Challenges</h2>
+            <div className="space-y-6">
+              <div>
+                <div className="flex justify-between text-sm text-purple-300 mb-2">
+                  <span>7-Day Challenge</span>
+                  <span>5/7</span>
+                </div>
+                <div className="h-2 bg-purple-900 rounded-full overflow-hidden">
+                  <div className="h-full bg-purple-500 rounded-full" style={{ width: '71%' }} />
+                </div>
+                <div className="text-sm text-purple-300 mt-2">
+                  Complete at least 15 minutes of practice each day for 7 days straight.
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-sm text-purple-300 mb-2">
+                  <span>Power Hour</span>
+                  <span>45/60</span>
+                </div>
+                <div className="h-2 bg-purple-900 rounded-full overflow-hidden">
+                  <div className="h-full bg-purple-500 rounded-full" style={{ width: '75%' }} />
+                </div>
+                <div className="text-sm text-purple-300 mt-2">
+                  Complete a full 60-minute session without interruptions.
+                </div>
               </div>
             </div>
           </motion.div>
-        </motion.div>
 
-        <main className="container mx-auto px-4 pt-4">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-4 space-y-6">
-              <motion.div
-                initial={{ x: -20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.1 }}
-              >
-                {stats && (
-                  <LevelProgress
-                    user={stats.user}
-                    nextLevelXP={stats.nextLevelXP}
-                    currentLevelXP={stats.currentLevelXP}
-                    style={preferences.goonStyle}
-                  />
-                )}
-              </motion.div>
-
-              <motion.div
-                initial={{ x: -20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                whileHover={{ scale: 1.02 }}
-              >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur-2xl ${style.border} hover:bg-black/30 transition-all duration-700 shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:shadow-[0_32px_64px_rgba(0,0,0,0.25)] rounded-xl hover:scale-[1.02] group`}>
-                  <CardHeader>
-                    <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
-                      <Flame className={`${style.accent}`} />
-                      Your Streak
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <StreakStats stats={stats} />
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              <motion.div
-                initial={{ x: -20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                whileHover={{ scale: 1.02 }}
-              >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur-2xl ${style.border} hover:bg-black/30 transition-all duration-700 shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:shadow-[0_32px_64px_rgba(0,0,0,0.25)] rounded-xl hover:scale-[1.02] group`}>
-                  <CardHeader>
-                    <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
-                      <Clock className={`${style.accent}`} />
-                      Power Hours
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className={`text-lg ${style.text}`}>
-                      {preferences.timePreference === "morning" && "Early Bird 🌅"}
-                      {preferences.timePreference === "afternoon" && "Midday Warrior ☀️"}
-                      {preferences.timePreference === "night" && "Night Owl 🌙"}
-                    </div>
-                    <p className={`${style.text} opacity-80 mt-2`}>
-                      Your optimal performance time
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              <motion.div
-                initial={{ x: -20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Card
-                  className={`overflow-hidden ${style.cardBg} backdrop-blur-2xl ${style.border} hover:bg-black/30 transition-all duration-700 shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:shadow-[0_32px_64px_rgba(0,0,0,0.25)] rounded-xl hover:scale-[1.02] group cursor-pointer group`}
-                  onClick={() => setIsGoonRoomOpen(true)}
-                >
-                  <CardHeader>
-                    <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
-                      <Users className={`${style.accent} group-hover:scale-110 transition-transform`} />
-                      Live Sessions
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className={`${style.text} opacity-80`}>
-                      {preferences.socialMode === "solo"
-                        ? "Join a private training session"
-                        : preferences.socialMode === "competitive"
-                        ? "Compete in live challenges!"
-                        : "Enter the darkness together..."}
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
+          {/* Streak Calendar */}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className={`p-6 rounded-2xl ${style.cardBg} backdrop-blur border ${style.border}`}
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-white">Streak Calendar</h2>
+              <div className="flex gap-2 text-sm">
+                <span className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-purple-500" /> Active
+                </span>
+                <span className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-purple-900" /> Inactive
+                </span>
+              </div>
             </div>
-
-            <div className="lg:col-span-8 space-y-6">
-              <motion.div
-                initial={{ x: 20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                whileHover={{ scale: 1.02 }}
-              >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur-2xl ${style.border} hover:bg-black/30 transition-all duration-700 shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:shadow-[0_32px_64px_rgba(0,0,0,0.25)] rounded-xl hover:scale-[1.02] group`}>
-                  <CardHeader>
-                    <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
-                      <Target className={`${style.accent}`} />
-                      Daily Challenges
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Challenges challenges={stats?.challenges || []} />
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              <motion.div
-                initial={{ x: 20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                whileHover={{ scale: 1.02 }}
-              >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur-2xl ${style.border} hover:bg-black/30 transition-all duration-700 shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:shadow-[0_32px_64px_rgba(0,0,0,0.25)] rounded-xl hover:scale-[1.02] group`}>
-                  <CardHeader>
-                    <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
-                      <Trophy className={`${style.accent}`} />
-                      Achievements
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Achievements
-                      achievements={stats?.achievements || []}
-                      stats={{
-                        currentStreak: stats?.user?.currentStreak || 0,
-                        totalSessions: stats?.user?.totalSessions || 0
-                      }}
-                    />
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              {preferences.socialMode !== "solo" && (
-                <motion.div
-                  initial={{ x: 20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                  whileHover={{ scale: 1.02 }}
-                >
-                  <Card className={`overflow-hidden ${style.cardBg} backdrop-blur-2xl ${style.border} hover:bg-black/30 transition-all duration-700 shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:shadow-[0_32px_64px_rgba(0,0,0,0.25)] rounded-xl hover:scale-[1.02] group`}>
-                    <CardHeader>
-                      <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
-                        <Users className={`${style.accent}`} />
-                        {preferences.socialMode === "friends" ? "Friend Activity" : "Global Leaders"}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className={`${style.text} opacity-80`}>
-                        {preferences.socialMode === "friends"
-                          ? "Stay motivated with your friends!"
-                          : "Compete with the best worldwide!"}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              )}
+            <div className="grid grid-cols-5 gap-3">
+              {Array.from({ length: 20 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`aspect-square rounded-lg ${
+                    Math.random() > 0.3 ? 'bg-purple-500' : 'bg-purple-900'
+                  }`}
+                />
+              ))}
             </div>
-          </div>
+          </motion.div>
         </main>
 
+        {/* Action Button */}
+        <motion.div
+          initial={{ y: 100 }}
+          animate={{ y: 0 }}
+          className="fixed bottom-6 left-0 right-0 flex justify-center"
+        >
+          <Button
+            className={`
+              h-14 px-8 rounded-full text-lg font-medium
+              bg-gradient-to-r from-purple-500 to-violet-600
+              hover:from-purple-600 hover:to-violet-700
+              transition-all duration-300
+              shadow-lg shadow-purple-900/50
+              flex items-center gap-2
+            `}
+            onClick={() => setIsSessionModalOpen(true)}
+          >
+            <Sparkles className="h-5 w-5" />
+            Start New Session
+          </Button>
+        </motion.div>
+
+        {/* Modals */}
         <LogSessionModal
           isOpen={isSessionModalOpen}
           onClose={() => setIsSessionModalOpen(false)}
@@ -519,42 +423,6 @@ export default function HomePage() {
           isOpen={isGoonRoomOpen}
           onClose={() => setIsGoonRoomOpen(false)}
         />
-
-        <motion.div
-          initial={{ y: 100 }}
-          animate={{ y: 0 }}
-          className={`fixed bottom-0 left-0 right-0 p-6 ${style.headerBg} backdrop-blur-xl border-t ${style.border}`}
-        >
-          <div className="container mx-auto max-w-lg">
-            <Button
-              className={`
-                w-full h-16 text-xl rounded-2xl 
-                bg-gradient-to-r ${style.button} 
-                hover:brightness-110 transition-all duration-300 
-                shadow-xl shadow-black/30 hover:shadow-2xl hover:shadow-black/40 
-                font-bold tracking-wide text-white transform hover:scale-[1.02]
-                relative overflow-hidden group
-              `}
-              size="lg"
-              onClick={() => setIsSessionModalOpen(true)}
-            >
-              <motion.div
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-3 justify-center relative z-10"
-              >
-                <Sparkles className="h-6 w-6 md:h-7 md:w-7" />
-                <span className="relative">
-                  {preferences.goonStyle === "solo" ? "LOG TRAINING SESSION" :
-                    preferences.goonStyle === "competitive" ? "Record Your Victory!" :
-                      preferences.goonStyle === "hardcore" ? "Embrace The Darkness..." :
-                        "Log Session"}
-                </span>
-              </motion.div>
-              <div className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
-            </Button>
-          </div>
-        </motion.div>
       </div>
     </>
   );
