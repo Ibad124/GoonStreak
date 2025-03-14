@@ -4,10 +4,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BackgroundEffects } from "@/components/BackgroundEffects";
 import StreakStats from "@/components/StreakStats";
 import Achievements from "@/components/Achievements";
-import XPProgress from "@/components/XPProgress";
+import LevelProgress from "@/components/LevelProgress";
 import LogSessionModal from "@/components/LogSessionModal";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -25,6 +24,7 @@ interface StatsData {
     todaySessions: number;
     xpPoints: number;
     title: string;
+    level: number;
     lastSessionDate: string | null;
   };
   nextLevelXP: number;
@@ -122,8 +122,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen pb-20 relative overflow-hidden">
-      <BackgroundEffects style={preferences.goonStyle} />
-
       {/* Fixed Header */}
       <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 z-50 border-b border-zinc-200/50">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
@@ -143,7 +141,7 @@ export default function HomePage() {
               animate={{ x: 0, opacity: 1 }}
               className="text-sm text-zinc-500"
             >
-              • Level {stats?.user?.level}
+              • Level {stats.user.level}
             </motion.div>
           </div>
           <Sheet>
@@ -185,13 +183,13 @@ export default function HomePage() {
       {/* Main Content */}
       <main className="container mx-auto px-4 pt-20">
         <div className="space-y-6">
-          {/* XP Progress */}
+          {/* Level Progress */}
           <motion.div
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
           >
             {stats && (
-              <XPProgress
+              <LevelProgress
                 user={stats.user}
                 nextLevelXP={stats.nextLevelXP}
                 currentLevelXP={stats.currentLevelXP}
@@ -199,43 +197,46 @@ export default function HomePage() {
             )}
           </motion.div>
 
-          {/* Challenges Section */}
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.1 }}
-          >
-            <Card className="backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-zinc-100/50 hover:shadow-xl hover:shadow-zinc-100/50 transition-shadow">
-              <CardHeader>
-                <CardTitle className="text-2xl font-semibold tracking-tight flex items-center gap-2">
-                  <Trophy className="h-6 w-6 text-yellow-500" />
-                  Daily Challenges
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Challenges challenges={stats?.challenges || []} />
-              </CardContent>
-            </Card>
-          </motion.div>
+          {/* Two Column Layout for Streaks and Challenges */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Streak Stats */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Card className="backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-zinc-100/50 hover:shadow-xl hover:shadow-zinc-100/50 transition-shadow h-full">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+                    <Flame className="h-6 w-6 text-orange-500" />
+                    Your Streak
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <StreakStats stats={stats} />
+                </CardContent>
+              </Card>
+            </motion.div>
 
-          {/* Streak Stats */}
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Card className="backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-zinc-100/50 hover:shadow-xl hover:shadow-zinc-100/50 transition-shadow">
-              <CardHeader>
-                <CardTitle className="text-2xl font-semibold tracking-tight flex items-center gap-2">
-                  <Flame className="h-6 w-6 text-orange-500" />
-                  Your Streak
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <StreakStats stats={stats} />
-              </CardContent>
-            </Card>
-          </motion.div>
+            {/* Challenges Section */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+            >
+              <Card className="backdrop-blur bg-white/80 border-zinc-200/50 shadow-lg shadow-zinc-100/50 hover:shadow-xl hover:shadow-zinc-100/50 transition-shadow h-full">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-semibold tracking-tight flex items-center gap-2">
+                    <Trophy className="h-6 w-6 text-yellow-500" />
+                    Daily Challenges
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Challenges challenges={stats?.challenges || []} />
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
 
           {/* Achievements */}
           <motion.div
