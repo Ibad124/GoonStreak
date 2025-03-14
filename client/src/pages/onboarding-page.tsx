@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { User, Users, Trophy, Target, ArrowRight, ArrowLeft, Ghost, Crown, Sparkles, Medal, Brain, Heart, Coffee, Sun, Moon, Zap, } from "lucide-react";
+import { User, Users, Trophy, Target, ArrowRight, ArrowLeft, Ghost, Crown, Medal, Brain, Heart, Coffee, Sun, Moon, Zap, } from "lucide-react";
 import { PageTransition } from "@/components/PageTransition";
 import type { ThemeStyle, ThemePreferences } from "@/types/theme";
 
@@ -478,6 +478,7 @@ const OnboardingPage = () => {
   const [guideEmotion, setGuideEmotion] = useState("happy");
   const [showTransition, setShowTransition] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [shouldRedirect, setShouldRedirect] = useState(false);
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -536,12 +537,17 @@ const OnboardingPage = () => {
   }, [goonStyle, timePreference, intensityLevel, socialMode, savePreferencesMutation, isNavigating]);
 
   const handleTransitionComplete = useCallback(() => {
-    // Add a small delay before navigation to ensure animation completes
-    setTimeout(() => {
-      // Force a full page reload to ensure clean state
-      window.location.href = "/";
-    }, 200);
+    setShouldRedirect(true);
   }, []);
+
+  useEffect(() => {
+    if (shouldRedirect) {
+      const timer = setTimeout(() => {
+        setLocation("/");
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [shouldRedirect, setLocation]);
 
   useEffect(() => {
     if (!user) {
@@ -553,6 +559,7 @@ const OnboardingPage = () => {
     return () => {
       setIsNavigating(false);
       setShowTransition(false);
+      setShouldRedirect(false);
     };
   }, []);
 
