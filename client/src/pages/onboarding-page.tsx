@@ -541,7 +541,7 @@ const OnboardingPage = () => {
   };
 
   const handleTransitionComplete = () => {
-    setLocation("/");
+    window.location.href = "/home";
   };
 
   return (
