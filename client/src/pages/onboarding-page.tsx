@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -6,25 +6,10 @@ import { Card } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import {
-  User,
-  Users,
-  Trophy,
-  Target,
-  ArrowRight,
-  ArrowLeft,
-  Sparkles,
-  Ghost,
-  Crown,
-  Medal,
-  Brain,
-  Heart,
-  Coffee,
-  Sun,
-  Moon,
-  Zap,
-} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { User, Users, Trophy, Target, ArrowRight, ArrowLeft, Sparkles, Ghost, Crown, Medal, Brain, Heart, Coffee, Sun, Moon, Zap, } from "lucide-react";
 import { PageTransition } from "@/components/PageTransition";
+import type { ThemePreferences } from "@/hooks/use-theme";
 
 // Enhanced typing animation for messages
 const TypedMessage = ({ text }: { text: string }) => {
@@ -493,46 +478,64 @@ const OnboardingPage = () => {
   const [showTransition, setShowTransition] = useState(false);
   const [, setLocation] = useLocation();
   const { user } = useAuth();
+  const { toast } = useToast();
 
   const savePreferencesMutation = useMutation({
-    mutationFn: async (preferences: any) => {
+    mutationFn: async (preferences: Partial<ThemePreferences>) => {
       const res = await apiRequest("POST", "/api/user/preferences", preferences);
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to save preferences");
+      }
       return res.json();
     },
     onSuccess: () => {
-      // Invalidate queries to ensure home page gets fresh data
       queryClient.invalidateQueries({ queryKey: ["/api/user/preferences"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
-      // Show the transition animation
       setShowTransition(true);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error Saving Preferences",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     setDirection(1);
     setStep(prev => prev + 1);
     setGuideEmotion("happy");
-  };
+  }, []);
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     setDirection(-1);
     setStep(prev => prev - 1);
     setGuideEmotion("happy");
-  };
+  }, []);
 
-  const handleComplete = () => {
-    savePreferencesMutation.mutate({
-      goonStyle,
-      timePreference,
-      intensityLevel,
-      socialMode
-    });
-  };
+  const handleComplete = useCallback(async () => {
+    try {
+      await savePreferencesMutation.mutateAsync({
+        goonStyle,
+        timePreference,
+        intensityLevel,
+        socialMode
+      });
+    } catch (error) {
+      console.error("Failed to save preferences:", error);
+    }
+  }, [goonStyle, timePreference, intensityLevel, socialMode, savePreferencesMutation]);
 
-  const handleTransitionComplete = () => {
-    // Use wouter's setLocation for client-side navigation
+  const handleTransitionComplete = useCallback(() => {
     setLocation("/");
-  };
+  }, [setLocation]);
+
+  if (!user) {
+    setLocation("/auth");
+    return null;
+  }
 
   return (
     <div className="min-h-screen relative overflow-hidden">

@@ -31,18 +31,30 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const [preferences, setPreferences] = useState<ThemePreferences>(DEFAULT_PREFERENCES);
 
-  // Fetch preferences query
-  const { data: preferencesData } = useQuery({
+  // Fetch preferences query with better error handling
+  const { data: preferencesData } = useQuery<ThemePreferences>({
     queryKey: ["/api/user/preferences"],
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     gcTime: 1000 * 60 * 60, // Keep in cache for 1 hour
+    retry: 3,
+    onError: () => {
+      toast({
+        title: "Error Loading Preferences",
+        description: "Your preferences could not be loaded. Using default settings.",
+        variant: "destructive",
+      });
+    }
   });
 
-  // Update preferences mutation
+  // Update preferences mutation with improved error handling
   const updatePreferencesMutation = useMutation({
     mutationFn: async (newPrefs: Partial<ThemePreferences>) => {
       const res = await apiRequest("POST", "/api/user/preferences", newPrefs);
-      return res.json();
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to save preferences");
+      }
+      return data as ThemePreferences;
     },
     onSuccess: (data) => {
       queryClient.setQueryData(["/api/user/preferences"], data);
@@ -62,12 +74,27 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  // Update local state when data changes
+  // Update local state when data changes with validation
   useEffect(() => {
     if (preferencesData) {
-      setPreferences(prev => ({ ...prev, ...preferencesData }));
+      // Validate the data structure before updating state
+      const isValid = preferencesData.goonStyle && 
+                     typeof preferencesData.timePreference === 'string' && 
+                     typeof preferencesData.intensityLevel === 'string' && 
+                     typeof preferencesData.socialMode === 'string';
+
+      if (isValid) {
+        setPreferences(prev => ({ ...prev, ...preferencesData }));
+      } else {
+        console.warn("Received invalid preferences data:", preferencesData);
+        toast({
+          title: "Warning",
+          description: "Some preferences were invalid. Using default settings.",
+          variant: "destructive",
+        });
+      }
     }
-  }, [preferencesData]);
+  }, [preferencesData, toast]);
 
   const updatePreferences = async (prefs: Partial<ThemePreferences>) => {
     await updatePreferencesMutation.mutateAsync(prefs);
