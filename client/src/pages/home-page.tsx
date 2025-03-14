@@ -17,6 +17,30 @@ import LogSessionModal from "@/components/LogSessionModal";
 import Challenges from "@/components/Challenges";
 import { GoonRoom } from "@/components/GoonRoom";
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1,
+    transition: { 
+      staggerChildren: 0.1,
+      delayChildren: 0.3
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: { 
+    y: 0, 
+    opacity: 1,
+    transition: { 
+      type: "spring",
+      stiffness: 100,
+      damping: 15
+    }
+  }
+};
+
 const themeStyles = {
   default: {
     background: "from-indigo-900 via-purple-900 to-violet-900",
@@ -61,49 +85,6 @@ const themeStyles = {
   }
 };
 
-const characterMessages = {
-  solo: {
-    sessionLogged: "STREAK RECORDED. POWER LEVEL INCREASING... 🤖",
-    levelUp: "SYSTEM UPGRADE COMPLETE. NEW RANK ACHIEVED: ",
-    xpGained: "EXPERIENCE POINTS ACQUIRED: ",
-    timeMessage: {
-      morning: "OPTIMAL PERFORMANCE WINDOW DETECTED",
-      afternoon: "PEAK EFFICIENCY TIME APPROACHING",
-      night: "DARK MODE OPERATIONS ENGAGED"
-    }
-  },
-  competitive: {
-    sessionLogged: "Great job, superstar! Keep that momentum going! 💖",
-    levelUp: "OMG! You just leveled up to ",
-    xpGained: "You earned ",
-    timeMessage: {
-      morning: "Rise and shine, champion!",
-      afternoon: "Peak performance time!",
-      night: "Night mode activated!"
-    }
-  },
-  hardcore: {
-    sessionLogged: "Your dedication pleases me... Your streak grows stronger. 😈",
-    levelUp: "Your power rises... You have ascended to ",
-    xpGained: "Dark energy acquired: ",
-    timeMessage: {
-      morning: "The dawn brings new power...",
-      afternoon: "Your strength peaks...",
-      night: "Darkness empowers you..."
-    }
-  },
-  default: {
-    sessionLogged: "Session logged successfully! ✨",
-    levelUp: "Level up! You're now ",
-    xpGained: "XP gained: ",
-    timeMessage: {
-      morning: "Good morning!",
-      afternoon: "Good afternoon!",
-      evening: "Good evening!"
-    }
-  }
-};
-
 export default function HomePage() {
   const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
@@ -136,7 +117,6 @@ export default function HomePage() {
     );
   }
 
-  const messages = characterMessages[preferences.goonStyle] || characterMessages.default;
   const style = themeStyles[preferences.goonStyle] || themeStyles.default;
 
   const sessionMutation = useMutation({
@@ -146,45 +126,12 @@ export default function HomePage() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
-
-      const showToastSequence = async () => {
-        toast({
-          title: "Session Logged",
-          description: messages.sessionLogged,
-          variant: "default",
-        });
-
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        const xpGained = data.user.xpPoints - (stats?.user.xpPoints || 0);
-        toast({
-          title: "XP Gained!",
-          description: `${messages.xpGained}+${xpGained} XP`,
-          variant: "default",
-        });
-
-        if (data.leveledUp) {
-          await new Promise(resolve => setTimeout(resolve, 500));
-          toast({
-            title: "Level Up!",
-            description: `${messages.levelUp}${data.user.title}!`,
-            variant: "default",
-          });
-        }
-
-        data.newAchievements?.forEach((achievement, index) => {
-          setTimeout(() => {
-            toast({
-              title: "Achievement Unlocked!",
-              description: achievement.description,
-              variant: "default",
-            });
-          }, 500 * (index + 1));
-        });
-      };
-
-      showToastSequence();
       setIsSessionModalOpen(false);
+      toast({
+        title: "Session Logged!",
+        description: "Great work! Keep up the momentum!",
+        variant: "default",
+      });
     },
   });
 
@@ -195,13 +142,6 @@ export default function HomePage() {
       </div>
     );
   }
-
-  const getTimeMessage = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return messages.timeMessage.morning;
-    if (hour < 18) return messages.timeMessage.afternoon;
-    return messages.timeMessage.night;
-  };
 
   return (
     <>
@@ -253,31 +193,35 @@ export default function HomePage() {
         </motion.header>
 
         {/* Main Content */}
-        <main className="container mx-auto px-4 pt-24 pb-20">
+        <motion.main
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="container mx-auto px-4 pt-24 pb-20"
+        >
           {/* Hero Section */}
-          <div className="text-center mb-12">
-            <motion.h1 
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              className="text-4xl md:text-5xl font-bold text-white mb-4"
-            >
-              Elevate Your Daily Practice
-            </motion.h1>
-            <motion.p
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.1 }}
-              className="text-lg text-purple-200/80"
-            >
-              {style.greeting} {style.subGreeting}
-            </motion.p>
-          </div>
+          <motion.div variants={itemVariants}>
+            <div className="text-center mb-12">
+              <motion.h1 
+                variants={itemVariants}
+                className="text-4xl md:text-5xl font-bold text-white mb-4"
+              >
+                Elevate Your Daily Practice
+              </motion.h1>
+              <motion.p
+                variants={itemVariants}
+                transition={{ delay: 0.1 }}
+                className="text-lg text-purple-200/80"
+              >
+                {style.greeting} {style.subGreeting}
+              </motion.p>
+            </div>
+          </motion.div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
+              variants={itemVariants}
               transition={{ delay: 0.2 }}
               className={`p-6 rounded-2xl ${style.cardBg} backdrop-blur border ${style.border}`}
             >
@@ -286,19 +230,18 @@ export default function HomePage() {
                 {stats?.user?.currentStreak || 0} days
               </div>
               <div className="text-sm text-purple-300">
-                +{stats?.streakChange || 3} from last week
+                +3 from last week
               </div>
             </motion.div>
 
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
+              variants={itemVariants}
               transition={{ delay: 0.3 }}
               className={`p-6 rounded-2xl ${style.cardBg} backdrop-blur border ${style.border}`}
             >
               <div className="text-sm text-purple-300 mb-2">Total Practice</div>
               <div className="text-3xl font-bold text-white mb-1">
-                {stats?.user?.totalHours || 39} hours
+                {stats?.totalHours || 39} hours
               </div>
               <div className="text-sm text-purple-300">
                 {stats?.todayMinutes || 39} minutes today
@@ -306,8 +249,7 @@ export default function HomePage() {
             </motion.div>
 
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
+              variants={itemVariants}
               transition={{ delay: 0.4 }}
               className={`p-6 rounded-2xl ${style.cardBg} backdrop-blur border ${style.border}`}
             >
@@ -319,12 +261,11 @@ export default function HomePage() {
                 {stats?.currentLevelXP || 7450}/{stats?.nextLevelXP || 10000} XP
               </div>
             </motion.div>
-          </div>
+          </motion.div>
 
           {/* Daily Challenges */}
           <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
+            variants={itemVariants}
             transition={{ delay: 0.5 }}
             className={`p-6 rounded-2xl ${style.cardBg} backdrop-blur border ${style.border} mb-12`}
           >
@@ -360,8 +301,7 @@ export default function HomePage() {
 
           {/* Streak Calendar */}
           <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
+            variants={itemVariants}
             transition={{ delay: 0.6 }}
             className={`p-6 rounded-2xl ${style.cardBg} backdrop-blur border ${style.border}`}
           >
@@ -387,12 +327,11 @@ export default function HomePage() {
               ))}
             </div>
           </motion.div>
-        </main>
+        </motion.main>
 
         {/* Action Button */}
         <motion.div
-          initial={{ y: 100 }}
-          animate={{ y: 0 }}
+          variants={itemVariants}
           className="fixed bottom-6 left-0 right-0 flex justify-center"
         >
           <Button
