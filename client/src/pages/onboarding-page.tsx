@@ -504,7 +504,7 @@ const OnboardingPage = () => {
         onSuccess: () => {
           setShowTransition(true);
           setTimeout(() => {
-            setLocation("/home");
+            setLocation("/");
           }, 1000);
         },
         onError: (error) => {
@@ -527,7 +527,7 @@ const OnboardingPage = () => {
   }, [goonStyle, timePreference, intensityLevel, socialMode, savePreferencesMutation, toast, setLocation]);
 
   const handleTransitionComplete = useCallback(() => {
-    setLocation("/home");
+    setLocation("/");
   }, [setLocation]);
 
   useEffect(() => {
@@ -930,8 +930,7 @@ const OnboardingPage = () => {
                         transition={{ duration: 1, repeat: Infinity }}
                       >>
                         <ArrowRight className="ml-2 h-5 w-5" />
-                      </motion.div>
-                    </>
+                      </motion.div>                    </>
                   )}
                 </Button>
               </motion.div>
