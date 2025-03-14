@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Menu, Film, Trophy, Star, Flame, Clock, Users, Target, Sparkles, ChevronRight } from "lucide-react";
-import { useTheme } from "next-themes";
+import { useTheme } from "next-themes"; //This import remains as stated in thinking
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
+import { usePreferences } from "@/hooks/use-preferences"; // Changed import to usePreferences
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -107,7 +108,7 @@ const characterMessages = {
 export default function HomePage() {
   const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
-  const { preferences } = useTheme();
+  const { preferences } = usePreferences(); // Changed useTheme to usePreferences
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
   const [isGoonRoomOpen, setIsGoonRoomOpen] = useState(false);
 
