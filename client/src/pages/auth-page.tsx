@@ -53,19 +53,6 @@ const inputContainerVariants = {
   })
 };
 
-const buttonVariants = {
-  hover: {
-    scale: 1.02,
-    transition: {
-      duration: 0.2,
-      yoyo: Infinity
-    }
-  },
-  tap: {
-    scale: 0.95
-  }
-};
-
 const MotionButton = motion(Button);
 
 export default function AuthPage() {
