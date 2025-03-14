@@ -4,106 +4,82 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Link } from "wouter";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Menu,
+  Film,
+  Trophy,
+  Star,
+  Flame,
+  Clock,
+  Users,
+  Target,
+  Sparkles,
+  ArrowRight,
+  Loader2,
+  Activity,
+  Crown,
+  Medal,
+} from "lucide-react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import StreakStats from "@/components/StreakStats";
 import Achievements from "@/components/Achievements";
 import LevelProgress from "@/components/LevelProgress";
 import LogSessionModal from "@/components/LogSessionModal";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { Loader2, Menu, Film, Trophy, Star, Flame, Clock, Users, Target, Sparkles } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Challenges from "@/components/Challenges";
-import { Link } from "wouter";
-import { motion, AnimatePresence } from "framer-motion";
 import { GoonRoom } from "@/components/GoonRoom";
 
 const themeStyles = {
   default: {
-    background: "from-zinc-50 to-blue-50",
+    background: "from-blue-50 via-indigo-50 to-violet-50",
+    pattern: "opacity-[0.15]",
     headerBg: "bg-white/80",
-    cardBg: "bg-white/80",
-    text: "text-zinc-900",
-    accent: "text-blue-500",
-    button: "from-blue-500 to-blue-600",
-    border: "border-zinc-200/50",
-    greeting: "Ready to conquer today? 🌟",
+    cardBg: "bg-white/90",
+    text: "text-slate-900",
+    accent: "text-blue-600",
+    button: "from-blue-600 to-indigo-600",
+    border: "border-slate-200/50",
+    greeting: "Time to level up! 🌟",
     cardHover: "hover:shadow-blue-500/10"
   },
   solo: {
-    background: "from-slate-900 to-zinc-900",
-    headerBg: "bg-black/20",
-    cardBg: "bg-black/20",
-    text: "text-zinc-100",
-    accent: "text-emerald-500",
+    background: "from-emerald-950 via-slate-900 to-emerald-950",
+    pattern: "opacity-[0.25]",
+    headerBg: "bg-black/40",
+    cardBg: "bg-black/40",
+    text: "text-emerald-50",
+    accent: "text-emerald-400",
     button: "from-emerald-500 to-emerald-600",
-    border: "border-white/10",
-    greeting: "SYSTEMS ONLINE. READY FOR TRAINING. 🤖",
+    border: "border-emerald-400/20",
+    greeting: "SYSTEMS ONLINE. INITIATING SESSION... 🤖",
     cardHover: "hover:shadow-emerald-500/20"
   },
   competitive: {
-    background: "from-purple-900 to-pink-900",
-    headerBg: "bg-black/20",
-    cardBg: "bg-black/20",
-    text: "text-pink-100",
-    accent: "text-pink-500",
+    background: "from-pink-500 via-purple-600 to-indigo-600",
+    pattern: "opacity-[0.15]",
+    headerBg: "bg-black/30",
+    cardBg: "bg-black/30",
+    text: "text-pink-50",
+    accent: "text-pink-400",
     button: "from-pink-500 to-purple-500",
-    border: "border-white/10",
-    greeting: "Time to crush those goals! 🔥",
+    border: "border-pink-400/20",
+    greeting: "Ready to dominate? Let's go! 🔥",
     cardHover: "hover:shadow-pink-500/20"
   },
   hardcore: {
-    background: "from-red-950 to-black",
-    headerBg: "bg-black/20",
-    cardBg: "bg-black/20",
-    text: "text-red-100",
+    background: "from-red-950 via-black to-red-950",
+    pattern: "opacity-[0.3]",
+    headerBg: "bg-black/40",
+    cardBg: "bg-black/40",
+    text: "text-red-50",
     accent: "text-red-500",
-    button: "from-red-500 to-red-600",
-    border: "border-white/10",
-    greeting: "Embrace the darkness within... 😈",
+    button: "from-red-600 to-red-700",
+    border: "border-red-500/20",
+    greeting: "Embrace the power within... 😈",
     cardHover: "hover:shadow-red-500/20"
-  }
-};
-
-const characterMessages = {
-  solo: {
-    sessionLogged: "STREAK RECORDED. POWER LEVEL INCREASING... 🤖",
-    levelUp: "SYSTEM UPGRADE COMPLETE. NEW RANK ACHIEVED: ",
-    xpGained: "EXPERIENCE POINTS ACQUIRED: ",
-    timeMessage: {
-      morning: "OPTIMAL PERFORMANCE WINDOW DETECTED",
-      afternoon: "PEAK EFFICIENCY TIME APPROACHING",
-      night: "DARK MODE OPERATIONS ENGAGED"
-    }
-  },
-  competitive: {
-    sessionLogged: "Great job, superstar! Keep that momentum going! 💖",
-    levelUp: "OMG! You just leveled up to ",
-    xpGained: "You earned ",
-    timeMessage: {
-      morning: "Rise and shine, champion!",
-      afternoon: "Peak performance time!",
-      night: "Night mode activated!"
-    }
-  },
-  hardcore: {
-    sessionLogged: "Your dedication pleases me... Your streak grows stronger. 😈",
-    levelUp: "Your power rises... You have ascended to ",
-    xpGained: "Dark energy acquired: ",
-    timeMessage: {
-      morning: "The dawn brings new power...",
-      afternoon: "Your strength peaks...",
-      night: "Darkness empowers you..."
-    }
-  },
-  default: {
-    sessionLogged: "Session logged successfully! ✨",
-    levelUp: "Level up! You're now ",
-    xpGained: "XP gained: ",
-    timeMessage: {
-      morning: "Good morning!",
-      afternoon: "Good afternoon!",
-      evening: "Good evening!"
-    }
   }
 };
 
@@ -118,7 +94,6 @@ export default function HomePage() {
     queryKey: ["/api/stats"],
   });
 
-  // If not authenticated, return early
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -127,7 +102,6 @@ export default function HomePage() {
     );
   }
 
-  // If there's an error, show error state
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -141,7 +115,6 @@ export default function HomePage() {
     );
   }
 
-  const messages = characterMessages[preferences.goonStyle] || characterMessages.default;
   const style = themeStyles[preferences.goonStyle] || themeStyles.default;
 
   const sessionMutation = useMutation({
@@ -151,45 +124,14 @@ export default function HomePage() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
-
-      const showToastSequence = async () => {
-        toast({
-          title: "Session Logged",
-          description: messages.sessionLogged,
-          variant: "default",
-        });
-
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        const xpGained = data.user.xpPoints - (stats?.user.xpPoints || 0);
-        toast({
-          title: "XP Gained!",
-          description: `${messages.xpGained}+${xpGained} XP`,
-          variant: "default",
-        });
-
-        if (data.leveledUp) {
-          await new Promise(resolve => setTimeout(resolve, 500));
-          toast({
-            title: "Level Up!",
-            description: `${messages.levelUp}${data.user.title}!`,
-            variant: "default",
-          });
-        }
-
-        data.newAchievements?.forEach((achievement, index) => {
-          setTimeout(() => {
-            toast({
-              title: "Achievement Unlocked!",
-              description: achievement.description,
-              variant: "default",
-            });
-          }, 500 * (index + 1));
-        });
-      };
-
-      showToastSequence();
       setIsSessionModalOpen(false);
+
+      // Show success animations and notifications
+      toast({
+        title: "Session Logged!",
+        description: `Great work! +${data.xpGained}XP earned`,
+        variant: "default",
+      });
     },
   });
 
@@ -201,21 +143,16 @@ export default function HomePage() {
     );
   }
 
-  const getTimeMessage = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return messages.timeMessage.morning;
-    if (hour < 18) return messages.timeMessage.afternoon;
-    return messages.timeMessage.night;
-  };
-
   return (
     <>
       <div className={`min-h-screen pb-20 relative overflow-hidden bg-gradient-to-br ${style.background}`}>
+        {/* Background Pattern */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoNDUpIj48cGF0aCBkPSJNLTEwIDMwbDIwLTIwTTAgNDBsMjAtMjBNMTAgNTBsMjAtMjAiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4xIiBzdHJva2Utd2lkdGg9IjIiLz48L3BhdHRlcm4+PC9kZWZzPjxwYXRoIGZpbGw9InVybCgjYSkiIGQ9Ik0wIDBoMjAwdjIwMEgweiIvPjwvc3ZnPg==')]" />
+          <div className={`absolute inset-0 ${style.pattern} bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoNDUpIj48cGF0aCBkPSJNLTEwIDMwbDIwLTIwTTAgNDBsMjAtMjBNMTAgNTBsMjAtMjAiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4xIiBzdHJva2Utd2lkdGg9IjIiLz48L3BhdHRlcm4+PC9kZWZzPjxwYXRoIGZpbGw9InVybCgjYSkiIGQ9Ik0wIDBoMjAwdjIwMEgweiIvPjwvc3ZnPg==')]`} />
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
         </div>
 
+        {/* Header */}
         <motion.header
           initial={{ y: -100 }}
           animate={{ y: 0 }}
@@ -226,9 +163,9 @@ export default function HomePage() {
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="flex items-center gap-1"
+                className="flex items-center gap-2"
               >
-                <Star className={`h-5 w-5 ${style.accent}`} />
+                <Crown className={`h-5 w-5 ${style.accent}`} />
                 <span className={`font-bold tracking-tight text-lg md:text-xl truncate bg-gradient-to-r ${style.button} text-transparent bg-clip-text`}>
                   {user?.username}
                 </span>
@@ -236,9 +173,10 @@ export default function HomePage() {
               <motion.div
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                className={`${style.text} text-sm md:text-base`}
+                className={`${style.text} text-sm md:text-base flex items-center gap-1`}
               >
-                • Level {stats.user.level}
+                <Activity className="w-3 h-3" />
+                Level {stats.user.level}
               </motion.div>
             </div>
 
@@ -290,139 +228,128 @@ export default function HomePage() {
           </div>
         </motion.header>
 
+        {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="container mx-auto px-4 pt-24 pb-6"
         >
-          <div className={`${style.cardBg} backdrop-blur rounded-2xl p-6 md:p-8 ${style.border} ${style.cardHover}`}>
-            <div className="flex items-start md:items-center gap-4 flex-col md:flex-row">
-              <div className={`p-4 rounded-2xl bg-gradient-to-br ${style.button} shadow-lg relative overflow-hidden group`}>
-                <Clock className="h-6 w-6 md:h-8 md:w-8 text-white relative z-10" />
-                <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+          <div 
+            className={`
+              ${style.cardBg} backdrop-blur rounded-2xl 
+              p-6 md:p-8 ${style.border} ${style.cardHover}
+              transform transition-all duration-300
+              hover:scale-[1.01] hover:shadow-lg
+            `}
+          >
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+              <div className="flex-shrink-0">
+                <div className={`
+                  w-16 h-16 md:w-20 md:h-20 
+                  rounded-2xl bg-gradient-to-br ${style.button}
+                  flex items-center justify-center
+                  shadow-lg relative overflow-hidden group
+                `}>
+                  <Star className="h-8 w-8 md:h-10 md:w-10 text-white relative z-10" />
+                  <motion.div 
+                    className="absolute inset-0 bg-white/20"
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: [1, 1.5, 1], opacity: [0, 0.5, 0] }}
+                    transition={{ 
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  />
+                </div>
               </div>
+
               <div className="flex-1 min-w-0">
-                <motion.h2
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  className={`text-xl md:text-3xl font-bold ${style.text} mb-2`}
-                >
-                  {getTimeMessage()}
-                </motion.h2>
-                <motion.p
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.1 }}
-                  className={`${style.text} opacity-80 text-sm md:text-base`}
-                >
-                  {style.greeting}
-                </motion.p>
+                {/* Level Progress */}
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className={`text-sm font-medium ${style.text}`}>Level Progress</h3>
+                    <span className={`text-xs ${style.accent}`}>
+                      {stats.user.xpPoints}/{stats.nextLevelXP} XP
+                    </span>
+                  </div>
+                  <div className="h-2 bg-black/10 rounded-full overflow-hidden">
+                    <motion.div
+                      className={`h-full bg-gradient-to-r ${style.button}`}
+                      initial={{ width: 0 }}
+                      animate={{ 
+                        width: `${(stats.user.xpPoints / stats.nextLevelXP) * 100}%` 
+                      }}
+                      transition={{ duration: 1, ease: "easeOut" }}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className={`p-3 rounded-xl ${style.cardBg} border ${style.border}`}>
+                    <div className="flex items-center gap-2">
+                      <Medal className={`h-4 w-4 ${style.accent}`} />
+                      <span className={`text-sm font-medium ${style.text}`}>Rank</span>
+                    </div>
+                    <p className={`text-2xl font-bold ${style.text} mt-1`}>
+                      #{stats.rank || "??"}
+                    </p>
+                  </div>
+
+                  <div className={`p-3 rounded-xl ${style.cardBg} border ${style.border}`}>
+                    <div className="flex items-center gap-2">
+                      <Flame className={`h-4 w-4 ${style.accent}`} />
+                      <span className={`text-sm font-medium ${style.text}`}>Streak</span>
+                    </div>
+                    <p className={`text-2xl font-bold ${style.text} mt-1`}>
+                      {stats.user.currentStreak}d
+                    </p>
+                  </div>
+
+                  <div className={`p-3 rounded-xl ${style.cardBg} border ${style.border}`}>
+                    <div className="flex items-center gap-2">
+                      <Trophy className={`h-4 w-4 ${style.accent}`} />
+                      <span className={`text-sm font-medium ${style.text}`}>Best</span>
+                    </div>
+                    <p className={`text-2xl font-bold ${style.text} mt-1`}>
+                      {stats.user.longestStreak}d
+                    </p>
+                  </div>
+
+                  <div className={`p-3 rounded-xl ${style.cardBg} border ${style.border}`}>
+                    <div className="flex items-center gap-2">
+                      <Target className={`h-4 w-4 ${style.accent}`} />
+                      <span className={`text-sm font-medium ${style.text}`}>Today</span>
+                    </div>
+                    <p className={`text-2xl font-bold ${style.text} mt-1`}>
+                      {stats.user.todaySessions || 0}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </motion.div>
 
+        {/* Main Content */}
         <main className="container mx-auto px-4 pt-4">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
-            <div className="lg:col-span-4 space-y-4 md:space-y-6">
-              <motion.div
-                initial={{ x: -20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.1 }}
-              >
-                {stats && (
-                  <LevelProgress
-                    user={stats.user}
-                    nextLevelXP={stats.nextLevelXP}
-                    currentLevelXP={stats.currentLevelXP}
-                    style={preferences.goonStyle}
-                  />
-                )}
-              </motion.div>
-
+            {/* Left Column */}
+            <div className="lg:col-span-8 space-y-4 md:space-y-6">
+              {/* Daily Challenges */}
               <motion.div
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
               >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 transform hover:scale-[1.02] ${style.cardHover}`}>
+                <Card className={`
+                  overflow-hidden ${style.cardBg} backdrop-blur ${style.border} 
+                  hover:shadow-lg transition-all duration-300 
+                  transform hover:scale-[1.02] ${style.cardHover}
+                `}>
                   <CardHeader>
                     <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
-                      <Flame className={`${style.accent}`} />
-                      Your Streak
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <StreakStats stats={stats} />
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              <motion.div
-                initial={{ x: -20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-              >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 transform hover:scale-[1.02] ${style.cardHover}`}>
-                  <CardHeader>
-                    <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
-                      <Clock className={`${style.accent}`} />
-                      Power Hours
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className={`text-lg ${style.text}`}>
-                      {preferences.timePreference === "morning" && "Early Bird 🌅"}
-                      {preferences.timePreference === "afternoon" && "Midday Warrior ☀️"}
-                      {preferences.timePreference === "night" && "Night Owl 🌙"}
-                    </div>
-                    <p className={`${style.text} opacity-80 mt-2`}>
-                      Your optimal performance time
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              <motion.div
-                initial={{ x: -20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Card 
-                  className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 cursor-pointer ${style.cardHover}`}
-                  onClick={() => setIsGoonRoomOpen(true)}
-                >
-                  <CardHeader>
-                    <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
-                      <Users className={`${style.accent}`} />
-                      Live Sessions
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className={`${style.text} opacity-80`}>
-                      {preferences.socialMode === "solo"
-                        ? "Join a private training session"
-                        : preferences.socialMode === "competitive"
-                        ? "Compete in live challenges!"
-                        : "Enter the darkness together..."}
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </div>
-
-            <div className="lg:col-span-8 space-y-4 md:space-y-6">
-              <motion.div
-                initial={{ x: 20, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.3 }}
-              >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 transform hover:scale-[1.02] ${style.cardHover}`}>
-                  <CardHeader>
-                    <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
-                      <Target className={`${style.accent}`} />
+                      <Target className={style.accent} />
                       Daily Challenges
                     </CardTitle>
                   </CardHeader>
@@ -432,15 +359,20 @@ export default function HomePage() {
                 </Card>
               </motion.div>
 
+              {/* Achievements */}
               <motion.div
-                initial={{ x: 20, opacity: 0 }}
+                initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.4 }}
+                transition={{ delay: 0.3 }}
               >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 transform hover:scale-[1.02] ${style.cardHover}`}>
+                <Card className={`
+                  overflow-hidden ${style.cardBg} backdrop-blur ${style.border} 
+                  hover:shadow-lg transition-all duration-300 
+                  transform hover:scale-[1.02] ${style.cardHover}
+                `}>
                   <CardHeader>
                     <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
-                      <Trophy className={`${style.accent}`} />
+                      <Trophy className={style.accent} />
                       Achievements
                     </CardTitle>
                   </CardHeader>
@@ -455,34 +387,109 @@ export default function HomePage() {
                   </CardContent>
                 </Card>
               </motion.div>
+            </div>
 
-              {preferences.socialMode !== "solo" && (
-                <motion.div
-                  initial={{ x: 20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.5 }}
+            {/* Right Column */}
+            <div className="lg:col-span-4 space-y-4 md:space-y-6">
+              {/* Statistics Card */}
+              <motion.div
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+              >
+                <Card className={`
+                  overflow-hidden ${style.cardBg} backdrop-blur ${style.border} 
+                  hover:shadow-lg transition-all duration-300 
+                  transform hover:scale-[1.02] ${style.cardHover}
+                `}>
+                  <CardHeader>
+                    <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
+                      <Activity className={style.accent} />
+                      Statistics
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className={`p-4 rounded-xl ${style.cardBg} border ${style.border}`}>
+                        <div className="flex items-center justify-between">
+                          <span className={`text-sm font-medium ${style.text}`}>
+                            Total Sessions
+                          </span>
+                          <span className={`text-2xl font-bold ${style.accent}`}>
+                            {stats.user.totalSessions}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className={`p-4 rounded-xl ${style.cardBg} border ${style.border}`}>
+                        <div className="flex items-center justify-between">
+                          <span className={`text-sm font-medium ${style.text}`}>
+                            Avg. Duration
+                          </span>
+                          <span className={`text-2xl font-bold ${style.accent}`}>
+                            {stats.user.averageDuration || "0m"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className={`p-4 rounded-xl ${style.cardBg} border ${style.border}`}>
+                        <div className="flex items-center justify-between">
+                          <span className={`text-sm font-medium ${style.text}`}>
+                            Success Rate
+                          </span>
+                          <span className={`text-2xl font-bold ${style.accent}`}>
+                            {stats.user.successRate || "0%"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {/* Quick Actions */}
+              <motion.div
+                initial={{ x: 20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="space-y-3"
+              >
+                <Button
+                  className={`
+                    w-full h-12 rounded-xl
+                    bg-gradient-to-r ${style.button}
+                    hover:brightness-110 transition-all duration-300
+                    font-medium tracking-wide text-white
+                    flex items-center justify-center gap-2
+                    shadow-lg hover:shadow-xl relative overflow-hidden group
+                  `}
+                  onClick={() => setIsGoonRoomOpen(true)}
                 >
-                  <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 transform hover:scale-[1.02] ${style.cardHover}`}>
-                    <CardHeader>
-                      <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
-                        <Users className={`${style.accent}`} />
-                        {preferences.socialMode === "friends" ? "Friend Activity" : "Global Leaders"}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className={`${style.text} opacity-80`}>
-                        {preferences.socialMode === "friends"
-                          ? "Stay motivated with your friends!"
-                          : "Compete with the best worldwide!"}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              )}
+                  <Users className="h-5 w-5" />
+                  <span>Join Live Session</span>
+                  <div className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+                </Button>
+
+                <Button
+                  className={`
+                    w-full h-12 rounded-xl border ${style.border}
+                    ${style.cardBg} backdrop-blur
+                    hover:bg-white/10 transition-all duration-300
+                    font-medium tracking-wide ${style.text}
+                    flex items-center justify-center gap-2
+                  `}
+                  variant="outline"
+                  onClick={() => setIsSessionModalOpen(true)}
+                >
+                  <Target className="h-5 w-5" />
+                  <span>Log Session</span>
+                </Button>
+              </motion.div>
             </div>
           </div>
         </main>
 
+        {/* Log Session Modal */}
         <LogSessionModal
           isOpen={isSessionModalOpen}
           onClose={() => setIsSessionModalOpen(false)}
@@ -490,46 +497,11 @@ export default function HomePage() {
           isPending={sessionMutation.isPending}
         />
 
+        {/* Goon Room Modal */}
         <GoonRoom
           isOpen={isGoonRoomOpen}
           onClose={() => setIsGoonRoomOpen(false)}
         />
-
-        <motion.div
-          initial={{ y: 100 }}
-          animate={{ y: 0 }}
-          className={`fixed bottom-0 left-0 right-0 p-4 ${style.headerBg} backdrop-blur ${style.border}`}
-        >
-          <div className="container mx-auto max-w-lg">
-            <Button
-              className={`
-                w-full h-12 md:h-14 text-base md:text-lg rounded-full 
-                bg-gradient-to-r ${style.button} 
-                hover:brightness-110 transition-all duration-300 
-                shadow-lg shadow-current/20 hover:shadow-xl hover:shadow-current/30 
-                font-bold tracking-wide text-white transform hover:scale-[1.02]
-                relative overflow-hidden group
-              `}
-              size="lg"
-              onClick={() => setIsSessionModalOpen(true)}
-            >
-              <motion.div
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 justify-center relative z-10"
-              >
-                <Sparkles className="h-5 w-5 md:h-6 md:w-6" />
-                <span className="relative">
-                  {preferences.goonStyle === "solo" ? "LOG TRAINING SESSION" :
-                    preferences.goonStyle === "competitive" ? "Record Your Victory!" :
-                      preferences.goonStyle === "hardcore" ? "Embrace The Darkness..." :
-                        "Log Session"}
-                </span>
-              </motion.div>
-              <div className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
-            </Button>
-          </div>
-        </motion.div>
       </div>
     </>
   );
