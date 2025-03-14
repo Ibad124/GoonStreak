@@ -11,10 +11,12 @@ const transitionVariants = {
   initial: {
     opacity: 0,
     scale: 0.8,
+    y: 0
   },
   animate: {
     opacity: 1,
     scale: 1,
+    y: 0,
     transition: {
       duration: 0.5,
       ease: "easeOut",
@@ -23,9 +25,10 @@ const transitionVariants = {
   exit: {
     opacity: 0,
     scale: 1.2,
+    y: -1000,
     transition: {
-      duration: 0.3,
-      ease: "easeIn",
+      duration: 0.8,
+      ease: [0.65, 0, 0.35, 1],
     },
   },
 };
@@ -43,7 +46,7 @@ const backgroundVariants = {
   exit: {
     opacity: 0,
     transition: {
-      duration: 0.2,
+      duration: 0.6,
     },
   },
 };
@@ -73,25 +76,64 @@ export const PageTransition = ({
     <AnimatePresence mode="wait">
       {isVisible && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center"
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
           initial="initial"
           animate="animate"
           exit="exit"
           variants={transitionVariants}
           onAnimationComplete={(definition) => {
             if (definition === "exit") {
-              onComplete();
+              setTimeout(onComplete, 100);
             }
           }}
         >
           <motion.div
             className={`absolute inset-0 ${getBackgroundStyle()}`}
             variants={backgroundVariants}
-          />
+          >
+            {/* Add particle effects based on style */}
+            {style === "competitive" && (
+              <motion.div
+                className="absolute inset-0 overflow-hidden"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                {[...Array(20)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute w-2 h-2 bg-white rounded-full"
+                    style={{
+                      left: `${Math.random() * 100}%`,
+                      top: `${Math.random() * 100}%`,
+                    }}
+                    animate={{
+                      y: [-20, -window.innerHeight],
+                      opacity: [1, 0],
+                    }}
+                    transition={{
+                      duration: 1,
+                      delay: i * 0.1,
+                      ease: "easeOut",
+                    }}
+                  />
+                ))}
+              </motion.div>
+            )}
+          </motion.div>
 
-          <div className="relative text-white text-center px-4">
+          <motion.div 
+            className="relative text-white text-center px-4"
+            variants={{
+              exit: {
+                y: -100,
+                opacity: 0,
+                transition: { duration: 0.3 }
+              }
+            }}
+          >
             {children}
-          </div>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>

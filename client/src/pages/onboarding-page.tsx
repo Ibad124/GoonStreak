@@ -536,7 +536,11 @@ const OnboardingPage = () => {
   }, [goonStyle, timePreference, intensityLevel, socialMode, savePreferencesMutation, isNavigating]);
 
   const handleTransitionComplete = useCallback(() => {
-    window.location.href = "/";
+    // Add a small delay before navigation to ensure animation completes
+    setTimeout(() => {
+      // Force a full page reload to ensure clean state
+      window.location.href = "/";
+    }, 200);
   }, []);
 
   useEffect(() => {
