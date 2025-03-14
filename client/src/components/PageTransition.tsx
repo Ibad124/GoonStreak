@@ -111,17 +111,30 @@ export const PageTransition = ({
             }}
           >
             {children}
-            <Button 
-              className="mt-4 bg-white/20 hover:bg-white/30 text-white"
-              onClick={() => {
-                import('wouter').then(module => {
-                  const navigate = module.default[1];
-                  navigate('/');
-                });
-              }}
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              Go to Home
-            </Button>
+              <Button 
+                className="mt-4 px-6 py-2 bg-gradient-to-r from-white/20 to-white/30 hover:from-white/30 hover:to-white/40 text-white font-medium rounded-full shadow-lg shadow-black/20 backdrop-blur"
+                onClick={() => {
+                  import('wouter').then(({ useLocation }) => {
+                    const [_, navigate] = useLocation();
+                    navigate('/');
+                  });
+                }}
+              >
+                <span className="relative flex items-center gap-2">
+                  Skip Animation
+                  <motion.div
+                    animate={{ x: [0, 5, 0] }}
+                    transition={{ repeat: Infinity, duration: 1.5 }}
+                  >
+                    →
+                  </motion.div>
+                </span>
+              </Button>
+            </motion.div>
           </motion.div>
         </motion.div>
       )}
