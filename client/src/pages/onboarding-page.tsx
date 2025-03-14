@@ -28,7 +28,65 @@ import {
   Ghost,
   Crown,
   Medal,
+  Brain,
+  Heart,
+  Coffee,
+  Sun,
+  Moon,
+  Zap,
 } from "lucide-react";
+
+// SVG for our guide character
+const GuideCharacter = ({ emotion = "happy" }) => (
+  <motion.div
+    className="absolute top 4 right-4 w-24 h-24 md:w-32 md:h-32"
+    initial={{ scale: 0 }}
+    animate={{ scale: 1 }}
+    transition={{ type: "spring", stiffness: 260, damping: 20 }}
+  >
+    <div className="relative">
+      {/* Basic character shape */}
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full"
+        animate={{
+          scale: [1, 1.05, 1],
+        }}
+        transition={{ duration: 2, repeat: Infinity }}
+      />
+      {/* Eyes */}
+      <motion.div
+        className="absolute top-1/3 left-1/4 w-3 h-3 bg-white rounded-full"
+        animate={emotion === "happy" ? {
+          scale: [1, 1.2, 1],
+        } : {
+          scale: 1,
+        }}
+        transition={{ duration: 1, repeat: Infinity }}
+      />
+      <motion.div
+        className="absolute top-1/3 right-1/4 w-3 h-3 bg-white rounded-full"
+        animate={emotion === "happy" ? {
+          scale: [1, 1.2, 1],
+        } : {
+          scale: 1,
+        }}
+        transition={{ duration: 1, repeat: Infinity }}
+      />
+      {/* Mouth */}
+      <motion.div
+        className="absolute bottom-1/3 left-1/2 -translate-x-1/2 w-8 h-2 bg-white rounded-full"
+        animate={emotion === "happy" ? {
+          scaleX: [1, 1.2, 1],
+          rotate: [0, 5, 0],
+        } : {
+          scaleX: 1,
+          rotate: 0,
+        }}
+        transition={{ duration: 2, repeat: Infinity }}
+      />
+    </div>
+  </motion.div>
+);
 
 const slideVariants = {
   enter: (direction: number) => ({
@@ -53,43 +111,70 @@ const goonStyles = [
     title: "Solo Tracker",
     description: "I go solo, just tracking my progress.",
     icon: Ghost,
-    color: "from-purple-500 to-indigo-500"
+    color: "from-purple-500 to-indigo-500",
+    greeting: "A lone wolf! I respect that. 🐺"
   },
   {
     id: "competitive",
     title: "Competitive Spirit",
     description: "I love competing with friends!",
     icon: Trophy,
-    color: "from-yellow-500 to-orange-500"
+    color: "from-yellow-500 to-orange-500",
+    greeting: "Oh, a challenger appears! 🏆"
   },
   {
     id: "hardcore",
     title: "Record Breaker",
     description: "I want to break records & hit insane streaks!",
     icon: Crown,
-    color: "from-red-500 to-pink-500"
+    color: "from-red-500 to-pink-500",
+    greeting: "Now that's what I call dedication! 👑"
   }
 ];
 
-const gameStyles = [
+const timePreferences = [
+  {
+    id: "morning",
+    title: "Early Bird",
+    description: "I'm most productive in the morning",
+    icon: Sun,
+    color: "from-yellow-400 to-orange-500"
+  },
+  {
+    id: "afternoon",
+    title: "Midday Master",
+    description: "Afternoon is my power hour",
+    icon: Coffee,
+    color: "from-green-500 to-emerald-600"
+  },
+  {
+    id: "night",
+    title: "Night Owl",
+    description: "I come alive at night",
+    icon: Moon,
+    color: "from-blue-600 to-indigo-700"
+  }
+];
+
+const intensityLevels = [
   {
     id: "casual",
-    title: "Casual",
-    description: "Just tracking progress",
+    title: "Steady Pace",
+    description: "I like to take it easy and build consistently",
     icon: Target,
     color: "from-blue-500 to-cyan-500"
   },
   {
-    id: "competitive",
-    title: "Competitive",
-    description: "Beat friends & rank up",
-    icon: Medal,
+    id: "medium",
+    title: "Balanced",
+    description: "Mix of challenge and sustainability",
+    icon: Zap,
     color: "from-yellow-500 to-orange-500"
   },
   {
-    id: "extreme",
-    title: "Extreme Streaker",
-    description: "Longest streaks possible",
+    id: "intense",
+    title: "Maximum Effort",
+    description: "Push to the limit every time",
     icon: Trophy,
     color: "from-red-500 to-pink-500"
   }
@@ -123,8 +208,10 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(0);
   const [goonStyle, setGoonStyle] = useState("");
-  const [gameStyle, setGameStyle] = useState("");
+  const [timePreference, setTimePreference] = useState("");
+  const [intensityLevel, setIntensityLevel] = useState("");
   const [socialMode, setSocialMode] = useState("");
+  const [guideEmotion, setGuideEmotion] = useState("happy");
   const [, setLocation] = useLocation();
   const { user } = useAuth();
 
@@ -145,24 +232,55 @@ export default function OnboardingPage() {
   const handleNext = () => {
     setDirection(1);
     setStep(prev => prev + 1);
+    setGuideEmotion("happy");
   };
 
   const handleBack = () => {
     setDirection(-1);
     setStep(prev => prev - 1);
+    setGuideEmotion("happy");
   };
 
   const handleComplete = () => {
     savePreferencesMutation.mutate({
       goonStyle,
-      gameStyle,
+      timePreference,
+      intensityLevel,
       socialMode
     });
   };
 
+  const getGuideMessage = () => {
+    switch(step) {
+      case 1:
+        return goonStyle ? goonStyles.find(style => style.id === goonStyle)?.greeting : "Hey there! Let's get to know you better! 👋";
+      case 2:
+        return "When do you feel most energized? Pick your power hours! ⚡";
+      case 3:
+        return "How hard do you want to push yourself? Choose your intensity! 💪";
+      case 4:
+        return "Last step! Let's figure out your social style! 🌟";
+      default:
+        return "Ready to start your journey? Let's go! 🚀";
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto relative">
+        {/* Guide Character */}
+        <GuideCharacter emotion={guideEmotion} />
+
+        {/* Guide Message */}
+        <motion.div
+          className="text-xl font-medium text-primary mb-8 p-4 bg-white/50 backdrop-blur-sm rounded-lg shadow-sm"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          key={step}
+        >
+          {getGuideMessage()}
+        </motion.div>
+
         <AnimatePresence mode="wait" custom={direction}>
           {step === 1 && (
             <motion.div
@@ -206,7 +324,10 @@ export default function OnboardingPage() {
                           ? "ring-2 ring-primary ring-offset-2"
                           : "hover:shadow-lg"
                       }`}
-                      onClick={() => setGoonStyle(style.id)}
+                      onClick={() => {
+                        setGoonStyle(style.id);
+                        setGuideEmotion("happy");
+                      }}
                     >
                       <div className="flex items-start gap-4">
                         <div className={`p-3 rounded-xl bg-gradient-to-br ${style.color}`}>
@@ -261,37 +382,37 @@ export default function OnboardingPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <h1 className="text-4xl font-bold mb-4">Set Your Goals 🎯</h1>
+                <h1 className="text-4xl font-bold mb-4">Pick Your Power Hours ⚡</h1>
                 <p className="text-xl text-muted-foreground">
-                  How would you like to approach your journey?
+                  When are you at your peak performance?
                 </p>
               </motion.div>
 
               <motion.div
                 className="grid grid-cols-1 md:grid-cols-3 gap-6"
               >
-                {gameStyles.map((style, index) => (
+                {timePreferences.map((pref, index) => (
                   <motion.div
-                    key={style.id}
+                    key={pref.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
                   >
                     <Card
                       className={`p-6 cursor-pointer transition-all duration-300 ${
-                        gameStyle === style.id
+                        timePreference === pref.id
                           ? "ring-2 ring-primary ring-offset-2"
                           : "hover:shadow-lg"
                       }`}
-                      onClick={() => setGameStyle(style.id)}
+                      onClick={() => setTimePreference(pref.id)}
                     >
                       <div className="flex items-start gap-4">
-                        <div className={`p-3 rounded-xl bg-gradient-to-br ${style.color}`}>
-                          <style.icon className="h-6 w-6 text-white" />
+                        <div className={`p-3 rounded-xl bg-gradient-to-br ${pref.color}`}>
+                          <pref.icon className="h-6 w-6 text-white" />
                         </div>
                         <div className="flex-1">
-                          <h3 className="text-xl font-semibold mb-2">{style.title}</h3>
-                          <p className="text-muted-foreground">{style.description}</p>
+                          <h3 className="text-xl font-semibold mb-2">{pref.title}</h3>
+                          <p className="text-muted-foreground">{pref.description}</p>
                         </div>
                       </div>
                     </Card>
@@ -317,7 +438,7 @@ export default function OnboardingPage() {
                 <Button
                   size="lg"
                   onClick={handleNext}
-                  disabled={!gameStyle}
+                  disabled={!timePreference}
                   className="group"
                 >
                   Continue
@@ -330,6 +451,92 @@ export default function OnboardingPage() {
           {step === 3 && (
             <motion.div
               key="step3"
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ 
+                type: "spring",
+                stiffness: 300,
+                damping: 30
+              }}
+            >
+              <motion.div
+                className="text-center mb-12"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <h1 className="text-4xl font-bold mb-4">Set Your Intensity 🔥</h1>
+                <p className="text-xl text-muted-foreground">
+                  How hard do you want to push yourself?
+                </p>
+              </motion.div>
+
+              <motion.div
+                className="grid grid-cols-1 md:grid-cols-3 gap-6"
+              >
+                {intensityLevels.map((level, index) => (
+                  <motion.div
+                    key={level.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <Card
+                      className={`p-6 cursor-pointer transition-all duration-300 ${
+                        intensityLevel === level.id
+                          ? "ring-2 ring-primary ring-offset-2"
+                          : "hover:shadow-lg"
+                      }`}
+                      onClick={() => setIntensityLevel(level.id)}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className={`p-3 rounded-xl bg-gradient-to-br ${level.color}`}>
+                          <level.icon className="h-6 w-6 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-xl font-semibold mb-2">{level.title}</h3>
+                          <p className="text-muted-foreground">{level.description}</p>
+                        </div>
+                      </div>
+                    </Card>
+                  </motion.div>
+                ))}
+              </motion.div>
+
+              <motion.div
+                className="mt-8 flex justify-between"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6 }}
+              >
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={handleBack}
+                  className="group"
+                >
+                  <ArrowLeft className="mr-2 h-5 w-5 transition-transform group-hover:-translate-x-1" />
+                  Back
+                </Button>
+                <Button
+                  size="lg"
+                  onClick={handleNext}
+                  disabled={!intensityLevel}
+                  className="group"
+                >
+                  Continue
+                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                </Button>
+              </motion.div>
+            </motion.div>
+          )}
+
+          {step === 4 && (
+            <motion.div
+              key="step4"
               custom={direction}
               variants={slideVariants}
               initial="enter"
