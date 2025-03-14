@@ -36,57 +36,166 @@ import {
   Zap,
 } from "lucide-react";
 
-// SVG for our guide character
-const GuideCharacter = ({ emotion = "happy" }) => (
-  <motion.div
-    className="absolute top 4 right-4 w-24 h-24 md:w-32 md:h-32"
-    initial={{ scale: 0 }}
-    animate={{ scale: 1 }}
-    transition={{ type: "spring", stiffness: 260, damping: 20 }}
-  >
-    <div className="relative">
-      {/* Basic character shape */}
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full"
-        animate={{
-          scale: [1, 1.05, 1],
-        }}
-        transition={{ duration: 2, repeat: Infinity }}
-      />
-      {/* Eyes */}
-      <motion.div
-        className="absolute top-1/3 left-1/4 w-3 h-3 bg-white rounded-full"
-        animate={emotion === "happy" ? {
-          scale: [1, 1.2, 1],
-        } : {
-          scale: 1,
-        }}
-        transition={{ duration: 1, repeat: Infinity }}
-      />
-      <motion.div
-        className="absolute top-1/3 right-1/4 w-3 h-3 bg-white rounded-full"
-        animate={emotion === "happy" ? {
-          scale: [1, 1.2, 1],
-        } : {
-          scale: 1,
-        }}
-        transition={{ duration: 1, repeat: Infinity }}
-      />
-      {/* Mouth */}
-      <motion.div
-        className="absolute bottom-1/3 left-1/2 -translate-x-1/2 w-8 h-2 bg-white rounded-full"
-        animate={emotion === "happy" ? {
-          scaleX: [1, 1.2, 1],
-          rotate: [0, 5, 0],
-        } : {
-          scaleX: 1,
-          rotate: 0,
-        }}
-        transition={{ duration: 2, repeat: Infinity }}
-      />
-    </div>
-  </motion.div>
-);
+// Guide character variants
+const characterVariants = {
+  default: {
+    color: "from-blue-400 to-purple-500",
+    messages: {
+      welcome: "Hey there! Let's get to know you better! 👋",
+      timePreference: "When do you feel most energized? Pick your power hours! ⚡",
+      intensity: "How hard do you want to push yourself? Choose your intensity! 💪",
+      social: "Last step! Let's figure out your social style! 🌟",
+    }
+  },
+  solo: {
+    color: "from-red-500 to-orange-600",
+    messages: {
+      welcome: "GREETINGS, MORTAL. I AM GOONBOT 9000. YOU HAVE CHOSEN THE PATH OF SOLITUDE. INITIALIZING TRAINING PROTOCOL... 🤖",
+      timePreference: "ANALYZING OPTIMAL PERFORMANCE WINDOWS. SELECT YOUR PRIME OPERATION HOURS! ⚡",
+      intensity: "CALIBRATING CHALLENGE PARAMETERS. SET YOUR POWER LEVEL! 💪",
+      social: "CONFIGURING SOCIAL PROTOCOLS. DETERMINE YOUR INTERACTION MATRIX! 🔧",
+    }
+  },
+  competitive: {
+    color: "from-pink-400 to-purple-500",
+    messages: {
+      welcome: "Heya streaker! I'm Goonette, and I'm super excited to be your streak buddy! Let's make this fun! 💖",
+      timePreference: "When are you at your absolute best? Choose your power hours! ✨",
+      intensity: "Time to spice things up! How challenging should we make this? 🔥",
+      social: "Last but not least, let's see how social you wanna be! No pressure! 😘",
+    }
+  },
+  hardcore: {
+    color: "from-purple-900 to-red-900",
+    messages: {
+      welcome: "Ah, a seeker of ultimate power enters my domain. I am The Temptress, and I shall guide your journey... 😈",
+      timePreference: "Choose the hours when your power peaks, mortal. Choose wisely... ⏳",
+      intensity: "Now, show me how far you're willing to go. What intensity beckons you? 🔥",
+      social: "The final choice awaits. How shall others witness your ascension? 👑",
+    }
+  }
+};
+
+// Enhanced GuideCharacter component
+const GuideCharacter = ({ emotion = "happy", style = "default" }) => {
+  const variant = characterVariants[style];
+
+  return (
+    <motion.div
+      className="absolute top-4 right-4 w-24 h-24 md:w-32 md:h-32"
+      initial={{ scale: 0 }}
+      animate={{ scale: 1 }}
+      transition={{ type: "spring", stiffness: 260, damping: 20 }}
+    >
+      <div className="relative">
+        {/* Character base */}
+        <motion.div
+          className={`absolute inset-0 bg-gradient-to-br ${variant.color} rounded-full`}
+          animate={{
+            scale: [1, 1.05, 1],
+          }}
+          transition={{ duration: 2, repeat: Infinity }}
+        />
+
+        {/* Eyes */}
+        <motion.div
+          className={`absolute top-1/3 left-1/4 w-3 h-3 bg-white rounded-full ${
+            style === 'hardcore' ? 'bg-red-500' : 'bg-white'
+          }`}
+          animate={style === 'solo' ? {
+            opacity: [1, 0, 1],
+            scale: [1, 1.2, 1],
+          } : {
+            scale: [1, 1.2, 1],
+          }}
+          transition={{ duration: style === 'solo' ? 2 : 1, repeat: Infinity }}
+        />
+        <motion.div
+          className={`absolute top-1/3 right-1/4 w-3 h-3 bg-white rounded-full ${
+            style === 'hardcore' ? 'bg-red-500' : 'bg-white'
+          }`}
+          animate={style === 'solo' ? {
+            opacity: [1, 0, 1],
+            scale: [1, 1.2, 1],
+          } : {
+            scale: [1, 1.2, 1],
+          }}
+          transition={{ duration: style === 'solo' ? 2 : 1, repeat: Infinity }}
+        />
+
+        {/* Mouth */}
+        <motion.div
+          className={`absolute bottom-1/3 left-1/2 -translate-x-1/2 w-8 h-2 bg-white rounded-full ${
+            style === 'competitive' ? 'h-3' : 'h-2'
+          } ${style === 'hardcore' ? 'bg-red-500' : 'bg-white'}`}
+          animate={
+            style === 'competitive' 
+              ? {
+                  scaleX: [1, 1.2, 1],
+                  scaleY: [1, 1.5, 1],
+                  rotate: [0, 5, 0],
+                }
+              : style === 'solo'
+              ? {
+                  scaleX: [1, 1.1, 1],
+                  rotate: 0,
+                }
+              : {
+                  scaleX: [1, 1.2, 1],
+                  rotate: [0, 5, 0],
+                }
+          }
+          transition={{ duration: 2, repeat: Infinity }}
+        />
+
+        {/* Special effects based on character type */}
+        {style === 'solo' && (
+          <motion.div
+            className="absolute inset-0 border-2 border-red-500 rounded-full"
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.5, 0, 0.5],
+            }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
+        )}
+        {style === 'competitive' && (
+          <motion.div
+            className="absolute -inset-2 opacity-50"
+            animate={{
+              rotate: [0, 360],
+            }}
+            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+          >
+            {[...Array(8)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-2 h-2 bg-pink-300 rounded-full"
+                style={{
+                  top: '50%',
+                  left: '50%',
+                  transform: `rotate(${i * 45}deg) translateY(-12px)`,
+                }}
+              />
+            ))}
+          </motion.div>
+        )}
+        {style === 'hardcore' && (
+          <motion.div
+            className="absolute -inset-4 opacity-30"
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.3, 0.1, 0.3],
+            }}
+            transition={{ duration: 3, repeat: Infinity }}
+          >
+            <div className="absolute inset-0 bg-red-500 rounded-full filter blur-xl" />
+          </motion.div>
+        )}
+      </div>
+    </motion.div>
+  );
+};
 
 const slideVariants = {
   enter: (direction: number) => ({
@@ -204,6 +313,23 @@ const socialPreferences = [
   }
 ];
 
+const getGuideMessage = (step: number, goonStyle: string) => {
+  const variant = characterVariants[goonStyle || 'default'];
+
+  switch(step) {
+    case 1:
+      return goonStyle ? goonStyles.find(style => style.id === goonStyle)?.greeting : variant.messages.welcome;
+    case 2:
+      return variant.messages.timePreference;
+    case 3:
+      return variant.messages.intensity;
+    case 4:
+      return variant.messages.social;
+    default:
+      return "Ready to start your journey? Let's go! 🚀";
+  }
+};
+
 export default function OnboardingPage() {
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(0);
@@ -250,26 +376,12 @@ export default function OnboardingPage() {
     });
   };
 
-  const getGuideMessage = () => {
-    switch(step) {
-      case 1:
-        return goonStyle ? goonStyles.find(style => style.id === goonStyle)?.greeting : "Hey there! Let's get to know you better! 👋";
-      case 2:
-        return "When do you feel most energized? Pick your power hours! ⚡";
-      case 3:
-        return "How hard do you want to push yourself? Choose your intensity! 💪";
-      case 4:
-        return "Last step! Let's figure out your social style! 🌟";
-      default:
-        return "Ready to start your journey? Let's go! 🚀";
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-12 px-4">
       <div className="max-w-4xl mx-auto relative">
         {/* Guide Character */}
-        <GuideCharacter emotion={guideEmotion} />
+        <GuideCharacter emotion={guideEmotion} style={goonStyle || 'default'} />
 
         {/* Guide Message */}
         <motion.div
@@ -278,7 +390,7 @@ export default function OnboardingPage() {
           animate={{ opacity: 1, y: 0 }}
           key={step}
         >
-          {getGuideMessage()}
+          {getGuideMessage(step, goonStyle)}
         </motion.div>
 
         <AnimatePresence mode="wait" custom={direction}>
