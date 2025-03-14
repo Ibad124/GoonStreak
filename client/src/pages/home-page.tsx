@@ -1,15 +1,13 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { Loader2, Menu, Film, Trophy, Star, Flame, Clock, Users, Target, Sparkles, ChevronRight } from "lucide-react";
-import { useTheme } from "next-themes"; //This import remains as stated in thinking
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
-import { usePreferences } from "@/hooks/use-preferences"; // Changed import to usePreferences
+import { useTheme } from "@/hooks/use-theme";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Link } from "wouter";
-
+import { motion, AnimatePresence } from "framer-motion";
+import { Loader2, Menu, Film, Trophy, Star, Flame, Clock, Users, Target, Sparkles } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import StreakStats from "@/components/StreakStats";
@@ -108,7 +106,7 @@ const characterMessages = {
 export default function HomePage() {
   const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
-  const { preferences } = usePreferences(); // Changed useTheme to usePreferences
+  const { preferences } = useTheme();
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
   const [isGoonRoomOpen, setIsGoonRoomOpen] = useState(false);
 
@@ -291,94 +289,41 @@ export default function HomePage() {
           animate={{ opacity: 1, y: 0 }}
           className="container mx-auto px-4 pt-24 pb-6"
         >
-          <div className="text-center mb-16">
-            <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-violet-200 to-violet-400 text-transparent bg-clip-text">
-              Elevate Your Daily Practice
-            </h1>
-            <p className="text-violet-200/80 text-lg mb-8">
-              Track your progress, build momentum, and unlock your full potential with our elegant tracking system.
-            </p>
-            <div className="flex justify-center gap-4">
-              <Button
-                size="lg"
-                className="bg-violet-500 hover:bg-violet-600 text-white rounded-full px-8"
-                onClick={() => setIsSessionModalOpen(true)}
-              >
-                Start New Session <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="text-violet-200 border-violet-500/50 hover:bg-violet-500/10 rounded-full px-8"
-              >
-                View Journey
-              </Button>
+          <div className={`${style.cardBg} backdrop-blur rounded-2xl p-6 md:p-8 ${style.border} hover:shadow-lg transition-all duration-300`}>
+            <div className="flex items-start md:items-center gap-4 flex-col md:flex-row">
+              <div className={`p-4 rounded-2xl bg-gradient-to-br ${style.button} shadow-lg relative overflow-hidden group`}>
+                <Clock className="h-6 w-6 md:h-8 md:w-8 text-white relative z-10" />
+                <motion.div
+                  className="absolute inset-0 bg-white/20"
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: [1, 1.5, 1], opacity: [0, 0.5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <motion.h2
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  className={`text-xl md:text-3xl font-bold ${style.text} mb-2`}
+                >
+                  {getTimeMessage()}
+                </motion.h2>
+                <motion.p
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                  className={`${style.text} opacity-80 text-sm md:text-base`}
+                >
+                  {style.greeting}
+                </motion.p>
+              </div>
             </div>
           </div>
         </motion.div>
 
         <main className="container mx-auto px-4 pt-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="bg-violet-900/30 backdrop-blur-lg rounded-2xl p-6 border border-violet-500/20"
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-violet-500/20 rounded-lg">
-                  <Flame className="h-5 w-5 text-violet-400" />
-                </div>
-                <h3 className="text-violet-200 font-medium">Current Streak</h3>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold text-white">{stats.user.currentStreak}</span>
-                <span className="text-violet-300">days</span>
-              </div>
-              <p className="text-sm text-violet-300/80 mt-2">+3 from last week</p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-violet-900/30 backdrop-blur-lg rounded-2xl p-6 border border-violet-500/20"
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-violet-500/20 rounded-lg">
-                  <Clock className="h-5 w-5 text-violet-400" />
-                </div>
-                <h3 className="text-violet-200 font-medium">Total Practice</h3>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold text-white">{stats.user.totalSessions}</span>
-                <span className="text-violet-300">hours</span>
-              </div>
-              <p className="text-sm text-violet-300/80 mt-2">39 minutes today</p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-violet-900/30 backdrop-blur-lg rounded-2xl p-6 border border-violet-500/20"
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-violet-500/20 rounded-lg">
-                  <Star className="h-5 w-5 text-violet-400" />
-                </div>
-                <h3 className="text-violet-200 font-medium">Level Progress</h3>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold text-white">75</span>
-                <span className="text-violet-300">%</span>
-              </div>
-              <p className="text-sm text-violet-300/80 mt-2">7450/10000 XP</p>
-            </motion.div>
-          </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
-            <div className="lg:col-span-12 space-y-4 md:space-y-6">
+            <div className="lg:col-span-4 space-y-4 md:space-y-6">
               <motion.div
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
