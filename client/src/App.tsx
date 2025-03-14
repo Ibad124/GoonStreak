@@ -8,15 +8,17 @@ import HomePage from "@/pages/home-page";
 import AuthPage from "@/pages/auth-page";
 import LeaderboardPage from "@/pages/leaderboard-page";
 import AdultPage from "@/pages/adult-content";
+import GoalsPage from "@/pages/goals-page";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
     <Switch>
+      <Route path="/auth" component={AuthPage} />
+      <ProtectedRoute path="/onboarding/goals" component={GoalsPage} />
       <ProtectedRoute path="/adult-content" component={AdultPage} />
       <ProtectedRoute path="/leaderboard" component={LeaderboardPage} />
-      <ProtectedRoute path="/" exact component={HomePage} />
-      <Route path="/auth" component={AuthPage} />
+      <ProtectedRoute path="/" component={HomePage} />
       <Route component={NotFound} />
     </Switch>
   );

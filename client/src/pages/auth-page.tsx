@@ -1,6 +1,8 @@
 import React from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { insertUserSchema } from "@shared/schema";
 import {
   Form,
   FormControl,
@@ -13,10 +15,35 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Redirect } from "wouter";
-import { Loader2 } from "lucide-react";
+import { Loader2, Lock, User, ArrowRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+const formVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: "easeOut"
+    }
+  },
+  exit: { 
+    opacity: 0, 
+    y: -20,
+    transition: {
+      duration: 0.3
+    }
+  }
+};
+
+const inputVariants = {
+  focus: { scale: 1.02, transition: { duration: 0.2 } },
+  blur: { scale: 1, transition: { duration: 0.2 } }
+};
 
 export default function AuthPage() {
-  const { user, login, isAuthenticated } = useAuth();
+  const { user, loginMutation, registerMutation } = useAuth();
 
   const loginForm = useForm({
     defaultValues: {
@@ -25,130 +52,232 @@ export default function AuthPage() {
     },
   });
 
-  const handleLogin = async (data: { username: string; password: string }) => {
-    await login(data);
-  };
+  const registerForm = useForm({
+    resolver: zodResolver(insertUserSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+      isAnonymous: false,
+      showOnLeaderboard: true,
+    },
+  });
 
-  if (isAuthenticated) {
-    return <Redirect to="/" />;
+  if (user) {
+    return <Redirect to="/onboarding/goals" />;
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
-      {/* Form Section - Takes full width on mobile, half on desktop */}
-      <div className="flex-1 flex items-center justify-center p-4">
-        <Card className="w-full max-w-sm p-4">
+    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      {/* Form Section */}
+      <motion.div 
+        className="flex-1 flex items-center justify-center p-6 md:p-8"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+      >
+        <Card className="w-full max-w-md p-6 backdrop-blur-xl bg-white/90 shadow-xl shadow-blue-900/5 border-zinc-200/50">
           <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-4">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="register">Register</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 mb-8">
+              <TabsTrigger value="login" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                Login
+              </TabsTrigger>
+              <TabsTrigger value="register" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                Register
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="login">
-              <Form {...loginForm}>
-                <form
-                  onSubmit={loginForm.handleSubmit(handleLogin)}
-                  className="space-y-4"
+            <AnimatePresence mode="wait">
+              <TabsContent value="login">
+                <motion.div
+                  variants={formVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
                 >
-                  <FormField
-                    control={loginForm.control}
-                    name="username"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            placeholder="Username"
-                            {...field}
-                            className="h-12"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={loginForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            type="password"
-                            placeholder="Password"
-                            {...field}
-                            className="h-12"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" className="w-full h-12 text-lg">
-                    Login
-                  </Button>
-                </form>
-              </Form>
-            </TabsContent>
+                  <Form {...loginForm}>
+                    <form
+                      onSubmit={loginForm.handleSubmit((data) => loginMutation.mutate(data))}
+                      className="space-y-6"
+                    >
+                      <FormField
+                        control={loginForm.control}
+                        name="username"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <motion.div
+                                variants={inputVariants}
+                                whileFocus="focus"
+                                animate="blur"
+                              >
+                                <div className="relative">
+                                  <User className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground/50" />
+                                  <Input
+                                    placeholder="Username"
+                                    {...field}
+                                    className="h-12 pl-10"
+                                  />
+                                </div>
+                              </motion.div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={loginForm.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <motion.div
+                                variants={inputVariants}
+                                whileFocus="focus"
+                                animate="blur"
+                              >
+                                <div className="relative">
+                                  <Lock className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground/50" />
+                                  <Input
+                                    type="password"
+                                    placeholder="Password"
+                                    {...field}
+                                    className="h-12 pl-10"
+                                  />
+                                </div>
+                              </motion.div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button
+                        type="submit"
+                        className="w-full h-12 text-lg relative group"
+                        disabled={loginMutation.isPending}
+                      >
+                        {loginMutation.isPending ? (
+                          <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+                        ) : (
+                          <>
+                            Login
+                            <ArrowRight className="h-5 w-5 ml-2 inline-block transition-transform group-hover:translate-x-1" />
+                          </>
+                        )}
+                      </Button>
+                    </form>
+                  </Form>
+                </motion.div>
+              </TabsContent>
 
-            <TabsContent value="register">
-              <Form {...loginForm}>
-                <form
-                  onSubmit={loginForm.handleSubmit(handleLogin)}
-                  className="space-y-4"
+              <TabsContent value="register">
+                <motion.div
+                  variants={formVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
                 >
-                  <FormField
-                    control={loginForm.control}
-                    name="username"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            placeholder="Username"
-                            {...field}
-                            className="h-12"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={loginForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            type="password"
-                            placeholder="Password"
-                            {...field}
-                            className="h-12"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" className="w-full h-12 text-lg">
-                    Register
-                  </Button>
-                </form>
-              </Form>
-            </TabsContent>
+                  <Form {...registerForm}>
+                    <form
+                      onSubmit={registerForm.handleSubmit((data) => registerMutation.mutate(data))}
+                      className="space-y-6"
+                    >
+                      <FormField
+                        control={registerForm.control}
+                        name="username"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <motion.div
+                                variants={inputVariants}
+                                whileFocus="focus"
+                                animate="blur"
+                              >
+                                <div className="relative">
+                                  <User className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground/50" />
+                                  <Input
+                                    placeholder="Choose a username"
+                                    {...field}
+                                    className="h-12 pl-10"
+                                  />
+                                </div>
+                              </motion.div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={registerForm.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <motion.div
+                                variants={inputVariants}
+                                whileFocus="focus"
+                                animate="blur"
+                              >
+                                <div className="relative">
+                                  <Lock className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground/50" />
+                                  <Input
+                                    type="password"
+                                    placeholder="Create a password"
+                                    {...field}
+                                    className="h-12 pl-10"
+                                  />
+                                </div>
+                              </motion.div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button
+                        type="submit"
+                        className="w-full h-12 text-lg relative group"
+                        disabled={registerMutation.isPending}
+                      >
+                        {registerMutation.isPending ? (
+                          <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+                        ) : (
+                          <>
+                            Get Started
+                            <ArrowRight className="h-5 w-5 ml-2 inline-block transition-transform group-hover:translate-x-1" />
+                          </>
+                        )}
+                      </Button>
+                    </form>
+                  </Form>
+                </motion.div>
+              </TabsContent>
+            </AnimatePresence>
           </Tabs>
         </Card>
-      </div>
+      </motion.div>
 
-      {/* Hero Section - Hidden on mobile, shown on desktop */}
-      <div className="bg-primary hidden md:flex flex-1 items-center justify-center p-8">
-        <div className="max-w-md text-primary-foreground">
-          <h1 className="text-4xl font-bold mb-4">Welcome to Goon Streak</h1>
-          <p className="text-lg opacity-90">
-            Track your daily streaks, earn achievements, and compete with others
-            in this adult-oriented habit tracking application.
-          </p>
+      {/* Hero Section */}
+      <motion.div 
+        className="bg-primary hidden md:flex flex-1 items-center justify-center p-12"
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+      >
+        <div className="max-w-lg">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <h1 className="text-5xl font-bold mb-6 text-primary-foreground">
+              Welcome to Goon Streak
+            </h1>
+            <p className="text-xl leading-relaxed text-primary-foreground/90">
+              Transform your daily habits into achievements. Track streaks, earn rewards, 
+              and join a community of motivated individuals on their journey to success.
+            </p>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
