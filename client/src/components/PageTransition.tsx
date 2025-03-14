@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/hooks/use-theme";
+import { Button } from "@/components/ui/button";
 
 interface PageTransitionProps {
   children: React.ReactNode;
