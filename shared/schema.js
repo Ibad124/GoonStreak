@@ -107,6 +107,11 @@ export const LEVEL_THRESHOLDS = {
   3: { xp: 150, title: "Goon Expert" },
   4: { xp: 300, title: "Master Stroker" },
   5: { xp: 500, title: "Legendary Gooner" },
+  6: { xp: 750, title: "Elite Edger" },
+  7: { xp: 1000, title: "Supreme Gooner" },
+  8: { xp: 1500, title: "Transcendent One" },
+  9: { xp: 2000, title: "Eternal Stroker" },
+  10: { xp: 3000, title: "God of Pleasure" }
 };
 
 export const XP_REWARDS = {
@@ -114,6 +119,9 @@ export const XP_REWARDS = {
   STREAK_MILESTONE: 30,
   ACHIEVEMENT_EARNED: 25,
   CHALLENGE_COMPLETED: 50,
+  DAILY_BONUS: 10,
+  WEEKLY_BONUS: 100,
+  SOCIAL_INTERACTION: 5
 };
 
 export const DAYS_OF_WEEK = [

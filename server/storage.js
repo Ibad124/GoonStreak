@@ -207,7 +207,7 @@ export class MemStorage {
     return user;
   }
 
-  calculateLevel(xpPoints) {
+  async calculateLevel(xpPoints) {
     let level = 1;
     let nextLevelXP = LEVEL_THRESHOLDS[1].xp;
     let currentLevelXP = 0;
@@ -236,7 +236,7 @@ export class MemStorage {
 
     const oldLevel = user.level;
     const newXP = user.xpPoints + xpToAdd;
-    const { level, title, nextLevelXP, currentLevelXP } = this.calculateLevel(newXP);
+    const { level, title, nextLevelXP, currentLevelXP } = await this.calculateLevel(newXP);
 
     console.log('Storage updateUserXP:', {
       userId,
@@ -253,11 +253,24 @@ export class MemStorage {
       title,
     });
 
+    const newAchievements = [];
+
+    // Check for level-up achievements
+    if (level > oldLevel) {
+      newAchievements.push(await this.addAchievement(
+        userId,
+        "LEVEL_UP",
+        `Reached level ${level} and earned the title ${title}!`
+      ));
+    }
+
+    // Return updated stats
     return {
       user: updatedUser,
       leveledUp: level > oldLevel,
       nextLevelXP,
-      currentLevelXP
+      currentLevelXP,
+      newAchievements
     };
   }
 
