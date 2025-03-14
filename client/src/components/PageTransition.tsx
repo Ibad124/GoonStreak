@@ -110,6 +110,17 @@ export const PageTransition = ({
             }}
           >
             {children}
+            <Button 
+              className="mt-4 bg-white/20 hover:bg-white/30 text-white"
+              onClick={() => {
+                import('wouter').then(module => {
+                  const navigate = module.default[1];
+                  navigate('/');
+                });
+              }}
+            >
+              Go to Home
+            </Button>
           </motion.div>
         </motion.div>
       )}
