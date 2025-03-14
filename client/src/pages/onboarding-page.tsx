@@ -35,6 +35,7 @@ import {
   Moon,
   Zap,
 } from "lucide-react";
+import { PageTransition } from "@/components/PageTransition";
 
 // Enhanced typing animation for messages
 const TypedMessage = ({ text }: { text: string }) => {
@@ -73,7 +74,7 @@ const BackgroundEffects = ({ style = "default" }) => {
     solo: {
       className: "absolute inset-0 bg-gradient-to-br from-red-900/20 via-orange-900/10 to-red-900/20",
       patterns: (
-        <motion.div 
+        <motion.div
           className="absolute inset-0 overflow-hidden"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -104,7 +105,7 @@ const BackgroundEffects = ({ style = "default" }) => {
     competitive: {
       className: "absolute inset-0 bg-gradient-to-br from-pink-400/20 via-purple-400/10 to-pink-400/20",
       patterns: (
-        <motion.div 
+        <motion.div
           className="absolute inset-0 overflow-hidden"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -137,7 +138,7 @@ const BackgroundEffects = ({ style = "default" }) => {
     hardcore: {
       className: "absolute inset-0 bg-gradient-to-br from-purple-900/30 via-red-900/20 to-purple-900/30",
       patterns: (
-        <motion.div 
+        <motion.div
           className="absolute inset-0 overflow-hidden"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -278,7 +279,7 @@ const GuideCharacter = ({ emotion = "happy", style = "default" }) => {
             style === 'competitive' ? 'h-3' : 'h-2'
           } ${style === 'hardcore' ? 'bg-red-500' : 'bg-white'}`}
           animate={
-            style === 'competitive' 
+            style === 'competitive'
               ? {
                   scaleX: [1, 1.2, 1],
                   scaleY: [1, 1.5, 1],
@@ -487,6 +488,7 @@ export default function OnboardingPage() {
   const [intensityLevel, setIntensityLevel] = useState("");
   const [socialMode, setSocialMode] = useState("");
   const [guideEmotion, setGuideEmotion] = useState("happy");
+  const [showTransition, setShowTransition] = useState(false);
   const [, setLocation] = useLocation();
   const { user } = useAuth();
 
@@ -500,7 +502,7 @@ export default function OnboardingPage() {
       return res.json();
     },
     onSuccess: () => {
-      setLocation("/onboarding/goals");
+      setShowTransition(true);
     },
   });
 
@@ -525,10 +527,28 @@ export default function OnboardingPage() {
     });
   };
 
+  const handleTransitionComplete = () => {
+    setLocation("/");
+  };
 
   return (
     <div className="min-h-screen relative overflow-hidden">
       <BackgroundEffects style={goonStyle} />
+
+      <PageTransition
+        isVisible={showTransition}
+        onComplete={handleTransitionComplete}
+      >
+        <motion.p
+          className="text-3xl font-bold text-white text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1 }}
+        >
+          Your journey begins now...
+        </motion.p>
+      </PageTransition>
+
       <div className="max-w-4xl mx-auto relative py-12 px-4">
         <GuideCharacter emotion={guideEmotion} style={goonStyle || 'default'} />
 
@@ -550,7 +570,7 @@ export default function OnboardingPage() {
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ 
+              transition={{
                 type: "spring",
                 stiffness: 300,
                 damping: 30
@@ -630,7 +650,7 @@ export default function OnboardingPage() {
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ 
+              transition={{
                 type: "spring",
                 stiffness: 300,
                 damping: 30
@@ -716,7 +736,7 @@ export default function OnboardingPage() {
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ 
+              transition={{
                 type: "spring",
                 stiffness: 300,
                 damping: 30
@@ -802,7 +822,7 @@ export default function OnboardingPage() {
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{ 
+              transition={{
                 type: "spring",
                 stiffness: 300,
                 damping: 30
