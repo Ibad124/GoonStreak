@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Link } from "wouter";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Loader2, Menu, Film, Trophy, Star, Flame, Clock, Users, Target, Sparkles } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -19,42 +19,42 @@ import { GoonRoom } from "@/components/GoonRoom";
 
 const themeStyles = {
   default: {
-    background: "from-zinc-50 to-blue-50",
-    headerBg: "bg-white/80",
-    cardBg: "bg-white/80",
-    text: "text-zinc-900",
-    accent: "text-blue-500",
-    button: "from-blue-500 to-blue-600",
-    border: "border-zinc-200/50",
-    greeting: "Ready to conquer today? 🌟"
+    background: "from-zinc-900 via-indigo-900 to-purple-900",
+    headerBg: "bg-black/40",
+    cardBg: "bg-black/40",
+    text: "text-white",
+    accent: "text-indigo-400",
+    button: "from-indigo-600 to-purple-600",
+    border: "border-white/10",
+    greeting: "Ready to push your limits? 🌟"
   },
   solo: {
-    background: "from-slate-900 to-zinc-900",
-    headerBg: "bg-black/20",
-    cardBg: "bg-black/20",
-    text: "text-zinc-100",
-    accent: "text-emerald-500",
-    button: "from-emerald-500 to-emerald-600",
+    background: "from-slate-900 via-cyan-900 to-blue-900",
+    headerBg: "bg-black/40",
+    cardBg: "bg-black/40",
+    text: "text-cyan-50",
+    accent: "text-cyan-400",
+    button: "from-cyan-600 to-blue-600",
     border: "border-white/10",
     greeting: "SYSTEMS ONLINE. READY FOR TRAINING. 🤖"
   },
   competitive: {
-    background: "from-purple-900 to-pink-900",
-    headerBg: "bg-black/20",
-    cardBg: "bg-black/20",
-    text: "text-pink-100",
-    accent: "text-pink-500",
-    button: "from-pink-500 to-purple-500",
+    background: "from-rose-900 via-pink-900 to-fuchsia-900",
+    headerBg: "bg-black/40",
+    cardBg: "bg-black/40",
+    text: "text-pink-50",
+    accent: "text-pink-400",
+    button: "from-rose-600 to-pink-600",
     border: "border-white/10",
     greeting: "Time to crush those goals! 🔥"
   },
   hardcore: {
-    background: "from-red-950 to-black",
-    headerBg: "bg-black/20",
-    cardBg: "bg-black/20",
-    text: "text-red-100",
-    accent: "text-red-500",
-    button: "from-red-500 to-red-600",
+    background: "from-red-950 via-purple-950 to-black",
+    headerBg: "bg-black/40",
+    cardBg: "bg-black/40",
+    text: "text-red-50",
+    accent: "text-red-400",
+    button: "from-red-600 to-purple-600",
     border: "border-white/10",
     greeting: "Embrace the darkness within... 😈"
   }
@@ -204,16 +204,33 @@ export default function HomePage() {
 
   return (
     <>
-      <div className={`min-h-screen pb-24 relative overflow-hidden bg-gradient-to-br ${style.background}`}>
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoNDUpIj48cGF0aCBkPSJNLTEwIDMwbDIwLTIwTTAgNDBsMjAtMjBNMTAgNTBsMjAtMjAiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4xIiBzdHJva2Utd2lkdGg9IjIiLz48L3BhdHRlcm4+PC9kZWZzPjxwYXRoIGZpbGw9InVybCgjYSkiIGQ9Ik0wIDBoMjAwdjIwMEgweiIvPjwvc3ZnPg==')]" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+      <div className={`min-h-screen pb-24 relative bg-gradient-to-br ${style.background}`}>
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <motion.div 
+            className="absolute inset-0 opacity-30"
+            animate={{
+              scale: [1, 1.1, 1],
+              rotate: [0, 5, 0],
+            }}
+            transition={{ duration: 20, repeat: Infinity }}
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]" />
+          </motion.div>
+          <motion.div
+            className="absolute -top-1/2 -left-1/2 w-full h-full opacity-20"
+            animate={{
+              rotate: [0, 360],
+            }}
+            transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+          >
+            <div className="w-full h-full bg-[conic-gradient(from_0deg,transparent,rgba(255,255,255,0.1),transparent)]" />
+          </motion.div>
         </div>
 
         <motion.header
           initial={{ y: -100 }}
           animate={{ y: 0 }}
-          className={`fixed top-0 left-0 right-0 ${style.headerBg} backdrop-blur-lg z-50 border-b ${style.border}`}
+          className={`fixed top-0 left-0 right-0 ${style.headerBg} backdrop-blur-xl z-50 border-b ${style.border}`}
         >
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
             <div className="flex items-center gap-2 min-w-0">
@@ -289,10 +306,14 @@ export default function HomePage() {
           animate={{ opacity: 1, y: 0 }}
           className="container mx-auto px-4 pt-24 pb-6"
         >
-          <div className={`${style.cardBg} backdrop-blur rounded-2xl p-6 md:p-8 ${style.border} hover:shadow-lg transition-all duration-300`}>
-            <div className="flex items-start md:items-center gap-4 flex-col md:flex-row">
-              <div className={`p-4 rounded-2xl bg-gradient-to-br ${style.button} shadow-lg relative overflow-hidden group`}>
-                <Clock className="h-6 w-6 md:h-8 md:w-8 text-white relative z-10" />
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            className={`${style.cardBg} backdrop-blur-xl rounded-3xl p-8 ${style.border} shadow-2xl shadow-black/20 relative overflow-hidden group`}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="flex items-start md:items-center gap-6 relative z-10">
+              <div className={`p-5 rounded-2xl bg-gradient-to-br ${style.button} shadow-lg relative overflow-hidden group`}>
+                <Clock className="h-8 w-8 md:h-10 md:w-10 text-white relative z-10" />
                 <motion.div
                   className="absolute inset-0 bg-white/20"
                   initial={{ scale: 0, opacity: 0 }}
@@ -304,7 +325,7 @@ export default function HomePage() {
                 <motion.h2
                   initial={{ x: -20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
-                  className={`text-xl md:text-3xl font-bold ${style.text} mb-2`}
+                  className={`text-2xl md:text-4xl font-bold ${style.text} mb-3`}
                 >
                   {getTimeMessage()}
                 </motion.h2>
@@ -312,18 +333,18 @@ export default function HomePage() {
                   initial={{ x: -20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 0.1 }}
-                  className={`${style.text} opacity-80 text-sm md:text-base`}
+                  className={`${style.text} opacity-80 text-lg md:text-xl font-medium`}
                 >
                   {style.greeting}
                 </motion.p>
               </div>
             </div>
-          </div>
+          </motion.div>
         </motion.div>
 
         <main className="container mx-auto px-4 pt-4">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
-            <div className="lg:col-span-4 space-y-4 md:space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-4 space-y-6">
               <motion.div
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
@@ -414,7 +435,7 @@ export default function HomePage() {
               </motion.div>
             </div>
 
-            <div className="lg:col-span-8 space-y-4 md:space-y-6">
+            <div className="lg:col-span-8 space-y-6">
               <motion.div
                 initial={{ x: 20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
@@ -502,15 +523,15 @@ export default function HomePage() {
         <motion.div
           initial={{ y: 100 }}
           animate={{ y: 0 }}
-          className={`fixed bottom-0 left-0 right-0 p-4 ${style.headerBg} backdrop-blur border-t ${style.border}`}
+          className={`fixed bottom-0 left-0 right-0 p-6 ${style.headerBg} backdrop-blur-xl border-t ${style.border}`}
         >
           <div className="container mx-auto max-w-lg">
             <Button
               className={`
-                w-full h-12 md:h-14 text-base md:text-lg rounded-full 
+                w-full h-16 text-xl rounded-2xl 
                 bg-gradient-to-r ${style.button} 
                 hover:brightness-110 transition-all duration-300 
-                shadow-lg shadow-current/20 hover:shadow-xl hover:shadow-current/30 
+                shadow-xl shadow-black/30 hover:shadow-2xl hover:shadow-black/40 
                 font-bold tracking-wide text-white transform hover:scale-[1.02]
                 relative overflow-hidden group
               `}
@@ -520,9 +541,9 @@ export default function HomePage() {
               <motion.div
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 justify-center relative z-10"
+                className="flex items-center gap-3 justify-center relative z-10"
               >
-                <Sparkles className="h-5 w-5 md:h-6 md:w-6" />
+                <Sparkles className="h-6 w-6 md:h-7 md:w-7" />
                 <span className="relative">
                   {preferences.goonStyle === "solo" ? "LOG TRAINING SESSION" :
                     preferences.goonStyle === "competitive" ? "Record Your Victory!" :
