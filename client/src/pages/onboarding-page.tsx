@@ -9,8 +9,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { User, Users, Trophy, Target, ArrowRight, ArrowLeft, Sparkles, Ghost, Crown, Medal, Brain, Heart, Coffee, Sun, Moon, Zap, } from "lucide-react";
 import { PageTransition } from "@/components/PageTransition";
-import type { ThemePreferences } from "@/hooks/use-theme";
-import type {ThemeStyle} from "@/types/theme";
+import type { ThemeStyle, ThemePreferences } from "@/types/theme";
 
 // Enhanced typing animation for messages
 const TypedMessage = ({ text }: { text: string }) => {
@@ -483,12 +482,17 @@ const OnboardingPage = () => {
 
   const savePreferencesMutation = useMutation({
     mutationFn: async (preferences: Partial<ThemePreferences>) => {
-      const res = await apiRequest("POST", "/api/user/preferences", preferences);
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to save preferences");
+      try {
+        const res = await apiRequest("POST", "/api/user/preferences", preferences);
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.message || "Failed to save preferences");
+        }
+        return data as ThemePreferences;
+      } catch (error) {
+        console.error("Failed to save preferences:", error);
+        throw error;
       }
-      return data as ThemePreferences;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user/preferences"] });
@@ -496,10 +500,9 @@ const OnboardingPage = () => {
       setShowTransition(true);
     },
     onError: (error: Error) => {
-      console.error("Failed to save preferences:", error);
       toast({
         title: "Error Saving Preferences",
-        description: "Failed to save your preferences. Please try again.",
+        description: error.message || "Failed to save your preferences. Please try again.",
         variant: "destructive",
       });
     },

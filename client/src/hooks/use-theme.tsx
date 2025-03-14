@@ -1,22 +1,9 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-
-export type ThemeStyle = "default" | "solo" | "competitive" | "hardcore";
-
-export interface ThemePreferences {
-  goonStyle: ThemeStyle;
-  timePreference: string;
-  intensityLevel: string;
-  socialMode: string;
-}
-
-interface ThemeContextType {
-  preferences: ThemePreferences;
-  updatePreferences: (prefs: Partial<ThemePreferences>) => Promise<void>;
-}
+import type { ThemeStyle, ThemePreferences } from "@/types/theme";
 
 const DEFAULT_PREFERENCES: ThemePreferences = {
   goonStyle: "default",
@@ -24,6 +11,11 @@ const DEFAULT_PREFERENCES: ThemePreferences = {
   intensityLevel: "",
   socialMode: "",
 };
+
+interface ThemeContextType {
+  preferences: ThemePreferences;
+  updatePreferences: (prefs: Partial<ThemePreferences>) => Promise<void>;
+}
 
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
