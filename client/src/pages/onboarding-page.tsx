@@ -478,7 +478,6 @@ const OnboardingPage = () => {
   const [guideEmotion, setGuideEmotion] = useState("happy");
   const [showTransition, setShowTransition] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
-  const [shouldRedirect, setShouldRedirect] = useState(false);
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -537,17 +536,8 @@ const OnboardingPage = () => {
   }, [goonStyle, timePreference, intensityLevel, socialMode, savePreferencesMutation, isNavigating]);
 
   const handleTransitionComplete = useCallback(() => {
-    setShouldRedirect(true);
-  }, []);
-
-  useEffect(() => {
-    if (shouldRedirect) {
-      const timer = setTimeout(() => {
-        setLocation("/");
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [shouldRedirect, setLocation]);
+    setLocation("/");
+  }, [setLocation]);
 
   useEffect(() => {
     if (!user) {
@@ -559,7 +549,6 @@ const OnboardingPage = () => {
     return () => {
       setIsNavigating(false);
       setShowTransition(false);
-      setShouldRedirect(false);
     };
   }, []);
 
