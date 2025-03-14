@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { User, Users, Trophy, Target, ArrowRight, ArrowLeft, Sparkles, Ghost, Crown, Medal, Brain, Heart, Coffee, Sun, Moon, Zap, } from "lucide-react";
 import { PageTransition } from "@/components/PageTransition";
 import type { ThemePreferences } from "@/hooks/use-theme";
+import type {ThemeStyle} from "@/types/theme";
 
 // Enhanced typing animation for messages
 const TypedMessage = ({ text }: { text: string }) => {
@@ -470,7 +471,7 @@ const getFinalButtonText = (style: string) => {
 const OnboardingPage = () => {
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(0);
-  const [goonStyle, setGoonStyle] = useState("");
+  const [goonStyle, setGoonStyle] = useState<ThemeStyle>("default");
   const [timePreference, setTimePreference] = useState("");
   const [intensityLevel, setIntensityLevel] = useState("");
   const [socialMode, setSocialMode] = useState("");
@@ -483,11 +484,11 @@ const OnboardingPage = () => {
   const savePreferencesMutation = useMutation({
     mutationFn: async (preferences: Partial<ThemePreferences>) => {
       const res = await apiRequest("POST", "/api/user/preferences", preferences);
+      const data = await res.json();
       if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Failed to save preferences");
+        throw new Error(data.message || "Failed to save preferences");
       }
-      return res.json();
+      return data as ThemePreferences;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user/preferences"] });
@@ -495,9 +496,10 @@ const OnboardingPage = () => {
       setShowTransition(true);
     },
     onError: (error: Error) => {
+      console.error("Failed to save preferences:", error);
       toast({
         title: "Error Saving Preferences",
-        description: error.message,
+        description: "Failed to save your preferences. Please try again.",
         variant: "destructive",
       });
     },
@@ -517,25 +519,30 @@ const OnboardingPage = () => {
 
   const handleComplete = useCallback(async () => {
     try {
-      await savePreferencesMutation.mutateAsync({
+      const preferences: Partial<ThemePreferences> = {
         goonStyle,
         timePreference,
         intensityLevel,
-        socialMode
-      });
+        socialMode,
+      };
+      await savePreferencesMutation.mutateAsync(preferences);
     } catch (error) {
-      console.error("Failed to save preferences:", error);
+      console.error("Failed to complete onboarding:", error);
     }
   }, [goonStyle, timePreference, intensityLevel, socialMode, savePreferencesMutation]);
 
   const handleTransitionComplete = useCallback(() => {
+    // Navigate to home page after transition completes
     setLocation("/");
   }, [setLocation]);
 
-  if (!user) {
-    setLocation("/auth");
-    return null;
-  }
+  useEffect(() => {
+    if (!user) {
+      setLocation("/auth");
+    }
+  }, [user, setLocation]);
+
+  if (!user) return null;
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -875,8 +882,7 @@ const OnboardingPage = () => {
                     <Card
                       className={`p-6 cursor-pointer transition-all duration-300 ${
                         socialMode === pref.id
-                          ? "ring-2 ring-primary ring-offset-2"
-                          : "hover:shadow-lg"
+                          ? "ring-2 ring-primary ring-offset-2"                          : "hover:shadow-lg"
                       }`}
                       onClick={() => setSocialMode(pref.id)}
                     >

@@ -31,12 +31,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const [preferences, setPreferences] = useState<ThemePreferences>(DEFAULT_PREFERENCES);
 
-  // Fetch preferences query with better error handling
   const { data: preferencesData } = useQuery<ThemePreferences>({
     queryKey: ["/api/user/preferences"],
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     gcTime: 1000 * 60 * 60, // Keep in cache for 1 hour
     retry: 3,
+    onSuccess: (data) => {
+      if (data) {
+        setPreferences(prev => ({ ...prev, ...data }));
+      }
+    },
     onError: () => {
       toast({
         title: "Error Loading Preferences",
@@ -46,19 +50,35 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   });
 
-  // Update preferences mutation with improved error handling
   const updatePreferencesMutation = useMutation({
     mutationFn: async (newPrefs: Partial<ThemePreferences>) => {
-      const res = await apiRequest("POST", "/api/user/preferences", newPrefs);
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to save preferences");
+      try {
+        const res = await apiRequest("POST", "/api/user/preferences", newPrefs);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || "Failed to save preferences");
+        }
+
+        // Ensure we have all required fields with proper types
+        const updatedPrefs: ThemePreferences = {
+          ...preferences,
+          ...data,
+          goonStyle: data.goonStyle || preferences.goonStyle,
+          timePreference: data.timePreference || preferences.timePreference,
+          intensityLevel: data.intensityLevel || preferences.intensityLevel,
+          socialMode: data.socialMode || preferences.socialMode,
+        };
+
+        return updatedPrefs;
+      } catch (error) {
+        console.error("Preference update error:", error);
+        throw error;
       }
-      return data as ThemePreferences;
     },
     onSuccess: (data) => {
       queryClient.setQueryData(["/api/user/preferences"], data);
-      setPreferences(prev => ({ ...prev, ...data }));
+      setPreferences(data);
       toast({
         title: "Preferences Updated",
         description: "Your theme preferences have been saved.",
@@ -66,35 +86,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       });
     },
     onError: (error: Error) => {
+      console.error("Failed to update preferences:", error);
       toast({
         title: "Error Saving Preferences",
-        description: error.message,
+        description: error.message || "Failed to save preferences. Please try again.",
         variant: "destructive",
       });
     },
   });
-
-  // Update local state when data changes with validation
-  useEffect(() => {
-    if (preferencesData) {
-      // Validate the data structure before updating state
-      const isValid = preferencesData.goonStyle && 
-                     typeof preferencesData.timePreference === 'string' && 
-                     typeof preferencesData.intensityLevel === 'string' && 
-                     typeof preferencesData.socialMode === 'string';
-
-      if (isValid) {
-        setPreferences(prev => ({ ...prev, ...preferencesData }));
-      } else {
-        console.warn("Received invalid preferences data:", preferencesData);
-        toast({
-          title: "Warning",
-          description: "Some preferences were invalid. Using default settings.",
-          variant: "destructive",
-        });
-      }
-    }
-  }, [preferencesData, toast]);
 
   const updatePreferences = async (prefs: Partial<ThemePreferences>) => {
     await updatePreferencesMutation.mutateAsync(prefs);
