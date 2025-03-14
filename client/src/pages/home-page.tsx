@@ -1,20 +1,14 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Menu, Film, Trophy, Star, Flame, Clock, Users, Target, Sparkles, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Link } from "wouter";
-import { useTheme } from "@/hooks/use-theme";
+import { useTheme } from "next-themes";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
-import { useTheme } from "@/hooks/use-theme";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Link } from "wouter";
-import { motion } from "framer-motion";
-import { Loader2, Menu, Film, Trophy, Star, Flame, Clock, Users, Target, Sparkles, ChevronRight } from "lucide-react";
+
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import StreakStats from "@/components/StreakStats";
@@ -304,14 +298,14 @@ export default function HomePage() {
               Track your progress, build momentum, and unlock your full potential with our elegant tracking system.
             </p>
             <div className="flex justify-center gap-4">
-              <Button 
+              <Button
                 size="lg"
                 className="bg-violet-500 hover:bg-violet-600 text-white rounded-full px-8"
                 onClick={() => setIsSessionModalOpen(true)}
               >
                 Start New Session <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button 
+              <Button
                 variant="outline"
                 size="lg"
                 className="text-violet-200 border-violet-500/50 hover:bg-violet-500/10 rounded-full px-8"
