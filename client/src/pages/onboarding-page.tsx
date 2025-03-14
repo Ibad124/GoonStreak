@@ -533,11 +533,14 @@ const OnboardingPage = () => {
       timePreference,
       intensityLevel,
       socialMode
+    }, {
+      onSuccess: () => {
+        window.location.href = "/";
+      }
     });
   };
 
   const handleTransitionComplete = () => {
-    // Use window.location.href for a full page refresh to ensure clean state
     window.location.href = "/";
   };
 
