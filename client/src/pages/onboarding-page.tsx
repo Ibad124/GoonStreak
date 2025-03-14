@@ -485,35 +485,34 @@ const OnboardingPage = () => {
   const [socialMode, setSocialMode] = useState("");
   const [guideEmotion, setGuideEmotion] = useState("happy");
   const [showTransition, setShowTransition] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   const [, setLocation] = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
 
   const savePreferencesMutation = useMutation({
-    mutationFn: async (preferences: Partial<ThemePreferences>) => {
-      try {
-        const res = await apiRequest("POST", "/api/user/preferences", preferences);
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.message || "Failed to save preferences");
-        }
-        return data as ThemePreferences;
-      } catch (error) {
-        console.error("Failed to save preferences:", error);
-        throw error;
+    mutationFn: async (preferences: ThemePreferences) => {
+      const res = await apiRequest("POST", "/api/user/preferences", preferences);
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to save preferences");
       }
+      return data as ThemePreferences;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user/preferences"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+      // Start the transition animation
       setShowTransition(true);
     },
     onError: (error: Error) => {
       toast({
         title: "Error Saving Preferences",
-        description: error.message || "Failed to save your preferences. Please try again.",
+        description: error.message || "Failed to save preferences. Please try again.",
         variant: "destructive",
       });
+      // Reset navigation state on error
+      setIsNavigating(false);
     },
   });
 
@@ -530,29 +529,23 @@ const OnboardingPage = () => {
   }, []);
 
   const handleComplete = useCallback(async () => {
+    if (isNavigating) return;
+
     try {
-      // Create a complete preferences object
-      const preferences: ThemePreferences = {
+      setIsNavigating(true);
+      await savePreferencesMutation.mutateAsync({
         goonStyle,
         timePreference,
         intensityLevel,
         socialMode,
-      };
-
-      // Save preferences
-      await savePreferencesMutation.mutateAsync(preferences);
+      });
     } catch (error) {
       console.error("Failed to complete onboarding:", error);
-      toast({
-        title: "Error Saving Preferences",
-        description: "Please try again. If the problem persists, refresh the page.",
-        variant: "destructive",
-      });
+      setIsNavigating(false);
     }
-  }, [goonStyle, timePreference, intensityLevel, socialMode, savePreferencesMutation, toast]);
+  }, [goonStyle, timePreference, intensityLevel, socialMode, savePreferencesMutation, isNavigating]);
 
   const handleTransitionComplete = useCallback(() => {
-    // Navigate to home page after transition completes
     setLocation("/");
   }, [setLocation]);
 
@@ -561,6 +554,14 @@ const OnboardingPage = () => {
       setLocation("/auth");
     }
   }, [user, setLocation]);
+
+  // Reset navigation state when component unmounts
+  useEffect(() => {
+    return () => {
+      setIsNavigating(false);
+      setShowTransition(false);
+    };
+  }, []);
 
   if (!user) return null;
 
@@ -895,7 +896,7 @@ const OnboardingPage = () => {
                 {socialPreferences.map((pref, index) => (
                   <motion.div
                     key={pref.id}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y:20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
                   >
@@ -903,7 +904,7 @@ const OnboardingPage = () => {
                       className={`p-6 cursor-pointer transition-all duration-300 ${
                         socialMode === pref.id
                           ? "ring-2 ring-primary ring-offset-2"
-                                                    : "hover:shadow-lg"
+                          : "hover:shadow-lg"
                       }`}
                       onClick={() => setSocialMode(pref.id)}
                     >
