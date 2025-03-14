@@ -116,6 +116,10 @@ export default function HomePage() {
   const sessionMutation = useMutation({
     mutationFn: async (sessionData) => {
       const res = await apiRequest("POST", "/api/session", sessionData);
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(error || 'Failed to log session');
+      }
       return res.json();
     },
     onSuccess: (data) => {
@@ -123,15 +127,15 @@ export default function HomePage() {
       setIsSessionModalOpen(false);
 
       toast({
-        title: "Session Logged!",
-        description: `You've earned ${data.xpGained} XP! Keep going! 🚀`,
+        title: "Session Logged Successfully! 🎉",
+        description: `Great work! You've earned ${data.xpGained} XP!`,
         variant: "default",
       });
     },
     onError: (error) => {
       toast({
-        title: "Error",
-        description: "Failed to log session. Please try again.",
+        title: "Failed to Log Session",
+        description: error.message || "Please try again.",
         variant: "destructive",
       });
     }
@@ -425,38 +429,41 @@ export default function HomePage() {
         </div>
       </main>
 
-      {/* Floating Action Button for Session Logging */}
+      {/* Session Logging Button */}
       <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 0.5, type: "spring" }}
-        className="fixed right-6 bottom-6"
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className={`fixed bottom-0 left-0 right-0 p-4 ${style.headerBg} backdrop-blur border-t ${style.border}`}
       >
-        <motion.div
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-        >
+        <div className="container mx-auto max-w-lg">
           <Button
-            size="lg"
             className={`
-              h-16 w-16 rounded-full
-              bg-gradient-to-r ${style.button}
-              shadow-lg hover:shadow-xl
-              transition-all duration-300
-              relative overflow-hidden
-              group
+              w-full h-16 text-lg rounded-2xl
+              bg-gradient-to-r ${style.button} 
+              hover:brightness-110 transition-all duration-300 
+              shadow-lg shadow-current/20 hover:shadow-xl hover:shadow-current/30 
+              font-bold tracking-wide text-white transform hover:scale-[1.02]
+              relative overflow-hidden group
             `}
+            size="lg"
             onClick={() => setIsSessionModalOpen(true)}
           >
-            <Plus className="h-8 w-8 text-white relative z-10" />
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 justify-center relative z-10"
+            >
+              <Sparkles className="h-6 w-6" />
+              <span className="relative">Log Session</span>
+            </motion.div>
             <motion.div
               className="absolute inset-0 bg-white/20"
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: [1, 1.5, 1], opacity: [0, 0.5, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
+              transition={{ duration: 2, repeat: Infinity }}
             />
           </Button>
-        </motion.div>
+        </div>
       </motion.div>
 
       {/* Modals */}
