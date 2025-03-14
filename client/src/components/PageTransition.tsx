@@ -90,37 +90,7 @@ export const PageTransition = ({
           <motion.div
             className={`absolute inset-0 ${getBackgroundStyle()}`}
             variants={backgroundVariants}
-          >
-            {/* Add particle effects based on style */}
-            {style === "competitive" && (
-              <motion.div
-                className="absolute inset-0 overflow-hidden"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                {[...Array(20)].map((_, i) => (
-                  <motion.div
-                    key={i}
-                    className="absolute w-2 h-2 bg-white rounded-full"
-                    style={{
-                      left: `${Math.random() * 100}%`,
-                      top: `${Math.random() * 100}%`,
-                    }}
-                    animate={{
-                      y: [-20, -window.innerHeight],
-                      opacity: [1, 0],
-                    }}
-                    transition={{
-                      duration: 1,
-                      delay: i * 0.1,
-                      ease: "easeOut",
-                    }}
-                  />
-                ))}
-              </motion.div>
-            )}
-          </motion.div>
+          />
 
           <motion.div 
             className="relative text-white text-center px-4"
