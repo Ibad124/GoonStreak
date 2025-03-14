@@ -53,6 +53,19 @@ const backgroundVariants = {
   },
 };
 
+const getStartButtonText = (style: string) => {
+  switch (style) {
+    case "solo":
+      return "INITIALIZE TRAINING PROTOCOL 🤖";
+    case "competitive":
+      return "Let's Get This Party Started! 🎉";
+    case "hardcore":
+      return "Embrace Your Destiny... 😈";
+    default:
+      return "Begin Your Journey! 🚀";
+  }
+};
+
 export const PageTransition = ({
   children,
   isVisible,
@@ -128,7 +141,7 @@ export const PageTransition = ({
                   }}
                 />
                 <span className="relative flex items-center gap-2">
-                  Skip Animation
+                  {getStartButtonText(style)}
                   <motion.div
                     animate={{ x: [0, 5, 0] }}
                     transition={{ repeat: Infinity, duration: 1.5 }}

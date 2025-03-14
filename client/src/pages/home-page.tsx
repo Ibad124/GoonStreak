@@ -16,23 +16,6 @@ import Challenges from "@/components/Challenges";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 
-interface StatsData {
-  user: {
-    currentStreak: number;
-    longestStreak: number;
-    totalSessions: number;
-    todaySessions: number;
-    xpPoints: number;
-    title: string;
-    level: number;
-    lastSessionDate: string | null;
-  };
-  nextLevelXP: number;
-  currentLevelXP: number;
-  challenges: any[];
-  achievements: any[];
-}
-
 const themeStyles = {
   default: {
     background: "from-zinc-50 to-blue-50",
@@ -101,11 +84,12 @@ export default function HomePage() {
   const { preferences } = useTheme();
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
 
-  const { data: stats, isLoading } = useQuery<StatsData>({
+  const { data: stats, isLoading } = useQuery({
     queryKey: ["/api/stats"],
   });
 
   const messages = characterMessages[preferences.goonStyle] || characterMessages.default;
+  const style = themeStyles[preferences.goonStyle] || themeStyles.default;
 
   const sessionMutation = useMutation({
     mutationFn: async (sessionData) => {
@@ -118,21 +102,21 @@ export default function HomePage() {
       toast({
         title: "Session Logged",
         description: messages.sessionLogged,
-        variant: "sexy",
+        variant: "default",
       });
 
       const xpGained = data.user.xpPoints - (stats?.user.xpPoints || 0);
       toast({
         title: "XP Gained!",
         description: `${messages.xpGained}+${xpGained} XP`,
-        variant: "sexy",
+        variant: "default",
       });
 
       if (data.leveledUp) {
         toast({
           title: "Level Up!",
           description: `${messages.levelUp}${data.user.title}!`,
-          variant: "sexy",
+          variant: "default",
         });
       }
 
@@ -140,15 +124,13 @@ export default function HomePage() {
         toast({
           title: "Achievement Unlocked!",
           description: achievement.description,
-          variant: "sexy",
+          variant: "default",
         });
       });
 
       setIsSessionModalOpen(false);
     },
   });
-
-  const style = themeStyles[preferences.goonStyle] || themeStyles.default;
 
   if (isLoading || !stats) {
     return (
