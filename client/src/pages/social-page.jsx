@@ -24,6 +24,7 @@ import SocialChallenges from "@/components/SocialChallenges";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { GoonRoom } from "@/components/GoonRoom";
+import { TooltipGuide } from "@/components/TooltipGuide";
 
 const themeStyles = {
   default: {
@@ -92,7 +93,7 @@ export default function SocialPage() {
 
   const { data: activeRooms = [], isLoading: isLoadingRooms } = useQuery({
     queryKey: ["/api/rooms/active"],
-    refetchInterval: 5000, // Refresh every 5 seconds
+    refetchInterval: 5000, 
   });
 
   if (!user) {
@@ -128,7 +129,6 @@ export default function SocialPage() {
         <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoNDUpIj48cGF0aCBkPSJNLTEwIDMwbDIwLTIwTTAgNDBsMjAtMjBNMTAgNTBsMjAtMjAiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4xIiBzdHJva2Utd2lkdGg9IjIiLz48L3BhdHRlcm4+PC9kZWZzPjxwYXRoIGZpbGw9InVybCgjYSkiIGQ9Ik0wIDBoMjAwdjIwMEgweiIvPjwvc3ZnPg==')]" />
       </div>
 
-      {/* Header */}
       <motion.header
         initial={{ y: -100 }}
         animate={{ y: 0 }}
@@ -154,18 +154,24 @@ export default function SocialPage() {
             animate={{ scale: 1, opacity: 1 }}
             whileHover={{ scale: 1.05 }}
           >
-            <Button 
-              onClick={() => setIsGoonRoomOpen(true)}
-              className={`rounded-full bg-gradient-to-br ${style.button} shadow-lg hover:shadow-xl transition-all duration-300`}
+            <TooltipGuide
+              id="create-room"
+              title="Create Training Room"
+              description="Start a live training session with friends. Share goals, track progress, and stay motivated together!"
+              position="bottom"
             >
-              <Video className="h-4 w-4 mr-2" />
-              Create Room
-            </Button>
+              <Button 
+                onClick={() => setIsGoonRoomOpen(true)}
+                className={`rounded-full bg-gradient-to-br ${style.button} shadow-lg hover:shadow-xl transition-all duration-300`}
+              >
+                <Video className="h-4 w-4 mr-2" />
+                Create Room
+              </Button>
+            </TooltipGuide>
           </motion.div>
         </div>
       </motion.header>
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 pt-24 pb-32">
         <motion.div 
           variants={containerVariants}
@@ -173,46 +179,79 @@ export default function SocialPage() {
           animate="visible"
           className="grid grid-cols-1 lg:grid-cols-3 gap-6"
         >
-          {/* Left Column - Friends List */}
           <motion.div variants={itemVariants} className="space-y-6">
-            <Card className={`${style.cardBg} backdrop-blur ${style.border} transition-all duration-300 hover:shadow-lg`}>
-              <CardHeader>
-                <CardTitle className={`${style.text}`}>
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex items-center justify-between"
-                  >
-                    <span>Friends</span>
-                  </motion.div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <FriendsList />
-              </CardContent>
-            </Card>
+            <TooltipGuide
+              id="friends-list"
+              title="Friend System"
+              description="Connect with like-minded individuals! Add friends, see their progress, and motivate each other."
+              position="right"
+            >
+              <Card className={`${style.cardBg} backdrop-blur ${style.border} transition-all duration-300 hover:shadow-lg`}>
+                <CardHeader>
+                  <CardTitle className={`${style.text}`}>
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="flex items-center justify-between"
+                    >
+                      <span>Friends</span>
+                    </motion.div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <FriendsList />
+                </CardContent>
+              </Card>
+            </TooltipGuide>
           </motion.div>
 
-          {/* Center and Right Columns */}
           <motion.div variants={itemVariants} className="lg:col-span-2 space-y-6">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid grid-cols-4 w-full">
-                <TabsTrigger value="activity" className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  Activity
-                </TabsTrigger>
-                <TabsTrigger value="rooms" className="flex items-center gap-2">
-                  <Video className="h-4 w-4" />
-                  Rooms
-                </TabsTrigger>
-                <TabsTrigger value="challenges" className="flex items-center gap-2">
-                  <Target className="h-4 w-4" />
-                  Challenges
-                </TabsTrigger>
-                <TabsTrigger value="achievements" className="flex items-center gap-2">
-                  <Trophy className="h-4 w-4" />
-                  Achievements
-                </TabsTrigger>
+                <TooltipGuide
+                  id="activity-feed"
+                  title="Activity Feed"
+                  description="Stay updated with your friends' achievements and progress in real-time!"
+                  position="bottom"
+                >
+                  <TabsTrigger value="activity" className="flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    Activity
+                  </TabsTrigger>
+                </TooltipGuide>
+                <TooltipGuide
+                  id="live-rooms"
+                  title="Live Sessions"
+                  description="Join active training sessions or create your own to train together!"
+                  position="bottom"
+                >
+                  <TabsTrigger value="rooms" className="flex items-center gap-2">
+                    <Video className="h-4 w-4" />
+                    Rooms
+                  </TabsTrigger>
+                </TooltipGuide>
+                <TooltipGuide
+                  id="group-challenges"
+                  title="Group Challenges"
+                  description="Take on challenges with friends and earn rewards together!"
+                  position="bottom"
+                >
+                  <TabsTrigger value="challenges" className="flex items-center gap-2">
+                    <Target className="h-4 w-4" />
+                    Challenges
+                  </TabsTrigger>
+                </TooltipGuide>
+                <TooltipGuide
+                  id="achievements"
+                  title="Social Achievements"
+                  description="Unlock special achievements by participating in group activities!"
+                  position="bottom"
+                >
+                  <TabsTrigger value="achievements" className="flex items-center gap-2">
+                    <Trophy className="h-4 w-4" />
+                    Achievements
+                  </TabsTrigger>
+                </TooltipGuide>
               </TabsList>
 
               <AnimatePresence mode="wait">
@@ -327,13 +366,11 @@ export default function SocialPage() {
         </motion.div>
       </main>
 
-      {/* Goon Room Modal */}
       <GoonRoom
         isOpen={isGoonRoomOpen}
         onClose={() => setIsGoonRoomOpen(false)}
       />
 
-      {/* Chat Button */}
       <motion.div
         initial={{ y: 100 }}
         animate={{ y: 0 }}
