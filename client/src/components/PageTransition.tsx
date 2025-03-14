@@ -85,8 +85,7 @@ export const PageTransition = ({
             if (definition === "exit") {
               setTimeout(() => {
                 onComplete();
-                // Navigate to home page after transition completes
-                window.location.href = '/';
+                import('wouter').then(({ navigate }) => navigate('/'));
               }, 100);
             }
           }}
