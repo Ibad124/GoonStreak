@@ -209,7 +209,7 @@ export default function HomePage() {
       <div className={`min-h-screen pb-20 relative overflow-hidden bg-gradient-to-br ${style.background}`}>
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoNDUpIj48cGF0aCBkPSJNLTEwIDMwbDIwLTIwTTAgNDBsMjAtMjBNMTAgNTBsMjAtMjAiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4xIiBzdHJva2Utd2lkdGg9IjIiLz48L3BhdHRlcm4+PC9kZWZzPjxwYXRoIGZpbGw9InVybCgjYSkiIGQ9Ik0wIDBoMjAwdjIwMEgweiIvPjwvc3ZnPg==')]" />
-        </div>
+          </div>
 
         <motion.header
           initial={{ y: -100 }}
@@ -290,14 +290,27 @@ export default function HomePage() {
           animate={{ opacity: 1, y: 0 }}
           className={`container mx-auto px-4 pt-24 pb-6`}
         >
-          <div className={`${style.cardBg} backdrop-blur rounded-2xl p-6 ${style.border}`}>
+          <div className={`${style.cardBg} backdrop-blur rounded-2xl p-6 ${style.border} hover:shadow-lg transition-all duration-300`}>
             <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-xl bg-gradient-to-br ${style.button}`}>
+              <div className={`p-3 rounded-xl bg-gradient-to-br ${style.button} shadow-lg`}>
                 <Clock className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h2 className={`text-2xl font-bold ${style.text}`}>{getTimeMessage()}</h2>
-                <p className={`${style.text} opacity-80`}>{style.greeting}</p>
+                <motion.h2
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  className={`text-2xl font-bold ${style.text}`}
+                >
+                  {getTimeMessage()}
+                </motion.h2>
+                <motion.p
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                  className={`${style.text} opacity-80`}
+                >
+                  {style.greeting}
+                </motion.p>
               </div>
             </div>
           </div>
@@ -326,7 +339,7 @@ export default function HomePage() {
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
               >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
+                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 transform hover:scale-[1.02]`}>
                   <CardHeader>
                     <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
                       <Flame className={`${style.accent}`} />
@@ -344,7 +357,7 @@ export default function HomePage() {
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
               >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
+                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 transform hover:scale-[1.02]`}>
                   <CardHeader>
                     <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
                       <Clock className={`${style.accent}`} />
@@ -369,7 +382,7 @@ export default function HomePage() {
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}
               >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 cursor-pointer`}
+                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 transform hover:scale-[1.02] cursor-pointer`}
                   onClick={() => setIsGoonRoomOpen(true)}
                 >
                   <CardHeader>
@@ -397,7 +410,7 @@ export default function HomePage() {
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
               >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
+                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 transform hover:scale-[1.02]`}>
                   <CardHeader>
                     <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
                       <Target className={`${style.accent}`} />
@@ -415,7 +428,7 @@ export default function HomePage() {
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}
               >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
+                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 transform hover:scale-[1.02]`}>
                   <CardHeader>
                     <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
                       <Trophy className={`${style.accent}`} />
@@ -440,7 +453,7 @@ export default function HomePage() {
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 0.5 }}
                 >
-                  <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
+                  <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300 transform hover:scale-[1.02]`}>
                     <CardHeader>
                       <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
                         <Users className={`${style.accent}`} />
@@ -480,7 +493,7 @@ export default function HomePage() {
         >
           <div className="container mx-auto max-w-lg">
             <Button
-              className={`w-full h-14 text-lg rounded-full bg-gradient-to-r ${style.button} hover:brightness-110 transition-all duration-300 shadow-lg shadow-current/20 hover:shadow-xl hover:shadow-current/30 font-bold tracking-wide text-white`}
+              className={`w-full h-14 text-lg rounded-full bg-gradient-to-r ${style.button} hover:brightness-110 transition-all duration-300 shadow-lg shadow-current/20 hover:shadow-xl hover:shadow-current/30 font-bold tracking-wide text-white transform hover:scale-[1.02]`}
               size="lg"
               onClick={() => setIsSessionModalOpen(true)}
             >

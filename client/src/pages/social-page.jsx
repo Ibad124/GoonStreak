@@ -6,9 +6,9 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  ChevronLeft, 
-  Video, 
+import {
+  ChevronLeft,
+  Video,
   Users,
   Trophy,
   MessageSquare,
@@ -93,7 +93,7 @@ export default function SocialPage() {
 
   const { data: activeRooms = [], isLoading: isLoadingRooms } = useQuery({
     queryKey: ["/api/rooms/active"],
-    refetchInterval: 5000, 
+    refetchInterval: 5000,
   });
 
   if (!user) {
@@ -141,7 +141,7 @@ export default function SocialPage() {
                 <ChevronLeft className="h-5 w-5" />
               </Button>
             </Link>
-            <motion.h1 
+            <motion.h1
               initial={{ x: -20, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               className={`text-xl font-semibold ${style.text}`}
@@ -156,11 +156,13 @@ export default function SocialPage() {
           >
             <TooltipGuide
               id="create-room"
-              title="Create Training Room"
-              description="Start a live training session with friends. Share goals, track progress, and stay motivated together!"
+              title="Create Your First Room"
+              description="Ready to start? Create a training room and invite your friends to join!"
               position="bottom"
+              step={5}
+              totalSteps={5}
             >
-              <Button 
+              <Button
                 onClick={() => setIsGoonRoomOpen(true)}
                 className={`rounded-full bg-gradient-to-br ${style.button} shadow-lg hover:shadow-xl transition-all duration-300`}
               >
@@ -173,7 +175,7 @@ export default function SocialPage() {
       </motion.header>
 
       <main className="container mx-auto px-4 pt-24 pb-32">
-        <motion.div 
+        <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
@@ -182,9 +184,11 @@ export default function SocialPage() {
           <motion.div variants={itemVariants} className="space-y-6">
             <TooltipGuide
               id="friends-list"
-              title="Friend System"
-              description="Connect with like-minded individuals! Add friends, see their progress, and motivate each other."
+              title="Welcome to Social Hub!"
+              description="Start by connecting with like-minded individuals. Add friends and build your support network."
               position="right"
+              step={1}
+              totalSteps={5}
             >
               <Card className={`${style.cardBg} backdrop-blur ${style.border} transition-all duration-300 hover:shadow-lg`}>
                 <CardHeader>
@@ -211,8 +215,10 @@ export default function SocialPage() {
                 <TooltipGuide
                   id="activity-feed"
                   title="Activity Feed"
-                  description="Stay updated with your friends' achievements and progress in real-time!"
+                  description="Keep track of your friends' progress and achievements in real-time!"
                   position="bottom"
+                  step={2}
+                  totalSteps={5}
                 >
                   <TabsTrigger value="activity" className="flex items-center gap-2">
                     <Users className="h-4 w-4" />
@@ -221,9 +227,11 @@ export default function SocialPage() {
                 </TooltipGuide>
                 <TooltipGuide
                   id="live-rooms"
-                  title="Live Sessions"
-                  description="Join active training sessions or create your own to train together!"
+                  title="Live Training Sessions"
+                  description="Train together in real-time! Join or create training rooms to stay motivated."
                   position="bottom"
+                  step={3}
+                  totalSteps={5}
                 >
                   <TabsTrigger value="rooms" className="flex items-center gap-2">
                     <Video className="h-4 w-4" />
@@ -233,8 +241,10 @@ export default function SocialPage() {
                 <TooltipGuide
                   id="group-challenges"
                   title="Group Challenges"
-                  description="Take on challenges with friends and earn rewards together!"
+                  description="Push your limits together! Join group challenges and compete with friends."
                   position="bottom"
+                  step={4}
+                  totalSteps={5}
                 >
                   <TabsTrigger value="challenges" className="flex items-center gap-2">
                     <Target className="h-4 w-4" />
@@ -246,6 +256,8 @@ export default function SocialPage() {
                   title="Social Achievements"
                   description="Unlock special achievements by participating in group activities!"
                   position="bottom"
+                  step={5}
+                  totalSteps={5}
                 >
                   <TabsTrigger value="achievements" className="flex items-center gap-2">
                     <Trophy className="h-4 w-4" />
@@ -286,7 +298,7 @@ export default function SocialPage() {
                             <p className={`${style.text}`}>Loading active sessions...</p>
                           </div>
                         ) : activeRooms.length > 0 ? (
-                          <motion.div 
+                          <motion.div
                             variants={containerVariants}
                             initial="hidden"
                             animate="visible"
@@ -309,7 +321,7 @@ export default function SocialPage() {
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                   >
-                                    <Button 
+                                    <Button
                                       onClick={() => handleJoinRoom(room.id)}
                                       className={`rounded-full bg-gradient-to-br ${style.button} shadow-md hover:shadow-lg transition-all duration-300`}
                                     >
@@ -322,7 +334,7 @@ export default function SocialPage() {
                             ))}
                           </motion.div>
                         ) : (
-                          <motion.div 
+                          <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             className="text-center py-8"
