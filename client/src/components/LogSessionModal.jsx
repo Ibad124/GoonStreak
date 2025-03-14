@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Timer, Clock, CheckCircle, Activity, Heart } from "lucide-react";
+import { Timer, Clock, CheckCircle, Activity, Heart, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function LogSessionModal({ isOpen, onClose, onSubmit, isPending }) {
@@ -34,6 +34,8 @@ export default function LogSessionModal({ isOpen, onClose, onSubmit, isPending }
       timerRef.current = setInterval(() => {
         setTime(t => t + 1);
       }, 1000);
+    } else {
+      clearInterval(timerRef.current);
     }
     return () => clearInterval(timerRef.current);
   }, [isRunning]);
@@ -45,18 +47,30 @@ export default function LogSessionModal({ isOpen, onClose, onSubmit, isPending }
   };
 
   const handleSubmit = () => {
-    const minutes = mode === "timer" ? Math.floor(time / 60) : parseInt(duration);
-    if (minutes <= 0) return;
+    let sessionDuration;
+
+    if (mode === "timer") {
+      sessionDuration = Math.max(1, Math.floor(time / 60));
+    } else {
+      sessionDuration = parseInt(duration);
+    }
+
+    if (!sessionDuration || sessionDuration <= 0) {
+      return;
+    }
 
     const sessionData = {
-      duration: minutes,
+      duration: sessionDuration,
       intensity,
       mood,
       timestamp: new Date().toISOString()
     };
 
     onSubmit(sessionData);
-    resetForm();
+  };
+
+  const handleStopTimer = () => {
+    setIsRunning(false);
   };
 
   const resetForm = () => {
@@ -164,7 +178,13 @@ export default function LogSessionModal({ isOpen, onClose, onSubmit, isPending }
                   variant={isRunning ? "destructive" : "default"}
                   size="lg"
                   className="mt-4"
-                  onClick={() => setIsRunning(!isRunning)}
+                  onClick={() => {
+                    if (isRunning) {
+                      handleStopTimer();
+                    } else {
+                      setIsRunning(true);
+                    }
+                  }}
                 >
                   {isRunning ? "Stop" : "Start"}
                 </Button>
@@ -248,7 +268,11 @@ export default function LogSessionModal({ isOpen, onClose, onSubmit, isPending }
           <DialogFooter className="gap-2 sm:gap-0">
             <Button
               variant="ghost"
-              onClick={() => setMode(null)}
+              onClick={() => {
+                setMode(null);
+                setTime(0);
+                setIsRunning(false);
+              }}
               className="flex-1 sm:flex-none"
             >
               Back
@@ -263,11 +287,16 @@ export default function LogSessionModal({ isOpen, onClose, onSubmit, isPending }
               className="flex-1 sm:flex-none"
             >
               {isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Submitting...
+                </>
               ) : (
-                <CheckCircle className="h-4 w-4 mr-2" />
+                <>
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Submit
+                </>
               )}
-              Submit
             </Button>
           </DialogFooter>
         )}
