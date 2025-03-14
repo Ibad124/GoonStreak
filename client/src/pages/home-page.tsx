@@ -17,8 +17,13 @@ import { Link } from "wouter";
 
 interface StatsData {
   user: {
+    currentStreak: number;
+    longestStreak: number;
+    totalSessions: number;
+    todaySessions: number;
     xpPoints: number;
     title: string;
+    lastSessionDate: string | null;
   };
   nextLevelXP: number;
   currentLevelXP: number;
