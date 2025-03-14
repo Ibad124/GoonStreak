@@ -70,7 +70,7 @@ export const PageTransition = ({
   };
 
   return (
-    <AnimatePresence mode="wait" onExitComplete={onComplete}>
+    <AnimatePresence mode="wait">
       {isVisible && (
         <motion.div
           className="fixed inset-0 z-50 flex items-center justify-center"
@@ -78,6 +78,11 @@ export const PageTransition = ({
           animate="animate"
           exit="exit"
           variants={transitionVariants}
+          onAnimationComplete={(definition) => {
+            if (definition === "exit") {
+              onComplete();
+            }
+          }}
         >
           <motion.div
             className={`absolute inset-0 ${getBackgroundStyle()}`}

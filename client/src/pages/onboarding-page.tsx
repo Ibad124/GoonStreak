@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { User, Users, Trophy, Target, ArrowRight, ArrowLeft, Sparkles, Ghost, Crown, Medal, Brain, Heart, Coffee, Sun, Moon, Zap, } from "lucide-react";
+import { User, Users, Trophy, Target, ArrowRight, ArrowLeft, Ghost, Crown, Sparkles, Medal, Brain, Heart, Coffee, Sun, Moon, Zap, } from "lucide-react";
 import { PageTransition } from "@/components/PageTransition";
 import type { ThemeStyle, ThemePreferences } from "@/types/theme";
 
@@ -15,7 +15,6 @@ interface TypedMessageProps {
   text: string;
 }
 
-// Enhanced typing animation for messages
 const TypedMessage: React.FC<TypedMessageProps> = ({ text = "" }) => {
   const [displayText, setDisplayText] = useState("");
 
@@ -51,7 +50,6 @@ const TypedMessage: React.FC<TypedMessageProps> = ({ text = "" }) => {
   );
 };
 
-// Enhanced background effects based on character style
 const BackgroundEffects = ({ style = "default" }) => {
   const variants = {
     solo: {
@@ -169,7 +167,6 @@ const BackgroundEffects = ({ style = "default" }) => {
   );
 };
 
-// Guide character variants
 const characterVariants = {
   default: {
     color: "from-blue-400 to-purple-500",
@@ -209,7 +206,6 @@ const characterVariants = {
   }
 };
 
-// Enhanced GuideCharacter component
 const GuideCharacter = ({ emotion = "happy", style = "default" }) => {
   const variant = characterVariants[style];
 
@@ -221,7 +217,6 @@ const GuideCharacter = ({ emotion = "happy", style = "default" }) => {
       transition={{ type: "spring", stiffness: 260, damping: 20 }}
     >
       <div className="relative">
-        {/* Character base */}
         <motion.div
           className={`absolute inset-0 bg-gradient-to-br ${variant.color} rounded-full`}
           animate={{
@@ -230,7 +225,6 @@ const GuideCharacter = ({ emotion = "happy", style = "default" }) => {
           transition={{ duration: 2, repeat: Infinity }}
         />
 
-        {/* Eyes */}
         <motion.div
           className={`absolute top-1/3 left-1/4 w-3 h-3 bg-white rounded-full ${
             style === 'hardcore' ? 'bg-red-500' : 'bg-white'
@@ -256,7 +250,6 @@ const GuideCharacter = ({ emotion = "happy", style = "default" }) => {
           transition={{ duration: style === 'solo' ? 2 : 1, repeat: Infinity }}
         />
 
-        {/* Mouth */}
         <motion.div
           className={`absolute bottom-1/3 left-1/2 -translate-x-1/2 w-8 h-2 bg-white rounded-full ${
             style === 'competitive' ? 'h-3' : 'h-2'
@@ -281,7 +274,6 @@ const GuideCharacter = ({ emotion = "happy", style = "default" }) => {
           transition={{ duration: 2, repeat: Infinity }}
         />
 
-        {/* Special effects based on character type */}
         {style === 'solo' && (
           <motion.div
             className="absolute inset-0 border-2 border-red-500 rounded-full"
@@ -502,7 +494,6 @@ const OnboardingPage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user/preferences"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
-      // Start the transition animation
       setShowTransition(true);
     },
     onError: (error: Error) => {
@@ -511,7 +502,6 @@ const OnboardingPage = () => {
         description: error.message || "Failed to save preferences. Please try again.",
         variant: "destructive",
       });
-      // Reset navigation state on error
       setIsNavigating(false);
     },
   });
@@ -546,8 +536,8 @@ const OnboardingPage = () => {
   }, [goonStyle, timePreference, intensityLevel, socialMode, savePreferencesMutation, isNavigating]);
 
   const handleTransitionComplete = useCallback(() => {
-    setLocation("/");
-  }, [setLocation]);
+    window.location.href = "/";
+  }, []);
 
   useEffect(() => {
     if (!user) {
@@ -555,7 +545,6 @@ const OnboardingPage = () => {
     }
   }, [user, setLocation]);
 
-  // Reset navigation state when component unmounts
   useEffect(() => {
     return () => {
       setIsNavigating(false);
