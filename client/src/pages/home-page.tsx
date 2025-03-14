@@ -19,16 +19,15 @@ import {
   Sparkles,
   Activity,
   Award,
-  ChevronRight,
   Calendar,
   Settings,
-  Loader2
+  Loader2,
+  Plus
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import StreakStats from "@/components/StreakStats";
 import Achievements from "@/components/Achievements";
-import LevelProgress from "@/components/LevelProgress";
 import LogSessionModal from "@/components/LogSessionModal";
 import Challenges from "@/components/Challenges";
 import { GoonRoom } from "@/components/GoonRoom";
@@ -86,7 +85,6 @@ export default function HomePage() {
   const { preferences } = useTheme();
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
   const [isGoonRoomOpen, setIsGoonRoomOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("overview");
 
   const { data: stats, isLoading, error } = useQuery({
     queryKey: ["/api/stats"],
@@ -126,10 +124,17 @@ export default function HomePage() {
 
       toast({
         title: "Session Logged!",
-        description: `You've earned ${data.xpGained} XP! Keep it up! 🎉`,
+        description: `You've earned ${data.xpGained} XP! Keep going! 🚀`,
         variant: "default",
       });
     },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to log session. Please try again.",
+        variant: "destructive",
+      });
+    }
   });
 
   if (isLoading || !stats) {
@@ -161,7 +166,7 @@ export default function HomePage() {
               animate={{ scale: 1, opacity: 1 }}
               className="flex items-center gap-2"
             >
-              <Star className={`h-5 w-5 ${style.accent}`} />
+              <Award className={`h-5 w-5 ${style.accent}`} />
               <span className={`font-bold tracking-tight text-lg md:text-xl truncate bg-gradient-to-r ${style.button} text-transparent bg-clip-text`}>
                 {user?.username}
               </span>
@@ -194,14 +199,6 @@ export default function HomePage() {
               </SheetTrigger>
               <SheetContent className={`bg-gradient-to-br ${style.background} ${style.border}`}>
                 <nav className="space-y-4 mt-8">
-                  <Button
-                    variant="outline"
-                    className={`w-full rounded-xl flex items-center justify-start gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
-                    onClick={() => setActiveTab("overview")}
-                  >
-                    <Activity className="h-4 w-4" />
-                    Overview
-                  </Button>
                   <Link href="/social">
                     <Button
                       variant="outline"
@@ -232,7 +229,6 @@ export default function HomePage() {
                   <Button
                     variant="outline"
                     className={`w-full rounded-xl flex items-center justify-start gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
-                    onClick={() => setActiveTab("settings")}
                   >
                     <Settings className="h-4 w-4" />
                     Settings
@@ -394,43 +390,7 @@ export default function HomePage() {
 
           {/* Right Column */}
           <div className="lg:col-span-4 space-y-4 md:space-y-6">
-            {/* Quick Actions */}
-            <div className="space-y-3">
-              <Button
-                className={`
-                  w-full h-14 rounded-xl
-                  bg-gradient-to-r ${style.button}
-                  hover:brightness-110 transition-all duration-300
-                  font-medium tracking-wide text-white
-                  flex items-center justify-center gap-2
-                  shadow-lg hover:shadow-xl relative overflow-hidden group
-                `}
-                onClick={() => setIsSessionModalOpen(true)}
-              >
-                <div className="flex items-center gap-2 relative z-10">
-                  <Sparkles className="h-5 w-5" />
-                  <span>Log Session</span>
-                </div>
-                <div className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
-              </Button>
-
-              <Button
-                className={`
-                  w-full h-14 rounded-xl border ${style.border}
-                  ${style.cardBg} backdrop-blur
-                  hover:bg-white/10 transition-all duration-300
-                  font-medium tracking-wide ${style.text}
-                  flex items-center justify-center gap-2
-                `}
-                variant="outline"
-                onClick={() => setIsGoonRoomOpen(true)}
-              >
-                <Users className="h-5 w-5" />
-                <span>Join Live Session</span>
-              </Button>
-            </div>
-
-            {/* Stats Card */}
+            {/* Statistics */}
             <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
               <CardHeader>
                 <CardTitle className={`text-xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
@@ -464,6 +424,40 @@ export default function HomePage() {
           </div>
         </div>
       </main>
+
+      {/* Floating Action Button for Session Logging */}
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: 0.5, type: "spring" }}
+        className="fixed right-6 bottom-6"
+      >
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          <Button
+            size="lg"
+            className={`
+              h-16 w-16 rounded-full
+              bg-gradient-to-r ${style.button}
+              shadow-lg hover:shadow-xl
+              transition-all duration-300
+              relative overflow-hidden
+              group
+            `}
+            onClick={() => setIsSessionModalOpen(true)}
+          >
+            <Plus className="h-8 w-8 text-white relative z-10" />
+            <motion.div
+              className="absolute inset-0 bg-white/20"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: [1, 1.5, 1], opacity: [0, 0.5, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            />
+          </Button>
+        </motion.div>
+      </motion.div>
 
       {/* Modals */}
       <LogSessionModal
