@@ -530,8 +530,10 @@ const OnboardingPage = () => {
   };
 
   const handleTransitionComplete = () => {
-    // Use wouter's setLocation for client-side navigation
-    setLocation("/");
+    // Ensure all animations are complete before navigation
+    setTimeout(() => {
+      setLocation("/");
+    }, 100); // Small delay to ensure smooth transition
   };
 
   return (

@@ -35,40 +35,40 @@ interface StatsData {
 
 const themeStyles = {
   default: {
-    background: "from-zinc-50 to-blue-50",
-    headerBg: "bg-white/80",
-    cardBg: "bg-white/80",
-    text: "text-zinc-900",
-    accent: "text-blue-500",
-    button: "from-blue-500 to-blue-600",
-    border: "border-zinc-200/50"
+    background: "from-indigo-50 via-blue-50 to-sky-50",
+    headerBg: "bg-white/90",
+    cardBg: "bg-white/90",
+    text: "text-indigo-950",
+    accent: "text-indigo-500",
+    button: "from-indigo-500 via-blue-500 to-sky-500",
+    border: "border-indigo-100"
   },
   solo: {
-    background: "from-slate-900 to-zinc-900",
-    headerBg: "bg-black/20",
-    cardBg: "bg-black/20",
-    text: "text-zinc-100",
-    accent: "text-emerald-500",
-    button: "from-emerald-500 to-emerald-600",
-    border: "border-white/10"
+    background: "from-zinc-900 via-slate-900 to-neutral-900",
+    headerBg: "bg-zinc-900/90",
+    cardBg: "bg-zinc-900/90",
+    text: "text-emerald-100",
+    accent: "text-emerald-400",
+    button: "from-emerald-500 via-teal-500 to-cyan-500",
+    border: "border-emerald-900"
   },
   competitive: {
-    background: "from-purple-900 to-pink-900",
-    headerBg: "bg-black/20",
-    cardBg: "bg-black/20",
-    text: "text-pink-100",
-    accent: "text-pink-500",
-    button: "from-pink-500 to-purple-500",
-    border: "border-white/10"
+    background: "from-fuchsia-900 via-purple-900 to-violet-900",
+    headerBg: "bg-fuchsia-900/90",
+    cardBg: "bg-fuchsia-900/90",
+    text: "text-fuchsia-100",
+    accent: "text-fuchsia-400",
+    button: "from-fuchsia-500 via-purple-500 to-violet-500",
+    border: "border-fuchsia-900"
   },
   hardcore: {
-    background: "from-red-950 to-black",
-    headerBg: "bg-black/20",
-    cardBg: "bg-black/20",
-    text: "text-red-100",
-    accent: "text-red-500",
-    button: "from-red-500 to-red-600",
-    border: "border-white/10"
+    background: "from-rose-950 via-red-950 to-rose-900",
+    headerBg: "bg-rose-950/90",
+    cardBg: "bg-rose-950/90",
+    text: "text-rose-100",
+    accent: "text-rose-400",
+    button: "from-rose-600 via-red-600 to-rose-500",
+    border: "border-rose-900"
   }
 };
 
@@ -165,7 +165,7 @@ export default function HomePage() {
           <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoNDUpIj48cGF0aCBkPSJNLTEwIDMwbDIwLTIwTTAgNDBsMjAtMjBNMTAgNTBsMjAtMjAiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4xIiBzdHJva2Utd2lkdGg9IjIiLz48L3BhdHRlcm4+PC9kZWZzPjxwYXRoIGZpbGw9InVybCgjYSkiIGQ9Ik0wIDBoMjAwdjIwMEgweiIvPjwvc3ZnPg==')]" />
         </div>
 
-        <motion.header 
+        <motion.header
           initial={{ y: -100 }}
           animate={{ y: 0 }}
           className={`fixed top-0 left-0 right-0 ${style.headerBg} backdrop-blur-lg z-50 border-b ${style.border}`}
@@ -208,8 +208,8 @@ export default function HomePage() {
                     </Button>
                   </Link>
                   <Link href="/leaderboard">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className={`w-full rounded-full flex items-center bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
                     >
                       <Trophy className="h-4 w-4 mr-2" />
@@ -252,7 +252,7 @@ export default function HomePage() {
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
               >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
+                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur-xl ${style.border} hover:bg-opacity-100 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-current/10 transform-gpu rounded-2xl`}>
                   <CardHeader>
                     <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
                       <Flame className={`${style.accent}`} />
@@ -272,7 +272,7 @@ export default function HomePage() {
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
               >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
+                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur-xl ${style.border} hover:bg-opacity-100 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-current/10 transform-gpu rounded-2xl`}>
                   <CardHeader>
                     <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
                       <Trophy className={`${style.accent}`} />
@@ -290,7 +290,7 @@ export default function HomePage() {
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}
               >
-                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
+                <Card className={`overflow-hidden ${style.cardBg} backdrop-blur-xl ${style.border} hover:bg-opacity-100 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl hover:shadow-current/10 transform-gpu rounded-2xl`}>
                   <CardHeader>
                     <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
                       <Star className={`${style.accent}`} />
@@ -298,8 +298,8 @@ export default function HomePage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className={style.text}>
-                    <Achievements 
-                      achievements={stats?.achievements || []} 
+                    <Achievements
+                      achievements={stats?.achievements || []}
                       stats={{
                         currentStreak: stats?.user?.currentStreak || 0,
                         totalSessions: stats?.user?.totalSessions || 0
@@ -326,7 +326,7 @@ export default function HomePage() {
         >
           <div className="container mx-auto max-w-lg">
             <Button
-              className={`w-full h-14 text-lg rounded-full bg-gradient-to-r ${style.button} hover:brightness-110 transition-all duration-300 shadow-lg shadow-current/20 hover:shadow-xl hover:shadow-current/30 font-bold tracking-wide text-white`}
+              className={`w-full h-16 text-lg rounded-full bg-gradient-to-r ${style.button} hover:brightness-110 transition-all duration-500 shadow-lg shadow-current/20 hover:shadow-2xl hover:shadow-current/30 font-bold tracking-wide text-white transform-gpu hover:scale-[1.02]`}
               size="lg"
               onClick={() => setIsSessionModalOpen(true)}
             >
