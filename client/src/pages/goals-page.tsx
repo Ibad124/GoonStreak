@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "wouter";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -89,7 +89,7 @@ export default function GoalsPage() {
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(0);
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { user } = useAuth();
 
   const saveGoalsMutation = useMutation({
@@ -98,7 +98,7 @@ export default function GoalsPage() {
       return res.json();
     },
     onSuccess: () => {
-      navigate("/");
+      setLocation("/");
     },
   });
 
