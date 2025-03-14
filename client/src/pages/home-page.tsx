@@ -118,21 +118,21 @@ export default function HomePage() {
       toast({
         title: "Session Logged",
         description: messages.sessionLogged,
-        variant: "sexy",
+        variant: "default",
       });
 
       const xpGained = data.user.xpPoints - (stats?.user.xpPoints || 0);
       toast({
         title: "XP Gained!",
         description: `${messages.xpGained}+${xpGained} XP`,
-        variant: "sexy",
+        variant: "default",
       });
 
       if (data.leveledUp) {
         toast({
           title: "Level Up!",
           description: `${messages.levelUp}${data.user.title}!`,
-          variant: "sexy",
+          variant: "default",
         });
       }
 
@@ -140,7 +140,7 @@ export default function HomePage() {
         toast({
           title: "Achievement Unlocked!",
           description: achievement.description,
-          variant: "sexy",
+          variant: "default",
         });
       });
 
@@ -165,7 +165,7 @@ export default function HomePage() {
           <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoNDUpIj48cGF0aCBkPSJNLTEwIDMwbDIwLTIwTTAgNDBsMjAtMjBNMTAgNTBsMjAtMjAiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4xIiBzdHJva2Utd2lkdGg9IjIiLz48L3BhdHRlcm4+PC9kZWZzPjxwYXRoIGZpbGw9InVybCgjYSkiIGQ9Ik0wIDBoMjAwdjIwMEgweiIvPjwvc3ZnPg==')]" />
         </div>
 
-        <motion.header
+        <motion.header 
           initial={{ y: -100 }}
           animate={{ y: 0 }}
           className={`fixed top-0 left-0 right-0 ${style.headerBg} backdrop-blur-lg z-50 border-b ${style.border}`}
@@ -298,8 +298,8 @@ export default function HomePage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className={style.text}>
-                    <Achievements
-                      achievements={stats?.achievements || []}
+                    <Achievements 
+                      achievements={stats?.achievements || []} 
                       stats={{
                         currentStreak: stats?.user?.currentStreak || 0,
                         totalSessions: stats?.user?.totalSessions || 0
