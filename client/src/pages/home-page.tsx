@@ -31,53 +31,23 @@ import Achievements from "@/components/Achievements";
 import LogSessionModal from "@/components/LogSessionModal";
 import Challenges from "@/components/Challenges";
 import { GoonRoom } from "@/components/GoonRoom";
+import SessionCalendar from "@/components/SessionCalendar";
 
-const themeStyles = {
-  default: {
-    background: "from-blue-50 via-indigo-50 to-violet-50",
-    headerBg: "bg-white/80",
-    cardBg: "bg-white/90",
-    text: "text-slate-900",
-    accent: "text-blue-600",
-    button: "from-blue-600 to-indigo-600",
-    border: "border-slate-200/50",
-    greeting: "Ready to level up? 🌟",
-    pattern: "opacity-5"
-  },
-  solo: {
-    background: "from-emerald-950 via-slate-900 to-emerald-950",
-    headerBg: "bg-black/40",
-    cardBg: "bg-black/40",
-    text: "text-emerald-50",
-    accent: "text-emerald-400",
-    button: "from-emerald-500 to-emerald-600",
-    border: "border-emerald-400/20",
-    greeting: "SYSTEMS ONLINE. INITIATING SESSION... 🤖",
-    pattern: "opacity-10"
-  },
-  competitive: {
-    background: "from-pink-500 via-purple-600 to-indigo-600",
-    headerBg: "bg-black/30",
-    cardBg: "bg-black/30",
-    text: "text-pink-50",
-    accent: "text-pink-400",
-    button: "from-pink-500 to-purple-500",
-    border: "border-pink-400/20",
-    greeting: "Ready to dominate? Let's go! 🔥",
-    pattern: "opacity-10"
-  },
-  hardcore: {
-    background: "from-red-950 via-black to-red-950",
-    headerBg: "bg-black/40",
-    cardBg: "bg-black/40",
-    text: "text-red-50",
-    accent: "text-red-500",
-    button: "from-red-600 to-red-700",
-    border: "border-red-500/20",
-    greeting: "Embrace the power within... 😈",
-    pattern: "opacity-15"
-  }
-};
+interface Stats {
+  user: {
+    level: number;
+    xpPoints: number;
+    currentStreak: number;
+    longestStreak: number;
+    totalSessions: number;
+    todaySessions: number;
+  };
+  nextLevelXP: number;
+  rank?: number;
+  challenges?: any[];
+  achievements?: any[];
+  sessions?: any[];
+}
 
 export default function HomePage() {
   const { user, logoutMutation } = useAuth();
@@ -86,7 +56,7 @@ export default function HomePage() {
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
   const [isGoonRoomOpen, setIsGoonRoomOpen] = useState(false);
 
-  const { data: stats, isLoading, error } = useQuery({
+  const { data: stats, isLoading, error } = useQuery<Stats>({
     queryKey: ["/api/stats"],
   });
 
@@ -394,35 +364,19 @@ export default function HomePage() {
 
           {/* Right Column */}
           <div className="lg:col-span-4 space-y-4 md:space-y-6">
-            {/* Statistics */}
+            {/* Session Calendar */}
             <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
               <CardHeader>
                 <CardTitle className={`text-xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
-                  <Activity className={`${style.accent}`} />
-                  Statistics
+                  <Calendar className={`${style.accent}`} />
+                  Activity Calendar
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className={`${style.text}`}>Total Sessions</span>
-                    <span className={`text-xl font-bold ${style.accent}`}>
-                      {stats.user.totalSessions}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className={`${style.text}`}>Success Rate</span>
-                    <span className={`text-xl font-bold ${style.accent}`}>
-                      {stats.user.successRate || "0%"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className={`${style.text}`}>Avg. Duration</span>
-                    <span className={`text-xl font-bold ${style.accent}`}>
-                      {stats.user.averageDuration || "0m"}
-                    </span>
-                  </div>
-                </div>
+                <SessionCalendar
+                  sessions={stats?.sessions || []}
+                  currentStreak={stats?.user?.currentStreak || 0}
+                />
               </CardContent>
             </Card>
           </div>
@@ -481,3 +435,50 @@ export default function HomePage() {
     </div>
   );
 }
+
+const themeStyles = {
+  default: {
+    background: "from-blue-50 via-indigo-50 to-violet-50",
+    headerBg: "bg-white/80",
+    cardBg: "bg-white/90",
+    text: "text-slate-900",
+    accent: "text-blue-600",
+    button: "from-blue-600 to-indigo-600",
+    border: "border-slate-200/50",
+    greeting: "Ready to level up? 🌟",
+    pattern: "opacity-5"
+  },
+  solo: {
+    background: "from-emerald-950 via-slate-900 to-emerald-950",
+    headerBg: "bg-black/40",
+    cardBg: "bg-black/40",
+    text: "text-emerald-50",
+    accent: "text-emerald-400",
+    button: "from-emerald-500 to-emerald-600",
+    border: "border-emerald-400/20",
+    greeting: "SYSTEMS ONLINE. INITIATING SESSION... 🤖",
+    pattern: "opacity-10"
+  },
+  competitive: {
+    background: "from-pink-500 via-purple-600 to-indigo-600",
+    headerBg: "bg-black/30",
+    cardBg: "bg-black/30",
+    text: "text-pink-50",
+    accent: "text-pink-400",
+    button: "from-pink-500 to-purple-500",
+    border: "border-pink-400/20",
+    greeting: "Ready to dominate? Let's go! 🔥",
+    pattern: "opacity-10"
+  },
+  hardcore: {
+    background: "from-red-950 via-black to-red-950",
+    headerBg: "bg-black/40",
+    cardBg: "bg-black/40",
+    text: "text-red-50",
+    accent: "text-red-500",
+    button: "from-red-600 to-red-700",
+    border: "border-red-500/20",
+    greeting: "Embrace the power within... 😈",
+    pattern: "opacity-15"
+  }
+};
