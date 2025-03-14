@@ -251,7 +251,13 @@ export default function HomePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <Achievements achievements={stats?.achievements || []} />
+                <Achievements 
+                  achievements={stats?.achievements || []} 
+                  stats={{
+                    currentStreak: stats?.user?.currentStreak || 0,
+                    totalSessions: stats?.user?.totalSessions || 0
+                  }}
+                />
               </CardContent>
             </Card>
           </motion.div>
