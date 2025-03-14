@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 type ThemeStyle = "default" | "solo" | "competitive" | "hardcore";
 
@@ -25,15 +26,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     socialMode: "",
   });
 
-  useEffect(() => {
-    // Load preferences from API on mount
-    fetch("/api/user/preferences")
-      .then(res => res.json())
-      .then(data => {
-        setPreferences(data);
-      })
-      .catch(console.error);
-  }, []);
+  // Use React Query to manage preferences data
+  const { data } = useQuery({
+    queryKey: ["/api/user/preferences"],
+    onSuccess: (data) => {
+      if (data) {
+        setPreferences(prev => ({ ...prev, ...data }));
+      }
+    },
+  });
 
   const updatePreferences = (prefs: Partial<ThemePreferences>) => {
     setPreferences(prev => ({ ...prev, ...prefs }));

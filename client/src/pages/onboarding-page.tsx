@@ -500,8 +500,10 @@ const OnboardingPage = () => {
       return res.json();
     },
     onSuccess: () => {
-      // Invalidate preferences query to ensure home page gets fresh data
+      // Invalidate queries to ensure home page gets fresh data
       queryClient.invalidateQueries({ queryKey: ["/api/user/preferences"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+      // Show the transition animation
       setShowTransition(true);
     },
   });
@@ -528,7 +530,7 @@ const OnboardingPage = () => {
   };
 
   const handleTransitionComplete = () => {
-    // Use Wouter's setLocation for client-side navigation
+    // Use wouter's setLocation for client-side navigation
     setLocation("/");
   };
 
