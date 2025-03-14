@@ -3,20 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { insertUserSchema } from "@shared/schema";
 import { useAuth } from "@/hooks/use-auth";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import {
   User,
   Users,
@@ -511,6 +500,8 @@ const OnboardingPage = () => {
       return res.json();
     },
     onSuccess: () => {
+      // Invalidate preferences query to ensure home page gets fresh data
+      queryClient.invalidateQueries({ queryKey: ["/api/user/preferences"] });
       setShowTransition(true);
     },
   });
@@ -533,15 +524,12 @@ const OnboardingPage = () => {
       timePreference,
       intensityLevel,
       socialMode
-    }, {
-      onSuccess: () => {
-        setLocation("/home");
-      }
     });
   };
 
   const handleTransitionComplete = () => {
-    setLocation("/home");
+    // Use Wouter's setLocation for client-side navigation
+    setLocation("/");
   };
 
   return (
@@ -914,9 +902,9 @@ const OnboardingPage = () => {
                   className="group"
                 >
                   <ArrowLeft className="mr-2 h-5 w-5 transition-transform group-hover:-translatex-1" />
-                  Back                </Button>
-                <Button
-                  size="lg"
+                  Back
+                </Button>
+                <Button                  size="lg"
                   onClick={handleComplete}
                   disabled={!socialMode || savePreferencesMutation.isPending}
                   className="group"
