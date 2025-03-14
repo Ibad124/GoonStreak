@@ -209,7 +209,8 @@ export default function HomePage() {
       <div className={`min-h-screen pb-20 relative overflow-hidden bg-gradient-to-br ${style.background}`}>
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoNDUpIj48cGF0aCBkPSJNLTEwIDMwbDIwLTIwTTAgNDBsMjAtMjBNMTAgNTBsMjAtMjAiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4xIiBzdHJva2Utd2lkdGg9IjIiLz48L3BhdHRlcm4+PC9kZWZzPjxwYXRoIGZpbGw9InVybCgjYSkiIGQ9Ik0wIDBoMjAwdjIwMEgweiIvPjwvc3ZnPg==')]" />
-          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+        </div>
 
         <motion.header
           initial={{ y: -100 }}
@@ -217,21 +218,21 @@ export default function HomePage() {
           className={`fixed top-0 left-0 right-0 ${style.headerBg} backdrop-blur-lg z-50 border-b ${style.border}`}
         >
           <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 className="flex items-center gap-1"
               >
                 <Star className={`h-5 w-5 ${style.accent}`} />
-                <span className={`font-bold tracking-tight text-xl bg-gradient-to-r ${style.button} text-transparent bg-clip-text`}>
+                <span className={`font-bold tracking-tight text-lg md:text-xl truncate bg-gradient-to-r ${style.button} text-transparent bg-clip-text`}>
                   {user?.username}
                 </span>
               </motion.div>
               <motion.div
                 initial={{ x: -20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                className={style.text}
+                className={`${style.text} text-sm md:text-base`}
               >
                 • Level {stats.user.level}
               </motion.div>
@@ -248,27 +249,27 @@ export default function HomePage() {
                   <Link href="/social">
                     <Button
                       variant="outline"
-                      className={`w-full rounded-full flex items-center bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
+                      className={`w-full rounded-full flex items-center justify-start gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
                     >
-                      <Users className="h-4 w-4 mr-2" />
+                      <Users className="h-4 w-4" />
                       Social Hub
                     </Button>
                   </Link>
                   <Link href="/adult-content">
                     <Button
                       variant="outline"
-                      className={`w-full rounded-full flex items-center bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
+                      className={`w-full rounded-full flex items-center justify-start gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
                     >
-                      <Film className="h-4 w-4 mr-2" />
+                      <Film className="h-4 w-4" />
                       Adult Content
                     </Button>
                   </Link>
                   <Link href="/leaderboard">
                     <Button
                       variant="outline"
-                      className={`w-full rounded-full flex items-center bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
+                      className={`w-full rounded-full flex items-center justify-start gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
                     >
-                      <Trophy className="h-4 w-4 mr-2" />
+                      <Trophy className="h-4 w-4" />
                       Leaderboard
                     </Button>
                   </Link>
@@ -288,18 +289,19 @@ export default function HomePage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`container mx-auto px-4 pt-24 pb-6`}
+          className="container mx-auto px-4 pt-24 pb-6"
         >
-          <div className={`${style.cardBg} backdrop-blur rounded-2xl p-6 ${style.border} hover:shadow-lg transition-all duration-300`}>
-            <div className="flex items-center gap-4">
-              <div className={`p-3 rounded-xl bg-gradient-to-br ${style.button} shadow-lg`}>
-                <Clock className="h-6 w-6 text-white" />
+          <div className={`${style.cardBg} backdrop-blur rounded-2xl p-6 md:p-8 ${style.border} hover:shadow-lg transition-all duration-300 transform hover:scale-[1.01]`}>
+            <div className="flex items-start md:items-center gap-4 flex-col md:flex-row">
+              <div className={`p-4 rounded-2xl bg-gradient-to-br ${style.button} shadow-lg relative overflow-hidden group`}>
+                <Clock className="h-6 w-6 md:h-8 md:w-8 text-white relative z-10" />
+                <div className="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
               </div>
-              <div>
+              <div className="flex-1 min-w-0">
                 <motion.h2
                   initial={{ x: -20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
-                  className={`text-2xl font-bold ${style.text}`}
+                  className={`text-xl md:text-3xl font-bold ${style.text} mb-2`}
                 >
                   {getTimeMessage()}
                 </motion.h2>
@@ -307,7 +309,7 @@ export default function HomePage() {
                   initial={{ x: -20, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 0.1 }}
-                  className={`${style.text} opacity-80`}
+                  className={`${style.text} opacity-80 text-sm md:text-base`}
                 >
                   {style.greeting}
                 </motion.p>
@@ -317,7 +319,7 @@ export default function HomePage() {
         </motion.div>
 
         <main className="container mx-auto px-4 pt-4">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
             <div className="lg:col-span-4 space-y-6">
               <motion.div
                 initial={{ x: -20, opacity: 0 }}
@@ -493,21 +495,31 @@ export default function HomePage() {
         >
           <div className="container mx-auto max-w-lg">
             <Button
-              className={`w-full h-14 text-lg rounded-full bg-gradient-to-r ${style.button} hover:brightness-110 transition-all duration-300 shadow-lg shadow-current/20 hover:shadow-xl hover:shadow-current/30 font-bold tracking-wide text-white transform hover:scale-[1.02]`}
+              className={`
+                w-full h-12 md:h-14 text-base md:text-lg rounded-full 
+                bg-gradient-to-r ${style.button} 
+                hover:brightness-110 transition-all duration-300 
+                shadow-lg shadow-current/20 hover:shadow-xl hover:shadow-current/30 
+                font-bold tracking-wide text-white transform hover:scale-[1.02]
+                relative overflow-hidden group
+              `}
               size="lg"
               onClick={() => setIsSessionModalOpen(true)}
             >
               <motion.div
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 justify-center relative z-10"
               >
-                <Sparkles className="h-6 w-6" />
-                {preferences.goonStyle === "solo" ? "LOG TRAINING SESSION" :
-                  preferences.goonStyle === "competitive" ? "Record Your Victory!" :
-                    preferences.goonStyle === "hardcore" ? "Embrace The Darkness..." :
-                      "Log Session"}
+                <Sparkles className="h-5 w-5 md:h-6 md:w-6" />
+                <span className="relative">
+                  {preferences.goonStyle === "solo" ? "LOG TRAINING SESSION" :
+                    preferences.goonStyle === "competitive" ? "Record Your Victory!" :
+                      preferences.goonStyle === "hardcore" ? "Embrace The Darkness..." :
+                        "Log Session"}
+                </span>
               </motion.div>
+              <div className="absolute inset-0 bg-white/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
             </Button>
           </div>
         </motion.div>
