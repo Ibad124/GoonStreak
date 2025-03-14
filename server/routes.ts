@@ -21,6 +21,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   });
 
+  // Get user preferences
+  app.get("/api/user/preferences", requireAuth, async (req, res) => {
+    try {
+      const preferences = await storage.getUserPreferences(req.user!.id);
+      res.json(preferences || {
+        goonStyle: "default",
+        timePreference: "",
+        intensityLevel: "",
+        socialMode: ""
+      });
+    } catch (error) {
+      console.error("Error fetching preferences:", error);
+      res.status(500).json({ message: "Failed to fetch preferences" });
+    }
+  });
+
+  // Save user preferences
+  app.post("/api/user/preferences", requireAuth, async (req, res) => {
+    try {
+      const { goonStyle, timePreference, intensityLevel, socialMode } = req.body;
+
+      // Validate required fields
+      if (!goonStyle || !timePreference || !intensityLevel || !socialMode) {
+        return res.status(400).json({ message: "All preference fields are required" });
+      }
+
+      const preferences = await storage.saveUserPreferences(req.user!.id, {
+        goonStyle,
+        timePreference,
+        intensityLevel,
+        socialMode
+      });
+
+      res.json(preferences);
+    } catch (error) {
+      console.error("Error saving preferences:", error);
+      res.status(500).json({ message: "Failed to save preferences" });
+    }
+  });
+
   // Get user stats and achievements
   app.get("/api/stats", requireAuth, async (req, res) => {
     try {

@@ -1,6 +1,7 @@
 import { users, type User, type InsertUser, achievements, type Achievement, LEVEL_THRESHOLDS, XP_REWARDS } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
+import type { ThemePreferences } from "@/types/theme";
 
 const MemoryStore = createMemoryStore(session);
 
@@ -9,6 +10,8 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, data: Partial<User>): Promise<User>;
+  getUserPreferences(userId: number): Promise<ThemePreferences | undefined>;
+  saveUserPreferences(userId: number, preferences: ThemePreferences): Promise<ThemePreferences>;
   getLeaderboard(): Promise<User[]>;
   addAchievement(userId: number, type: string, description: string, xpAwarded: number): Promise<Achievement>;
   getUserAchievements(userId: number): Promise<Achievement[]>;
@@ -19,6 +22,7 @@ export interface IStorage {
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private achievements: Map<number, Achievement[]>;
+  private preferences: Map<number, ThemePreferences>;
   private currentId: number;
   private achievementId: number;
   readonly sessionStore: session.Store;
@@ -26,11 +30,21 @@ export class MemStorage implements IStorage {
   constructor() {
     this.users = new Map();
     this.achievements = new Map();
+    this.preferences = new Map();
     this.currentId = 1;
     this.achievementId = 1;
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000,
     });
+  }
+
+  async getUserPreferences(userId: number): Promise<ThemePreferences | undefined> {
+    return this.preferences.get(userId);
+  }
+
+  async saveUserPreferences(userId: number, preferences: ThemePreferences): Promise<ThemePreferences> {
+    this.preferences.set(userId, preferences);
+    return preferences;
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -55,7 +69,7 @@ export class MemStorage implements IStorage {
       todaySessions: 0,
       xpPoints: 0,
       level: 1,
-      currentBadge: LEVEL_THRESHOLDS[1].badge,
+      currentBadge: LEVEL_THRESHOLDS[1].title,
     };
     this.users.set(id, user);
     return user;
@@ -70,7 +84,7 @@ export class MemStorage implements IStorage {
       if (xpPoints >= data.points) {
         level = parseInt(lvl);
         currentLevelXP = data.points;
-        nextLevelXP = LEVEL_THRESHOLDS[parseInt(lvl) + 1]?.points || data.points;
+        nextLevelXP = LEVEL_THRESHOLDS[level + 1]?.points || data.points;
       } else {
         break;
       }
@@ -78,7 +92,7 @@ export class MemStorage implements IStorage {
 
     return {
       level,
-      badge: LEVEL_THRESHOLDS[level].badge,
+      badge: LEVEL_THRESHOLDS[level].title,
       nextLevelXP,
       currentLevelXP
     };
