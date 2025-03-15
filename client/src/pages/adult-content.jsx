@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ExternalLink } from "lucide-react";
+import { ChevronLeft, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 const sites = [
@@ -13,62 +13,65 @@ const sites = [
 
 export default function AdultContent() {
   const [selectedSite, setSelectedSite] = useState(sites[0].id);
-
-  const handleSiteClick = (url) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
-  };
+  const [viewerKey, setViewerKey] = useState(0); // Used to force viewer refresh
+  const [isLoading, setIsLoading] = useState(true);
 
   return (
     <div className="min-h-screen bg-zinc-50">
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur z-50 border-b border-zinc-200/50">
-        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Link href="/">
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <ChevronLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <h1 className="text-xl font-semibold">Adult Content</h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full"
-              onClick={() => handleSiteClick(sites.find(site => site.id === selectedSite)?.url)}
-            >
-              <ExternalLink className="h-5 w-5" />
+        <div className="container mx-auto px-4 h-14 flex items-center">
+          <Link href="/">
+            <Button variant="ghost" size="icon" className="rounded-full">
+              <ChevronLeft className="h-5 w-5" />
             </Button>
-          </div>
+          </Link>
+          <h1 className="text-xl font-semibold ml-2">Adult Content</h1>
         </div>
       </header>
 
-      {/* Site Selection */}
-      <main className="container mx-auto px-4 pt-24">
-        <div className="max-w-lg mx-auto">
-          <div className="flex flex-col gap-2">
-            {sites.map(site => (
-              <motion.div
-                key={site.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
+      {/* Main Content */}
+      <main className="pt-20">
+        {/* Site Selection Tabs */}
+        <div className="bg-white border-b border-zinc-200/50">
+          <div className="container mx-auto px-4">
+            <div className="flex gap-2">
+              {sites.map(site => (
                 <Button
-                  variant={selectedSite === site.id ? "default" : "outline"}
-                  className="w-full h-12 rounded-full flex items-center justify-between text-lg"
+                  key={site.id}
+                  variant={selectedSite === site.id ? "default" : "ghost"}
+                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-2 h-12"
                   onClick={() => {
                     setSelectedSite(site.id);
-                    handleSiteClick(site.url);
+                    setViewerKey(prev => prev + 1);
+                    setIsLoading(true);
                   }}
                 >
-                  <span>{site.name}</span>
-                  <ExternalLink className="h-5 w-5 opacity-50" />
+                  {site.name}
                 </Button>
-              </motion.div>
-            ))}
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Content Viewer */}
+        <div className="container mx-auto px-4 pt-4">
+          <div className="aspect-video w-full bg-black rounded-lg overflow-hidden relative">
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
+                <Loader2 className="w-8 h-8 animate-spin text-white" />
+              </div>
+            )}
+            <iframe
+              key={viewerKey}
+              src={sites.find(site => site.id === selectedSite)?.url}
+              style={{ width: '100%', height: '100%', border: 'none' }}
+              onLoad={() => setIsLoading(false)}
+              allowFullScreen
+              allow="fullscreen"
+              sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+              referrerPolicy="no-referrer"
+            />
           </div>
         </div>
       </main>
@@ -85,8 +88,16 @@ export default function AdultContent() {
               key={site.id}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => handleSiteClick(site.url)}
-              className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+              onClick={() => {
+                setSelectedSite(site.id);
+                setViewerKey(prev => prev + 1);
+                setIsLoading(true);
+              }}
+              className={`text-sm font-medium transition-colors ${
+                selectedSite === site.id 
+                  ? 'text-primary'
+                  : 'text-zinc-600 hover:text-zinc-900'
+              }`}
             >
               {site.name}
             </motion.button>
