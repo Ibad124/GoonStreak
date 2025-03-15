@@ -36,6 +36,8 @@ import SessionCalendar from "@/components/SessionCalendar";
 import ActiveFriends from "@/components/ActiveFriends";
 import { AiSuggestions } from "@/components/AiSuggestions";
 import { SexAiChat } from "@/components/SexAiChat";
+import { TooltipGuide } from "@/components/TooltipGuide"; 
+// Import TooltipGuide
 
 interface Stats {
   user: {
@@ -136,7 +138,16 @@ export default function HomePage() {
         animate={{ scale: 1, opacity: 1 }}
         className="fixed bottom-24 right-6 z-50"
       >
-        <SexAiChat />
+        <TooltipGuide
+          id="sex-ai-chat"
+          title="New! Intimate AI Chat"
+          description="Get personalized advice and answers about intimate topics in a private, safe environment. Click the floating button to start chatting."
+          position="left"
+          step={1}
+          totalSteps={3}
+        >
+          <SexAiChat />
+        </TooltipGuide>
       </motion.div>
 
       {/* Header */}
@@ -367,8 +378,6 @@ export default function HomePage() {
 
           {/* Right Column */}
           <div className="lg:col-span-4 space-y-4 md:space-y-6">
-
-
             {/* Active Friends Section */}
             <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
               <CardHeader>
@@ -382,7 +391,7 @@ export default function HomePage() {
               </CardContent>
             </Card>
 
-            {/* Session Calendar */}
+            {/* Calendar Section */}
             <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
               <CardHeader>
                 <CardTitle className={`text-xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
@@ -391,10 +400,19 @@ export default function HomePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <SessionCalendar
-                  sessions={stats?.sessions || []}
-                  currentStreak={stats?.user?.currentStreak || 0}
-                />
+                <TooltipGuide
+                  id="calendar-feature"
+                  title="Track Your Progress"
+                  description="View your activity history and streaks in this beautiful calendar. Days with completed sessions are highlighted!"
+                  position="bottom"
+                  step={3}
+                  totalSteps={3}
+                >
+                  <SessionCalendar
+                    sessions={stats?.sessions || []}
+                    currentStreak={stats?.user?.currentStreak || 0}
+                  />
+                </TooltipGuide>
               </CardContent>
             </Card>
           </div>
@@ -408,33 +426,42 @@ export default function HomePage() {
         className={`fixed bottom-0 left-0 right-0 p-4 ${style.headerBg} backdrop-blur border-t ${style.border}`}
       >
         <div className="container mx-auto max-w-lg">
-          <Button
-            className={`
-              w-full h-16 text-lg rounded-2xl
-              bg-gradient-to-r ${style.button} 
-              hover:brightness-110 transition-all duration-300 
-              shadow-lg shadow-current/20 hover:shadow-xl hover:shadow-current/30 
-              font-bold tracking-wide text-white transform hover:scale-[1.02]
-              relative overflow-hidden group
-            `}
-            size="lg"
-            onClick={() => setIsSessionModalOpen(true)}
+          <TooltipGuide
+            id="session-logging"
+            title="Track Your Progress"
+            description="Log your sessions to earn XP, maintain your streak, and unlock achievements. Regular logging helps you stay motivated!"
+            position="top"
+            step={2}
+            totalSteps={3}
           >
-            <motion.div
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 justify-center relative z-10"
+            <Button
+              className={`
+                w-full h-16 text-lg rounded-2xl
+                bg-gradient-to-r ${style.button} 
+                hover:brightness-110 transition-all duration-300 
+                shadow-lg shadow-current/20 hover:shadow-xl hover:shadow-current/30 
+                font-bold tracking-wide text-white transform hover:scale-[1.02]
+                relative overflow-hidden group
+              `}
+              size="lg"
+              onClick={() => setIsSessionModalOpen(true)}
             >
-              <Sparkles className="h-6 w-6" />
-              <span className="relative">Log Session</span>
-            </motion.div>
-            <motion.div
-              className="absolute inset-0 bg-white/20"
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: [1, 1.5, 1], opacity: [0, 0.5, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
-          </Button>
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center gap-2 justify-center relative z-10"
+              >
+                <Sparkles className="h-6 w-6" />
+                <span className="relative">Log Session</span>
+              </motion.div>
+              <motion.div
+                className="absolute inset-0 bg-white/20"
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: [1, 1.5, 1], opacity: [0, 0.5, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+            </Button>
+          </TooltipGuide>
         </div>
       </motion.div>
 

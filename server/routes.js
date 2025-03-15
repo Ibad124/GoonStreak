@@ -3,6 +3,7 @@ import { setupAuth } from "./auth.js";
 import { storage } from "./storage.js";
 import { aiSuggestionService } from "./services/ai-suggestions.js";
 import OpenAI from "openai";
+import { WebSocketServer } from 'ws'; // Import WebSocketServer
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -449,5 +450,32 @@ export async function registerRoutes(app) {
   });
 
   const httpServer = createServer(app);
+
+  // Initialize WebSocket server with explicit path
+  const wss = new WebSocketServer({ 
+    server: httpServer,
+    path: '/ws'
+  });
+
+  wss.on('connection', (ws) => {
+    console.log('Client connected to WebSocket');
+
+    ws.on('error', console.error);
+
+    ws.on('message', (data) => {
+      try {
+        const message = JSON.parse(data);
+        console.log('Received message:', message);
+        // Handle different message types here
+      } catch (error) {
+        console.error('Error parsing message:', error);
+      }
+    });
+
+    ws.on('close', () => {
+      console.log('Client disconnected from WebSocket');
+    });
+  });
+
   return httpServer;
 }

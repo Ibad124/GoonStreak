@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ThemeProvider } from "@/hooks/use-theme";
 import { ProtectedRoute } from "@/lib/protected-route";
+import { useEffect } from "react";
+import { setupWebSocket } from "@/lib/websocket";
 import HomePage from "@/pages/home-page";
 import AuthPage from "@/pages/auth-page";
 import LeaderboardPage from "@/pages/leaderboard-page";
@@ -29,15 +31,17 @@ function Router() {
   );
 }
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <ThemeProvider>
-        <Router />
-        <Toaster />
-      </ThemeProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <ThemeProvider>
+          <Router />
+          <Toaster />
+        </ThemeProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
