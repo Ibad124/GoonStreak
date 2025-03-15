@@ -358,34 +358,6 @@ export default function HomePage() {
 
           {/* Right Column */}
           <div className="lg:col-span-4 space-y-4 md:space-y-6">
-            {/* AI-Powered Growth Suggestions */}
-            <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
-              <CardHeader>
-                <CardTitle className={`text-xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
-                  <Brain className={`${style.accent}`} />
-                  Growth Insights
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <AiSuggestions />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Sex AI Chat */}
-            <Card className={`overflow-hidden bg-gradient-to-br from-pink-600/90 to-purple-700/90 backdrop-blur hover:from-pink-500/90 hover:to-purple-600/90 transition-all duration-300 transform hover:scale-[1.02] border-pink-400/30`}>
-              <CardHeader>
-                <CardTitle className="text-xl font-bold tracking-tight flex items-center gap-2 text-white">
-                  <Heart className="text-pink-300 animate-pulse" />
-                  Intimate AI Chat
-                </CardTitle>
-                <p className="text-pink-100/80 text-sm">Get personalized advice and guidance about intimate topics</p>
-              </CardHeader>
-              <CardContent>
-                <SexAiChat />
-              </CardContent>
-            </Card>
 
 
             {/* Active Friends Section */}
@@ -419,6 +391,15 @@ export default function HomePage() {
           </div>
         </div>
       </main>
+
+      {/* Sex AI Chat Button */}
+      <motion.div
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="fixed bottom-24 right-6 z-50"
+      >
+        <SexAiChat />
+      </motion.div>
 
       {/* Session Logging Button */}
       <motion.div
