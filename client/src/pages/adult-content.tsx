@@ -17,6 +17,10 @@ interface StatsData {
   user: {
     xpPoints: number;
     title: string;
+    currentStreak: number;
+    longestStreak: number;
+    totalSessions: number;
+    todaySessions: number;
   };
   nextLevelXP: number;
   currentLevelXP: number;
@@ -66,7 +70,7 @@ export default function AdultPage() {
       }
 
       // If new achievements were earned, show them
-      data.newAchievements?.forEach((achievement) => {
+      data.newAchievements?.forEach((achievement: { description: string }) => {
         toast({
           title: "Achievement Unlocked!",
           description: achievement.description,
@@ -160,15 +164,7 @@ export default function AdultPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <StreakStats
-                stats={{
-                  user: {
-                    currentStreak: 0,
-                    longestStreak: 0,
-                    totalSessions: 0,
-                  },
-                }}
-              />
+              <StreakStats stats={stats} />
             </CardContent>
           </Card>
 
@@ -180,7 +176,7 @@ export default function AdultPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Achievements achievements={stats?.achievements || []} />
+              <Achievements achievements={stats?.achievements || []} stats={stats} />
             </CardContent>
           </Card>
         </div>
