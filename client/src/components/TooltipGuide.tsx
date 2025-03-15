@@ -32,7 +32,8 @@ export function TooltipGuide({
       .every(prevStep => seenTooltips[`step-${prevStep}`]);
 
     if (!seenTooltips[id] && (!step || previousStepsCompleted)) {
-      setIsVisible(true);
+      // Delay showing tooltip slightly to ensure parent elements are rendered
+      setTimeout(() => setIsVisible(true), 500);
     } else {
       setHasBeenSeen(true);
     }
@@ -49,39 +50,20 @@ export function TooltipGuide({
 
   const positionStyles = {
     top: {
-      desktop: "bottom-full mb-2",
+      desktop: "bottom-[120%] mb-2",
       mobile: "bottom-[120%] mb-2 left-1/2 -translate-x-1/2"
     },
     bottom: {
-      desktop: "top-full mt-2",
+      desktop: "top-[120%] mt-2",
       mobile: "top-[120%] mt-2 left-1/2 -translate-x-1/2"
     },
     left: {
-      desktop: "right-full mr-2",
-      mobile: "top-full mt-2 left-1/2 -translate-x-1/2"
+      desktop: "right-[120%] mr-2",
+      mobile: "top-[120%] mt-2 left-1/2 -translate-x-1/2"
     },
     right: {
-      desktop: "left-full ml-2",
-      mobile: "top-full mt-2 left-1/2 -translate-x-1/2"
-    }
-  };
-
-  const arrowStyles = {
-    top: {
-      desktop: "bottom-[-6px] border-t-blue-500",
-      mobile: "bottom-[-6px] left-1/2 -translate-x-1/2 border-t-blue-500"
-    },
-    bottom: {
-      desktop: "top-[-6px] border-b-blue-500",
-      mobile: "top-[-6px] left-1/2 -translate-x-1/2 border-b-blue-500"
-    },
-    left: {
-      desktop: "right-[-6px] border-l-blue-500",
-      mobile: "top-[-6px] left-1/2 -translate-x-1/2 border-b-blue-500"
-    },
-    right: {
-      desktop: "left-[-6px] border-r-blue-500",
-      mobile: "top-[-6px] left-1/2 -translate-x-1/2 border-b-blue-500"
+      desktop: "left-[120%] ml-2",
+      mobile: "top-[120%] mt-2 left-1/2 -translate-x-1/2"
     }
   };
 
@@ -94,38 +76,33 @@ export function TooltipGuide({
             initial={{ opacity: 0, scale: 0.9, y: position === "top" ? 10 : -10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.2 }}
             className={`
-              absolute z-50 
-              hidden md:block md:${positionStyles[position].desktop}
-              md:w-72 bg-gradient-to-br from-blue-500 to-blue-600 
-              rounded-lg shadow-lg px-4 py-3 text-white
-
-              md:transform-none
-              fixed bottom-4 left-4 right-4 block
-              md:static
+              fixed z-[100] w-72
+              md:absolute md:w-80
+              ${positionStyles[position].desktop}
+              bg-gradient-to-br from-blue-500 to-blue-600 
+              rounded-lg shadow-xl px-4 py-3 text-white
+              border border-blue-400/20
+              backdrop-blur-sm
             `}
           >
-            {/* Arrow */}
-            <div className={`
-              absolute w-3 h-3 transform rotate-45 bg-blue-500
-              hidden md:block md:${arrowStyles[position].desktop}
-            `} />
-
+            {/* Content */}
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <h4 className="font-semibold text-sm md:text-base">{title}</h4>
-                <p className="text-xs md:text-sm text-blue-100 mt-1 line-clamp-3 md:line-clamp-none">
+                <h4 className="font-semibold text-base">{title}</h4>
+                <p className="text-sm text-blue-100 mt-1">
                   {description}
                 </p>
                 {step && totalSteps > 1 && (
-                  <div className="flex items-center gap-2 mt-2 text-xs text-blue-100">
+                  <div className="flex items-center gap-2 mt-3 text-xs text-blue-100">
                     <div className="flex-1 h-1 bg-blue-400/30 rounded-full overflow-hidden">
                       <div 
                         className="h-full bg-white" 
                         style={{ width: `${(step / totalSteps) * 100}%` }}
                       />
                     </div>
-                    <span className="whitespace-nowrap">Step {step}/{totalSteps}</span>
+                    <span>Step {step}/{totalSteps}</span>
                   </div>
                 )}
               </div>
@@ -142,6 +119,20 @@ export function TooltipGuide({
                 )}
               </Button>
             </div>
+
+            {/* Animated Pulse */}
+            <motion.div
+              className="absolute inset-0 rounded-lg bg-white/10"
+              animate={{ 
+                scale: [1, 1.02, 1],
+                opacity: [0.1, 0.2, 0.1]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
           </motion.div>
         )}
       </AnimatePresence>
