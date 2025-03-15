@@ -30,7 +30,6 @@ import StreakStats from "@/components/StreakStats";
 import Achievements from "@/components/Achievements";
 import LogSessionModal from "@/components/LogSessionModal";
 import Challenges from "@/components/Challenges";
-import { GoonRoom } from "@/components/GoonRoom";
 import SessionCalendar from "@/components/SessionCalendar";
 import ActiveFriends from "@/components/ActiveFriends";
 
@@ -55,7 +54,6 @@ export default function HomePage() {
   const { toast } = useToast();
   const { preferences } = useTheme();
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
-  const [isGoonRoomOpen, setIsGoonRoomOpen] = useState(false);
 
   const { data: stats, isLoading, error } = useQuery<Stats>({
     queryKey: ["/api/stats"],
@@ -157,15 +155,6 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className={`rounded-full ${style.text} hover:${style.accent}`}
-              onClick={() => setIsGoonRoomOpen(true)}
-            >
-              <Users className="h-5 w-5" />
-            </Button>
-
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">
@@ -440,11 +429,6 @@ export default function HomePage() {
         onClose={() => setIsSessionModalOpen(false)}
         onSubmit={(data) => sessionMutation.mutate(data)}
         isPending={sessionMutation.isPending}
-      />
-
-      <GoonRoom
-        isOpen={isGoonRoomOpen}
-        onClose={() => setIsGoonRoomOpen(false)}
       />
     </div>
   );
