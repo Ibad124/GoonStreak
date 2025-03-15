@@ -26,8 +26,8 @@ export default function LevelProgress({ user }: LevelProgressProps) {
 
   const levelInfo = calculateLevel(user.xpPoints);
   const nextTitle = LEVEL_THRESHOLDS[(user.level + 1) as keyof typeof LEVEL_THRESHOLDS]?.title || "Max Level";
-  const currentThreshold = LEVEL_THRESHOLDS[user.level]?.points || 0;
-  const nextThreshold = LEVEL_THRESHOLDS[user.level + 1]?.points || currentThreshold;
+  const currentThreshold = LEVEL_THRESHOLDS[user.level]?.xp || 0;
+  const nextThreshold = LEVEL_THRESHOLDS[user.level + 1]?.xp || currentThreshold;
   const progress = ((user.xpPoints - currentThreshold) / (nextThreshold - currentThreshold)) * 100;
   const percentage = Math.min(100, Math.max(0, progress));
 

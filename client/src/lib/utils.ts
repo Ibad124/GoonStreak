@@ -12,10 +12,10 @@ export function calculateLevel(xpPoints: number) {
 
   // Find the current level based on XP points
   for (const [level, threshold] of Object.entries(LEVEL_THRESHOLDS)) {
-    if (xpPoints >= threshold.points) {
+    if (xpPoints >= threshold.xp) {
       currentLevel = parseInt(level);
     } else {
-      nextLevelXP = threshold.points;
+      nextLevelXP = threshold.xp;
       break;
     }
   }
@@ -27,9 +27,9 @@ export function calculateLevel(xpPoints: number) {
     currentLevel,
     currentTitle: currentThreshold.title,
     currentEmoji: currentThreshold.emoji,
-    nextLevelXP: nextThreshold?.points || currentThreshold.points,
-    progress: xpPoints - currentThreshold.points,
-    total: (nextThreshold?.points || currentThreshold.points) - currentThreshold.points,
+    nextLevelXP: nextThreshold?.xp || currentThreshold.xp,
+    progress: xpPoints - currentThreshold.xp,
+    total: (nextThreshold?.xp || currentThreshold.xp) - currentThreshold.xp,
   };
 }
 
