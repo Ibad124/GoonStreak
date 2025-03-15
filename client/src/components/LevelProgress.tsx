@@ -1,10 +1,10 @@
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Star, Crown, Trophy, ChevronUp, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LEVEL_THRESHOLDS } from "@shared/schema";
 import { calculateLevel } from "@/lib/utils";
-import { useState, useEffect } from 'react';
 
 interface LevelProgressProps {
   user: {
@@ -17,20 +17,17 @@ export default function LevelProgress({ user }: LevelProgressProps) {
   const [showLevelUp, setShowLevelUp] = useState(false);
 
   useEffect(() => {
-    const shouldLevelUp = user.xpPoints >= LEVEL_THRESHOLDS[user.level + 1]?.xp;
+    const levelInfo = calculateLevel(user.xpPoints);
+    const shouldLevelUp = user.xpPoints >= LEVEL_THRESHOLDS[levelInfo.currentLevel + 1]?.points;
     if (shouldLevelUp) {
       setShowLevelUp(true);
       setTimeout(() => setShowLevelUp(false), 2000);
     }
-  }, [user.xpPoints, user.level]);
+  }, [user.xpPoints]);
 
   const levelInfo = calculateLevel(user.xpPoints);
-  const nextTitle = LEVEL_THRESHOLDS[(user.level + 1) as keyof typeof LEVEL_THRESHOLDS]?.title || "Max Level";
-  const currentThreshold = LEVEL_THRESHOLDS[user.level]?.xp || 0;
-  const nextThreshold = LEVEL_THRESHOLDS[user.level + 1]?.xp || currentThreshold;
-  const progress = ((user.xpPoints - currentThreshold) / (nextThreshold - currentThreshold)) * 100;
-  const percentage = Math.min(100, Math.max(0, progress));
-
+  const nextThreshold = LEVEL_THRESHOLDS[levelInfo.currentLevel + 1];
+  const percentage = Math.min(100, Math.max(0, (levelInfo.progress / levelInfo.total) * 100));
 
   return (
     <motion.div
@@ -113,14 +110,14 @@ export default function LevelProgress({ user }: LevelProgressProps) {
                 <div className="flex items-center gap-2">
                   <ChevronUp className="h-5 w-5 text-pink-300" />
                   <div className="flex flex-col">
-                    <span className="font-medium">Next: {nextTitle}</span>
+                    <span className="font-medium">Next: {nextThreshold?.title || "Max Level"}</span>
                     <span className="text-sm text-pink-200/80">
-                      {LEVEL_THRESHOLDS[levelInfo.currentLevel + 1]?.title || "Max level reached"}
+                      {nextThreshold?.title || "Max level reached"}
                     </span>
                   </div>
                 </div>
                 <span className="text-sm font-bold bg-white/10 px-3 py-1 rounded-full">
-                  {Math.round(progress)}%
+                  {Math.round(percentage)}%
                 </span>
               </div>
 
