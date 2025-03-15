@@ -9,16 +9,9 @@ interface ExtendedWebSocket extends WebSocket {
   isAlive: boolean;
 }
 
-interface VideoState {
-  currentTime: number;
-  isPlaying: boolean;
-  timestamp: Date;
-}
-
 export class WebSocketHandler {
   private wss: WebSocketServer;
   private rooms: Map<number, Set<ExtendedWebSocket>> = new Map();
-  private videoStates: Map<number, VideoState> = new Map();
   private heartbeatInterval: NodeJS.Timeout;
 
   constructor(server: Server) {
@@ -41,6 +34,7 @@ export class WebSocketHandler {
       callback(false, 401, "Unauthorized");
       return;
     }
+    // Allow the connection for now, we'll validate the user when they try to join a room
     callback(true);
   }
 
@@ -79,6 +73,10 @@ export class WebSocketHandler {
         console.error("WebSocket error:", error);
       });
     });
+
+    this.wss.on('error', (error) => {
+      console.error("WebSocket server error:", error);
+    });
   }
 
   private async handleEvent(ws: ExtendedWebSocket, event: RoomEvent) {
@@ -89,9 +87,6 @@ export class WebSocketHandler {
         break;
       case 'LEAVE_ROOM':
         await this.leaveRoom(ws);
-        break;
-      case 'VIDEO_UPDATE':
-        await this.handleVideoUpdate(ws, event.payload);
         break;
       case 'SEND_MESSAGE':
         await this.broadcastToRoom(ws.roomId!, {
@@ -104,16 +99,15 @@ export class WebSocketHandler {
           timestamp: new Date(),
         });
         break;
-      case 'STATUS_UPDATE':
-        await this.updateParticipantStatus(ws, event.payload.status);
-        break;
       case 'TIMER_START':
         await this.handleTimerStart(ws, event);
         break;
       case 'TIMER_STOP':
         await this.handleTimerStop(ws, event);
         break;
-
+      case 'STATUS_UPDATE':
+        await this.updateParticipantStatus(ws, event.payload.status);
+        break;
     }
   }
 
@@ -149,10 +143,7 @@ export class WebSocketHandler {
     // Broadcast join event
     this.broadcastToRoom(roomId, {
       type: 'USER_JOINED',
-      payload: {
-        userId: ws.userId,
-        username: payload.username,
-      },
+      payload: { userId: ws.userId },
       timestamp: new Date(),
     });
 
@@ -162,39 +153,11 @@ export class WebSocketHandler {
       status: 'active'
     }));
 
-    // Send current video state if exists
-    const videoState = this.videoStates.get(roomId);
-
     ws.send(JSON.stringify({
       type: 'ROOM_STATE',
-      payload: { 
-        room,
-        participants,
-        videoState,
-      },
+      payload: { room, participants },
       timestamp: new Date(),
     }));
-  }
-
-  private async handleVideoUpdate(ws: ExtendedWebSocket, payload: VideoState) {
-    if (!ws.roomId) return;
-
-    const room = await storage.getRoom(ws.roomId);
-    if (!room || room.hostId !== ws.userId) {
-      console.log("Video update rejected: User is not room host");
-      return;
-    }
-
-    this.videoStates.set(ws.roomId, {
-      ...payload,
-      timestamp: new Date(),
-    });
-
-    await this.broadcastToRoom(ws.roomId, {
-      type: 'VIDEO_STATE_UPDATED',
-      payload,
-      timestamp: new Date(),
-    });
   }
 
   private async leaveRoom(ws: ExtendedWebSocket) {
@@ -207,33 +170,14 @@ export class WebSocketHandler {
       roomParticipants.delete(ws);
       if (roomParticipants.size === 0) {
         this.rooms.delete(ws.roomId);
-        this.videoStates.delete(ws.roomId);
-        await storage.endRoom(ws.roomId);
         console.log(`Room ${ws.roomId} closed - no participants remaining`);
-      } else {
-        // If host left, assign new host
-        const room = await storage.getRoom(ws.roomId);
-        if (room && room.hostId === ws.userId) {
-          const newHost = Array.from(roomParticipants)[0];
-          if (newHost.userId) {
-            await storage.updateRoom(ws.roomId, { hostId: newHost.userId });
-            await this.broadcastToRoom(ws.roomId, {
-              type: 'HOST_CHANGED',
-              payload: { newHostId: newHost.userId },
-              timestamp: new Date(),
-            });
-          }
-        }
       }
     }
 
     // Broadcast leave event
     await this.broadcastToRoom(ws.roomId, {
       type: 'USER_LEFT',
-      payload: { 
-        userId: ws.userId,
-        username: storage.getUser(ws.userId)?.username
-      },
+      payload: { userId: ws.userId },
       timestamp: new Date(),
     });
 
@@ -251,6 +195,33 @@ export class WebSocketHandler {
       if (client.readyState === WebSocket.OPEN) {
         client.send(messageStr);
       }
+    });
+  }
+
+  private async handleTimerStart(ws: ExtendedWebSocket, event: RoomEvent) {
+    if (!ws.roomId) return;
+    console.log(`Timer started in room ${ws.roomId} by user ${ws.userId}`);
+
+    await this.broadcastToRoom(ws.roomId, {
+      type: 'TIMER_STARTED',
+      payload: {
+        duration: event.payload.duration,
+        startedBy: ws.userId,
+      },
+      timestamp: new Date(),
+    });
+  }
+
+  private async handleTimerStop(ws: ExtendedWebSocket, event: RoomEvent) {
+    if (!ws.roomId) return;
+    console.log(`Timer stopped in room ${ws.roomId} by user ${ws.userId}`);
+
+    await this.broadcastToRoom(ws.roomId, {
+      type: 'TIMER_STOPPED',
+      payload: {
+        stoppedBy: ws.userId,
+      },
+      timestamp: new Date(),
     });
   }
 
@@ -281,33 +252,6 @@ export class WebSocketHandler {
 
       extWs.isAlive = false;
       extWs.ping();
-    });
-  }
-
-  private async handleTimerStart(ws: ExtendedWebSocket, event: RoomEvent) {
-    if (!ws.roomId) return;
-    console.log(`Timer started in room ${ws.roomId} by user ${ws.userId}`);
-
-    await this.broadcastToRoom(ws.roomId, {
-      type: 'TIMER_STARTED',
-      payload: {
-        duration: event.payload.duration,
-        startedBy: ws.userId,
-      },
-      timestamp: new Date(),
-    });
-  }
-
-  private async handleTimerStop(ws: ExtendedWebSocket, event: RoomEvent) {
-    if (!ws.roomId) return;
-    console.log(`Timer stopped in room ${ws.roomId} by user ${ws.userId}`);
-
-    await this.broadcastToRoom(ws.roomId, {
-      type: 'TIMER_STOPPED',
-      payload: {
-        stoppedBy: ws.userId,
-      },
-      timestamp: new Date(),
     });
   }
 
