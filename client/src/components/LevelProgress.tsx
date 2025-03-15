@@ -14,10 +14,10 @@ interface LevelProgressProps {
 
 export default function LevelProgress({ user }: LevelProgressProps) {
   const calculateProgress = () => {
-    const currentThreshold = LEVEL_THRESHOLDS[user.level]?.xp || 0;
-    const nextThreshold = LEVEL_THRESHOLDS[user.level + 1]?.xp || currentThreshold;
-    const progress = user.xpPoints - currentThreshold;
-    const total = nextThreshold - currentThreshold;
+    const currentThreshold = LEVEL_THRESHOLDS[user.level] ? LEVEL_THRESHOLDS[user.level].xp : 0;
+    const nextThreshold = LEVEL_THRESHOLDS[user.level + 1] ? LEVEL_THRESHOLDS[user.level + 1].xp : currentThreshold;
+    const progress = Math.max(0, user.xpPoints - currentThreshold);
+    const total = Math.max(1, nextThreshold - currentThreshold);
     return {
       progress,
       total,
@@ -28,7 +28,7 @@ export default function LevelProgress({ user }: LevelProgressProps) {
 
   const levelInfo = calculateProgress();
   const nextTitle = LEVEL_THRESHOLDS[user.level + 1]?.title || "Max Level";
-  const showLevelUp = user.xpPoints >= LEVEL_THRESHOLDS[user.level + 1]?.xp;
+  const showLevelUp = LEVEL_THRESHOLDS[user.level + 1] && user.xpPoints >= LEVEL_THRESHOLDS[user.level + 1].xp;
 
 
   return (
@@ -168,15 +168,15 @@ export default function LevelProgress({ user }: LevelProgressProps) {
 
               <div className="space-y-2">
                 <div className="flex justify-between text-sm text-pink-200">
-                  <span>{levelInfo.progress} XP</span>
-                  <span>{levelInfo.total} XP</span>
+                  <span>{Math.round(levelInfo.progress)} XP</span>
+                  <span>{Math.round(levelInfo.total)} XP</span>
                 </div>
                 <div className="relative h-4 bg-black/20 rounded-full overflow-hidden backdrop-blur">
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-pink-300 via-purple-300 to-pink-300"
-                    style={{ width: `${progress}%` }}
+                    style={{ width: `${levelInfo.percentage}%` }}
                     initial={{ width: 0 }}
-                    animate={{ width: `${progress}%` }}
+                    animate={{ width: `${levelInfo.percentage}%` }}
                     transition={{ duration: 1, ease: "easeOut" }}
                   />
                   <motion.div
