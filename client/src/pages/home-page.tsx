@@ -369,8 +369,20 @@ export default function HomePage() {
               <CardContent>
                 <div className="space-y-4">
                   <AiSuggestions />
-                  <SexAiChat />
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Sex AI Chat */}
+            <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
+              <CardHeader>
+                <CardTitle className={`text-xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
+                  <Heart className={`${style.accent}`} />
+                  Intimate AI Chat
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <SexAiChat />
               </CardContent>
             </Card>
 
