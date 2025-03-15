@@ -415,8 +415,7 @@ export async function registerRoutes(app) {
         return res.status(400).json({ error: "Invalid message format" });
       }
 
-      res.setHeader('Content-Type', 'application/json'); });
-      }
+      res.setHeader('Content-Type', 'application/json');
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4",
