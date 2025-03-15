@@ -14,6 +14,7 @@ import AdultPage from "@/pages/adult-content";
 import GoalsPage from "@/pages/goals-page";
 import OnboardingPage from "@/pages/onboarding-page";
 import SocialPage from "@/pages/social-page";
+import SettingsPage from "@/pages/settings-page";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -25,6 +26,7 @@ function Router() {
       <ProtectedRoute path="/adult-content" component={AdultPage} />
       <ProtectedRoute path="/leaderboard" component={LeaderboardPage} />
       <ProtectedRoute path="/social" component={SocialPage} />
+      <ProtectedRoute path="/settings" component={SettingsPage} />
       <ProtectedRoute path="/" component={HomePage} />
       <Route component={NotFound} />
     </Switch>

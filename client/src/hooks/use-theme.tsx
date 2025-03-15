@@ -3,13 +3,28 @@ import type { ReactNode } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { ThemeStyle, ThemePreferences } from "@/types/theme";
+
+export type ThemeStyle = "default" | "competitive" | "hardcore" | "solo";
+export type ThemeAppearance = "light" | "dark" | "system";
+
+export interface ThemePreferences {
+  goonStyle: ThemeStyle;
+  appearance: ThemeAppearance;
+  showOnLeaderboard: boolean;
+  stealthMode: boolean;
+  achievementAlerts: boolean;
+  friendActivityAlerts: boolean;
+  defaultSessionDuration: number;
+}
 
 const DEFAULT_PREFERENCES: ThemePreferences = {
   goonStyle: "default",
-  timePreference: "",
-  intensityLevel: "",
-  socialMode: "",
+  appearance: "dark", // Set dark as default
+  showOnLeaderboard: true,
+  stealthMode: false,
+  achievementAlerts: true,
+  friendActivityAlerts: true,
+  defaultSessionDuration: 30,
 };
 
 interface ThemeContextType {
@@ -24,13 +39,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [preferences, setPreferences] = useState<ThemePreferences>(DEFAULT_PREFERENCES);
 
   // Fetch initial preferences
-  useQuery({
+  useQuery<ThemePreferences>({
     queryKey: ["/api/user/preferences"],
-    retry: 3,
-    onSuccess: (data: ThemePreferences | undefined) => {
-      if (data) {
-        setPreferences(prev => ({ ...prev, ...data }));
-      }
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/user/preferences");
+      if (!res.ok) throw new Error("Failed to load preferences");
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setPreferences(prev => ({ ...prev, ...data }));
+      // Apply dark mode class
+      document.documentElement.classList.toggle("dark", data.appearance === "dark");
     },
     onError: () => {
       toast({
@@ -44,28 +63,23 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // Update preferences mutation
   const updatePreferencesMutation = useMutation({
     mutationFn: async (newPrefs: Partial<ThemePreferences>) => {
-      try {
-        // Combine existing preferences with new ones
-        const updatedPrefs = {
-          ...preferences,
-          ...newPrefs,
-        };
-
-        const res = await apiRequest("POST", "/api/user/preferences", updatedPrefs);
-        if (!res.ok) {
-          const error = await res.json();
-          throw new Error(error.message || "Failed to save preferences");
-        }
-        const data = await res.json();
-        return data as ThemePreferences;
-      } catch (error) {
-        console.error("Failed to update preferences:", error);
-        throw error;
+      const updatedPrefs = { ...preferences, ...newPrefs };
+      const res = await apiRequest("POST", "/api/user/preferences", updatedPrefs);
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to save preferences");
       }
+      return res.json() as Promise<ThemePreferences>;
     },
     onSuccess: (data) => {
       queryClient.setQueryData(["/api/user/preferences"], data);
       setPreferences(data);
+      // Update dark mode when appearance changes
+      document.documentElement.classList.toggle("dark", data.appearance === "dark");
+      toast({
+        title: "Preferences Updated",
+        description: "Your settings have been saved.",
+      });
     },
     onError: (error: Error) => {
       toast({
