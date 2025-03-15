@@ -196,6 +196,39 @@ export async function registerRoutes(app) {
     res.json(friendsWithData);
   });
 
+  // Add the new active friends endpoint after the existing friends endpoint
+  app.get("/api/friends/active", requireAuth, async (req, res) => {
+    try {
+      const friends = await storage.getUserFriends(req.user.id);
+      const activeFriendsWithData = await Promise.all(
+        friends.map(async (friend) => {
+          const userData = await storage.getUser(friend.friendId);
+          return {
+            ...friend,
+            username: userData.username,
+            isOnline: userData.isOnline,
+            lastActive: userData.lastActive,
+            status: userData.status,
+            currentStreak: userData.currentStreak,
+            level: userData.level,
+            title: userData.title
+          };
+        })
+      );
+
+      // Filter only online friends and those active in the last 15 minutes
+      const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+      const activeFriends = activeFriendsWithData.filter(friend =>
+        friend.isOnline || (friend.lastActive && new Date(friend.lastActive) > fifteenMinutesAgo)
+      );
+
+      res.json(activeFriends);
+    } catch (error) {
+      console.error("Error fetching active friends:", error);
+      res.status(500).json({ error: "Failed to fetch active friends" });
+    }
+  });
+
   // Get pending friend requests
   app.get("/api/friends/requests", requireAuth, async (req, res) => {
     const requests = await storage.getFriendRequests(req.user.id);
