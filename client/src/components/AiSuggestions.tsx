@@ -4,7 +4,7 @@ import { Loader2, ThumbsUp, ThumbsDown, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 
 interface Suggestion {
   id: number;
@@ -25,8 +25,11 @@ export function AiSuggestions() {
   const generateMutation = useMutation({
     mutationFn: async () => {
       setIsGenerating(true);
-      const res = await fetch("/api/suggestions/generate", { method: "POST" });
-      if (!res.ok) throw new Error("Failed to generate suggestion");
+      const res = await apiRequest("POST", "/api/suggestions/generate");
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(error);
+      }
       return res.json();
     },
     onSuccess: () => {
@@ -48,12 +51,11 @@ export function AiSuggestions() {
 
   const rateMutation = useMutation({
     mutationFn: async ({ id, rating }: { id: number; rating: number }) => {
-      const res = await fetch(`/api/suggestions/${id}/rate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rating }),
-      });
-      if (!res.ok) throw new Error("Failed to rate suggestion");
+      const res = await apiRequest("POST", `/api/suggestions/${id}/rate`, { rating });
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(error);
+      }
       return res.json();
     },
     onSuccess: () => {

@@ -23,7 +23,8 @@ import {
   Settings,
   Loader2,
   Plus,
-  Brain
+  Brain,
+  Heart // Added import for Heart icon
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -34,6 +35,7 @@ import Challenges from "@/components/Challenges";
 import SessionCalendar from "@/components/SessionCalendar";
 import ActiveFriends from "@/components/ActiveFriends";
 import { AiSuggestions } from "@/components/AiSuggestions";
+import { SexAiChat } from "@/components/SexAiChat"; // Added import for SexAiChat component
 
 interface Stats {
   user: {
@@ -366,6 +368,19 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <AiSuggestions />
+              </CardContent>
+            </Card>
+
+            {/* Sex AI Chat */}
+            <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
+              <CardHeader>
+                <CardTitle className={`text-xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
+                  <Heart className={`${style.accent}`} />
+                  Intimate AI Chat
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <SexAiChat />
               </CardContent>
             </Card>
 

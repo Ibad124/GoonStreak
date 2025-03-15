@@ -2,6 +2,11 @@ import { createServer } from "http";
 import { setupAuth } from "./auth.js";
 import { storage } from "./storage.js";
 import { aiSuggestionService } from "./services/ai-suggestions.js";
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 export async function registerRoutes(app) {
   setupAuth(app);
@@ -398,6 +403,36 @@ export async function registerRoutes(app) {
     } catch (error) {
       console.error("Error rating suggestion:", error);
       res.status(500).json({ error: "Failed to rate suggestion" });
+    }
+  });
+
+  // Sex AI Chat Route
+  app.post("/api/chat/sex-ai", requireAuth, async (req, res) => {
+    try {
+      const { message } = req.body;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4",
+        messages: [
+          {
+            role: "system",
+            content: "You are a knowledgeable and respectful advisor for intimate topics and relationships. Provide accurate, helpful, and mature guidance while maintaining appropriate boundaries.",
+          },
+          {
+            role: "user",
+            content: message,
+          },
+        ],
+        temperature: 0.7,
+        max_tokens: 150,
+      });
+
+      res.json({
+        message: completion.choices[0].message.content,
+      });
+    } catch (error) {
+      console.error("Error in sex AI chat:", error);
+      res.status(500).json({ error: "Failed to generate response" });
     }
   });
 
