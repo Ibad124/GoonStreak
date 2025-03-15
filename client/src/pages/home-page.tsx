@@ -32,6 +32,7 @@ import LogSessionModal from "@/components/LogSessionModal";
 import Challenges from "@/components/Challenges";
 import { GoonRoom } from "@/components/GoonRoom";
 import SessionCalendar from "@/components/SessionCalendar";
+import ActiveFriends from "@/components/ActiveFriends";
 
 interface Stats {
   user: {
@@ -364,6 +365,19 @@ export default function HomePage() {
 
           {/* Right Column */}
           <div className="lg:col-span-4 space-y-4 md:space-y-6">
+            {/* Active Friends Section */}
+            <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
+              <CardHeader>
+                <CardTitle className={`text-xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
+                  <Users className={`${style.accent}`} />
+                  Active Friends
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ActiveFriends />
+              </CardContent>
+            </Card>
+
             {/* Session Calendar */}
             <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
               <CardHeader>
