@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Loader2 } from "lucide-react";
 
 const sites = [
   { id: "pornhub", name: "Pornhub", url: "https://www.pornhub.com" },
@@ -11,13 +11,17 @@ const sites = [
 
 export default function AdultContent() {
   const [activeTab, setActiveTab] = useState("pornhub");
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleSiteClick = (url: string) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
+  const currentSite = sites.find(site => site.id === activeTab);
+
+  const handleTabChange = (siteId: string) => {
+    setActiveTab(siteId);
+    setIsLoading(true);
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-black">
       {/* Back Button */}
       <div className="fixed top-0 left-0 right-0 bg-white z-50 border-b border-gray-200">
         <div className="container mx-auto px-4 h-14 flex items-center">
@@ -31,12 +35,12 @@ export default function AdultContent() {
       </div>
 
       {/* Site Selection */}
-      <div className="fixed top-14 left-0 right-0 bg-white border-b border-gray-200">
+      <div className="fixed top-14 left-0 right-0 bg-white z-50 border-b border-gray-200">
         <div className="flex">
           {sites.map(site => (
             <button
               key={site.id}
-              onClick={() => setActiveTab(site.id)}
+              onClick={() => handleTabChange(site.id)}
               className={`flex-1 h-12 text-center focus:outline-none transition-colors ${
                 activeTab === site.id
                   ? 'bg-blue-600 text-white'
@@ -50,22 +54,29 @@ export default function AdultContent() {
       </div>
 
       {/* Content Area */}
-      <div className="pt-28 pb-4 px-4">
-        <div className="max-w-md mx-auto">
-          <div className="flex flex-col gap-2">
-            {sites.map(site => (
-              <button
-                key={site.id}
-                onClick={() => handleSiteClick(site.url)}
-                className={`w-full h-12 px-4 text-left bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors ${
-                  activeTab === site.id ? 'border-blue-600' : ''
-                }`}
-              >
-                {site.name}
-              </button>
-            ))}
+      <div className="fixed top-[104px] left-0 right-0 bottom-0">
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black z-10">
+            <Loader2 className="h-8 w-8 animate-spin text-white" />
           </div>
-        </div>
+        )}
+        <iframe
+          key={activeTab}
+          src={currentSite?.url}
+          style={{
+            width: '100%',
+            height: '100%',
+            border: 'none',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0
+          }}
+          onLoad={() => setIsLoading(false)}
+          allow="fullscreen *; geolocation; autoplay; clipboard-write"
+          allowFullScreen
+        />
       </div>
     </div>
   );
