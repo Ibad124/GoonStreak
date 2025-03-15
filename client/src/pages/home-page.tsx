@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import LevelProgress from "@/components/LevelProgress";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
@@ -37,7 +38,6 @@ import ActiveFriends from "@/components/ActiveFriends";
 import { AiSuggestions } from "@/components/AiSuggestions";
 import { SexAiChat } from "@/components/SexAiChat";
 import { TooltipGuide } from "@/components/TooltipGuide";
-// Import TooltipGuide
 
 interface Stats {
   user: {
@@ -55,35 +55,12 @@ interface Stats {
   sessions?: any[];
 }
 
-const LevelProgress = ({ user }: { user: Stats['user'] }) => {
-  const { preferences } = useTheme();
-  const style = themeStyles[preferences.goonStyle] || themeStyles.default;
-
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <h3 className={`text-sm font-medium ${style.text}`}>Level Progress</h3>
-        <span className={`text-sm ${style.accent}`}>
-          {user.xpPoints}/{user.xpPoints + 100} XP
-        </span>
-      </div>
-      <div className="h-2 bg-black/10 rounded-full overflow-hidden">
-        <motion.div
-          className={`h-full bg-gradient-to-r ${style.button}`}
-          initial={{ width: 0 }}
-          animate={{ width: `${(user.xpPoints / (user.xpPoints + 100)) * 100}%` }}
-          transition={{ duration: 1, ease: "easeOut" }}
-        />
-      </div>
-    </div>
-  );
-};
-
 export default function HomePage() {
   const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
   const { preferences } = useTheme();
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
+  const style = themeStyles[preferences.goonStyle] || themeStyles.default;
 
   const { data: stats, isLoading, error } = useQuery<Stats>({
     queryKey: ["/api/stats"],
@@ -109,8 +86,6 @@ export default function HomePage() {
       </div>
     );
   }
-
-  const style = themeStyles[preferences.goonStyle] || themeStyles.default;
 
   const sessionMutation = useMutation({
     mutationFn: async (sessionData) => {
