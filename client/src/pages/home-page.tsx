@@ -373,18 +373,32 @@ export default function HomePage() {
               </CardContent>
             </Card>
 
-            {/* Sex AI Chat */}
-            <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
-              <CardHeader>
-                <CardTitle className={`text-xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
-                  <Heart className={`${style.accent}`} />
-                  Intimate AI Chat
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <SexAiChat />
-              </CardContent>
-            </Card>
+            {/* Floating AI Chat Button */}
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="fixed bottom-24 right-4 z-50"
+            >
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    className={`rounded-full w-14 h-14 shadow-lg ${style.button} hover:brightness-110 transition-all duration-300`}
+                    size="icon"
+                  >
+                    <Heart className="w-6 h-6 text-white" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[500px]">
+                  <DialogHeader>
+                    <DialogTitle className={`text-xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
+                      <Heart className={`${style.accent}`} />
+                      Intimate AI Chat
+                    </DialogTitle>
+                  </DialogHeader>
+                  <SexAiChat />
+                </DialogContent>
+              </Dialog>
+            </motion.div>
 
 
             {/* Active Friends Section */}

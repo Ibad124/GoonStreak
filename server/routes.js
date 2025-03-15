@@ -410,6 +410,9 @@ export async function registerRoutes(app) {
   app.post("/api/chat/sex-ai", requireAuth, async (req, res) => {
     try {
       const { message } = req.body;
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ error: "Invalid message format" });
+      } = req.body;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4",
