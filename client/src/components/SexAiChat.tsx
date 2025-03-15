@@ -38,13 +38,12 @@ export function SexAiChat() {
           const errorText = await res.text();
           try {
             const errorJson = JSON.parse(errorText);
-            throw new Error(errorJson.error || "Failed to send message");
+            throw new Error(errorJson.error || errorJson.details || "Failed to send message");
           } catch (e) {
             throw new Error(errorText || "Failed to send message");
           }
         }
-        const data = await res.json();
-        return data;
+        return await res.json();
       } catch (error) {
         throw error;
       }
@@ -56,7 +55,7 @@ export function SexAiChat() {
           id: Date.now().toString(),
           content: response.message,
           role: "assistant",
-          timestamp: new Date().toISOString()
+          timestamp: response.timestamp || new Date().toISOString()
         }
       ]);
     },

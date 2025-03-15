@@ -411,6 +411,10 @@ export async function registerRoutes(app) {
     try {
       const { message } = req.body;
 
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ error: "Invalid message format" });
+      }
+
       const completion = await openai.chat.completions.create({
         model: "gpt-4",
         messages: [
@@ -427,12 +431,20 @@ export async function registerRoutes(app) {
         max_tokens: 150,
       });
 
+      if (!completion.choices || !completion.choices[0] || !completion.choices[0].message) {
+        throw new Error("Invalid response from AI service");
+      }
+
       res.json({
         message: completion.choices[0].message.content,
+        timestamp: new Date().toISOString()
       });
     } catch (error) {
       console.error("Error in sex AI chat:", error);
-      res.status(500).json({ error: "Failed to generate response" });
+      res.status(500).json({ 
+        error: "Failed to generate response",
+        details: error.message 
+      });
     }
   });
 
