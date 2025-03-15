@@ -216,13 +216,15 @@ export default function HomePage() {
                       Leaderboard
                     </Button>
                   </Link>
-                  <Button
-                    variant="outline"
-                    className={`w-full rounded-xl flex items-center justify-start gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
-                  >
-                    <Settings className="h-4 w-4" />
-                    Settings
-                  </Button>
+                  <Link href="/settings">
+                    <Button
+                      variant="outline"
+                      className={`w-full rounded-xl flex items-center justify-start gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
+                    >
+                      <Settings className="h-4 w-4" />
+                      Settings
+                    </Button>
+                  </Link>
                   <Button
                     variant="destructive"
                     className="w-full rounded-xl bg-pink-900/50 hover:bg-pink-900/80"

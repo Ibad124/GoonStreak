@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -38,6 +38,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const [preferences, setPreferences] = useState<ThemePreferences>(DEFAULT_PREFERENCES);
 
+  // Apply dark mode by default
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
+
   // Fetch initial preferences
   useQuery<ThemePreferences>({
     queryKey: ["/api/user/preferences"],
@@ -48,7 +53,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (data) => {
       setPreferences(prev => ({ ...prev, ...data }));
-      // Apply dark mode class
+      // Apply theme class
       document.documentElement.classList.toggle("dark", data.appearance === "dark");
     },
     onError: () => {
