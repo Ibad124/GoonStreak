@@ -29,11 +29,9 @@ export function SexAiChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [open, setOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // Added isLoading state
 
   const sendMessageMutation = useMutation({
     mutationFn: async (content: string) => {
-      setIsLoading(true); // Set isLoading to true on mutation start
       try {
         const response = await fetch('/api/chat/sex-ai', {
           method: 'POST',
@@ -58,8 +56,6 @@ export function SexAiChat() {
       } catch (error) {
         console.error('Chat error:', error);
         throw error;
-      } finally {
-        setIsLoading(false); // Set isLoading to false regardless of success or failure
       }
     },
     onSuccess: (response) => {
@@ -111,27 +107,10 @@ export function SexAiChat() {
             <DialogTrigger asChild>
               <Button
                 size="lg"
-                className="rounded-full w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg group relative overflow-hidden"
+                className="rounded-full w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/30 transition-all duration-300 relative group"
               >
-                <motion.div
-                  className="absolute inset-0 bg-white/20"
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: [1, 1.5, 1], opacity: [0, 0.5, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                />
-                <Heart className="w-8 h-8 text-white relative z-10" />
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-pink-500/20 to-purple-500/20"
-                  animate={{
-                    scale: [1, 1.2, 1],
-                    rotate: [0, 180, 360],
-                  }}
-                  transition={{
-                    duration: 4,
-                    repeat: Infinity,
-                    ease: "linear",
-                  }}
-                />
+                <span className="text-2xl group-hover:scale-110 transition-transform duration-300">💭😉</span>
+                <div className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-red-500 animate-pulse" />
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px] bg-gradient-to-br from-pink-900 to-purple-900 border-pink-500/30">
@@ -147,80 +126,47 @@ export function SexAiChat() {
               </DialogHeader>
               <div className="flex flex-col h-[500px]">
                 <ScrollArea className="flex-1 px-4 py-6">
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     {messages.map((message) => (
-                      <div
+                      <Card
                         key={message.id}
-                        className={`flex ${
-                          message.role === 'user' ? 'justify-end' : 'justify-start'
+                        className={`p-4 rounded-2xl shadow-lg ${
+                          message.role === "user"
+                            ? "ml-12 bg-gradient-to-r from-blue-600 to-blue-700 text-white"
+                            : "mr-12 bg-gradient-to-r from-pink-600/90 to-purple-700/90 text-pink-50"
                         }`}
                       >
-                        <div
-                          className={`rounded-2xl p-4 max-w-[80%] shadow-lg ${
-                            message.role === 'user'
-                              ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white'
-                              : 'bg-gradient-to-r from-purple-800 to-purple-900 text-pink-100'
-                          } transition-all duration-300 hover:scale-[1.02]`}
-                        >
-                          <div className="whitespace-pre-wrap">{message.content}</div>
-                          <div className="text-xs opacity-70 mt-2">
-                            {message.role === 'user' ? 'You' : 'AI'} • {new Date(message.timestamp).toLocaleTimeString()}
-                          </div>
-                        </div>
-                      </div>
+                        <p className="leading-relaxed">{message.content}</p>
+                        <span className="text-xs opacity-70 block mt-2 font-medium">
+                          {new Date(message.timestamp).toLocaleTimeString()}
+                        </span>
+                      </Card>
                     ))}
                     {sendMessageMutation.isPending && (
-                      <div className="flex justify-start">
-                        <div className="bg-purple-800/50 rounded-2xl p-4 max-w-[80%]">
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" />
-                            <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce [animation-delay:-.3s]" />
-                            <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce [animation-delay:-.5s]" />
-                          </div>
-                        </div>
+                      <div className="flex justify-center">
+                        <Loader2 className="h-6 w-6 animate-spin text-blue-400" />
                       </div>
                     )}
                   </div>
                 </ScrollArea>
 
                 <div className="p-4 border-t border-pink-500/30 bg-gradient-to-r from-pink-900/50 to-purple-900/50">
-                  <div className="mt-4 space-y-4">
-                    <div className="flex gap-2 overflow-x-auto pb-2 px-1">
-                      {['Tell me about relationships', 'Help with intimacy', 'Dating advice'].map((suggestion) => (
-                        <Button
-                          key={suggestion}
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setInput(suggestion)}
-                          className="whitespace-nowrap bg-white/5 hover:bg-white/10 border-pink-500/30"
-                        >
-                          {suggestion}
-                        </Button>
-                      ))}
-                    </div>
-                    <form onSubmit={(e) => {e.preventDefault(); handleSend();}} className="flex gap-2">
-                      <Input
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        placeholder="Type your message..."
-                        className="flex-1 bg-white/5 border-pink-500/30 placeholder:text-pink-200/50"
-                        disabled={isLoading}
-                      />
-                      <Button
-                        type="submit"
-                        disabled={isLoading || !input.trim()}
-                        className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-400 hover:to-purple-400"
-                      >
-                        {isLoading ? (
-                          <div className="flex items-center gap-2">
-                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            <span>Sending...</span>
-                          </div>
-                        ) : (
-                          'Send'
-                        )}
-                      </Button>
-                    </form>
+                  <div className="flex gap-3">
+                    <Input
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                      placeholder="Ask anything about relationships or intimacy..."
+                      disabled={sendMessageMutation.isPending}
+                      className="bg-white/10 border-pink-500/30 text-white placeholder:text-pink-200/50 focus:border-pink-400/50 transition-colors"
+                    />
+                    <Button
+                      onClick={handleSend}
+                      disabled={sendMessageMutation.isPending || !input.trim()}
+                      className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 transition-all duration-300 shadow-lg shadow-pink-500/20"
+                    >
+                      <Send className="h-5 w-5" />
+                    </Button>
                   </div>
                 </div>
               </div>
