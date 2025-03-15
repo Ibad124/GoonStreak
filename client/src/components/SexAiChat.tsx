@@ -130,30 +130,31 @@ export function SexAiChat() {
                 />
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px] bg-gradient-to-br from-slate-900 to-slate-800 border-slate-700">
+            <DialogContent className="sm:max-w-[500px] bg-gradient-to-br from-pink-900 to-purple-900 border-pink-500/30">
               <DialogHeader>
-                <DialogTitle className="text-xl font-bold text-white flex items-center gap-2">
-                  <Heart className="w-5 h-5 text-pink-500" />
+                <DialogTitle className="text-2xl font-bold text-white flex items-center gap-2">
+                  <Heart className="w-6 h-6 text-pink-400" />
                   Intimate AI Chat
                 </DialogTitle>
-                <DialogDescription className="text-slate-300">
-                  Ask questions and get advice about intimate topics in a safe, private environment.
+                <DialogDescription className="text-pink-100/80">
+                  Ask questions and get advice about intimate topics in a safe, private environment. 
+                  Your conversations are completely confidential.
                 </DialogDescription>
               </DialogHeader>
               <div className="flex flex-col h-[500px]">
-                <ScrollArea className="flex-1 p-4">
-                  <div className="space-y-4">
+                <ScrollArea className="flex-1 px-4 py-6">
+                  <div className="space-y-6">
                     {messages.map((message) => (
                       <Card
                         key={message.id}
-                        className={`p-4 ${
+                        className={`p-4 rounded-2xl shadow-lg ${
                           message.role === "user"
-                            ? "ml-12 bg-blue-600 text-white"
-                            : "mr-12 bg-slate-700 text-slate-100"
+                            ? "ml-12 bg-gradient-to-r from-blue-600 to-blue-700 text-white"
+                            : "mr-12 bg-gradient-to-r from-pink-600/90 to-purple-700/90 text-pink-50"
                         }`}
                       >
-                        <p>{message.content}</p>
-                        <span className="text-xs opacity-70 block mt-2">
+                        <p className="leading-relaxed">{message.content}</p>
+                        <span className="text-xs opacity-70 block mt-2 font-medium">
                           {new Date(message.timestamp).toLocaleTimeString()}
                         </span>
                       </Card>
@@ -166,22 +167,22 @@ export function SexAiChat() {
                   </div>
                 </ScrollArea>
 
-                <div className="p-4 border-t border-slate-700">
-                  <div className="flex gap-2">
+                <div className="p-4 border-t border-pink-500/30 bg-gradient-to-r from-pink-900/50 to-purple-900/50">
+                  <div className="flex gap-3">
                     <Input
                       value={input}
                       onChange={(e) => setInput(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                      placeholder="Type your message..."
+                      placeholder="Ask anything about relationships or intimacy..."
                       disabled={sendMessageMutation.isPending}
-                      className="bg-slate-800 border-slate-700 text-white"
+                      className="bg-white/10 border-pink-500/30 text-white placeholder:text-pink-200/50 focus:border-pink-400/50 transition-colors"
                     />
                     <Button
                       onClick={handleSend}
                       disabled={sendMessageMutation.isPending || !input.trim()}
-                      className="bg-blue-600 hover:bg-blue-700"
+                      className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 transition-all duration-300 shadow-lg shadow-pink-500/20"
                     >
-                      <Send className="h-4 w-4" />
+                      <Send className="h-5 w-5" />
                     </Button>
                   </div>
                 </div>
