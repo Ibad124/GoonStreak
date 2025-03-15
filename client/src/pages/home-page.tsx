@@ -10,32 +10,18 @@ import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu,
-  Film,
   Trophy,
   Star,
   Flame,
-  Clock,
   Users,
-  Target,
-  Sparkles,
-  Activity,
-  Award,
   Calendar,
-  Settings,
-  Loader2,
-  Plus,
-  Brain,
-  Heart
+  Sparkles,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import StreakStats from "@/components/StreakStats";
-import Achievements from "@/components/Achievements";
 import LogSessionModal from "@/components/LogSessionModal";
-import Challenges from "@/components/Challenges";
 import SessionCalendar from "@/components/SessionCalendar";
 import ActiveFriends from "@/components/ActiveFriends";
-import { AiSuggestions } from "@/components/AiSuggestions";
 import { SexAiChat } from "@/components/SexAiChat";
 import { TooltipGuide } from "@/components/TooltipGuide";
 
@@ -69,7 +55,13 @@ export default function HomePage() {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-border" />
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="p-8 rounded-2xl bg-white/5 backdrop-blur border border-white/10"
+        >
+          <h2 className="text-xl font-bold text-white">Please log in to continue</h2>
+        </motion.div>
       </div>
     );
   }
@@ -83,6 +75,20 @@ export default function HomePage() {
             <p className="text-sm text-muted-foreground mt-2">Please refresh the page to try again.</p>
           </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  if (isLoading || !stats) {
+    return (
+      <div className={`flex items-center justify-center min-h-screen bg-gradient-to-br ${style.background}`}>
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="p-8 rounded-2xl bg-white/5 backdrop-blur border border-white/10"
+        >
+          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+        </motion.div>
       </div>
     );
   }
@@ -115,14 +121,6 @@ export default function HomePage() {
     }
   });
 
-  if (isLoading || !stats) {
-    return (
-      <div className={`flex items-center justify-center min-h-screen bg-gradient-to-br ${style.background}`}>
-        <Loader2 className={`h-8 w-8 animate-spin ${style.accent}`} />
-      </div>
-    );
-  }
-
   return (
     <div className={`min-h-screen pb-24 relative overflow-hidden bg-gradient-to-br ${style.background}`}>
       {/* Background Pattern */}
@@ -130,24 +128,6 @@ export default function HomePage() {
         <div className={`absolute inset-0 ${style.pattern} bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoNDUpIj48cGF0aCBkPSJNLTEwIDMwbDIwLTIwTTAgNDBsMjAtMjBNMTAgNTBsMjAtMjAiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4xIiBzdHJva2Utd2lkdGg9IjIiLz48L3BhdHRlcm4+PC9kZWZzPjxwYXRoIGZpbGw9InVybCgjYSkiIGQ9Ik0wIDBoMjAwdjIwMEgweiIvPjwvc3ZnPg==')]`} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
       </div>
-
-      {/* Sex AI Chat Button */}
-      <motion.div
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="fixed bottom-24 right-6 z-50"
-      >
-        <TooltipGuide
-          id="sex-ai-chat"
-          title="New! Intimate AI Chat"
-          description="Get personalized advice and answers about intimate topics in a private, safe environment. Click the floating button to start chatting."
-          position="left"
-          step={1}
-          totalSteps={3}
-        >
-          <SexAiChat />
-        </TooltipGuide>
-      </motion.div>
 
       {/* Header */}
       <motion.header
@@ -162,75 +142,49 @@ export default function HomePage() {
               animate={{ scale: 1, opacity: 1 }}
               className="flex items-center gap-2"
             >
-              <Award className={`h-5 w-5 ${style.accent}`} />
+              <Star className={`h-5 w-5 ${style.accent}`} />
               <span className={`font-bold tracking-tight text-lg md:text-xl truncate bg-gradient-to-r ${style.button} text-transparent bg-clip-text`}>
                 {user?.username}
               </span>
             </motion.div>
-            <motion.div
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              className={`${style.text} text-sm md:text-base flex items-center gap-1`}
-            >
-              <Activity className="w-3 h-3" />
-              <span>Level {stats.user.level}</span>
-            </motion.div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
-                  <Menu className={`h-5 w-5 ${style.text}`} />
-                </Button>
-              </SheetTrigger>
-              <SheetContent className={`bg-gradient-to-br ${style.background} ${style.border}`}>
-                <nav className="space-y-4 mt-8">
-                  <Link href="/social">
-                    <Button
-                      variant="outline"
-                      className={`w-full rounded-xl flex items-center justify-start gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
-                    >
-                      <Users className="h-4 w-4" />
-                      Social Hub
-                    </Button>
-                  </Link>
-                  <Link href="/adult-content">
-                    <Button
-                      variant="outline"
-                      className={`w-full rounded-xl flex items-center justify-start gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
-                    >
-                      <Film className="h-4 w-4" />
-                      Adult Content
-                    </Button>
-                  </Link>
-                  <Link href="/leaderboard">
-                    <Button
-                      variant="outline"
-                      className={`w-full rounded-xl flex items-center justify-start gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
-                    >
-                      <Trophy className="h-4 w-4" />
-                      Leaderboard
-                    </Button>
-                  </Link>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <Menu className={`h-5 w-5 ${style.text}`} />
+              </Button>
+            </SheetTrigger>
+            <SheetContent className={`bg-gradient-to-br ${style.background} ${style.border}`}>
+              <nav className="space-y-4 mt-8">
+                <Link href="/social">
                   <Button
                     variant="outline"
                     className={`w-full rounded-xl flex items-center justify-start gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
                   >
-                    <Settings className="h-4 w-4" />
-                    Settings
+                    <Users className="h-4 w-4" />
+                    Social Hub
                   </Button>
+                </Link>
+                <Link href="/leaderboard">
                   <Button
-                    variant="destructive"
-                    className="w-full rounded-xl bg-pink-900/50 hover:bg-pink-900/80"
-                    onClick={() => logoutMutation.mutate()}
+                    variant="outline"
+                    className={`w-full rounded-xl flex items-center justify-start gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
                   >
-                    Logout
+                    <Trophy className="h-4 w-4" />
+                    Leaderboard
                   </Button>
-                </nav>
-              </SheetContent>
-            </Sheet>
-          </div>
+                </Link>
+                <Button
+                  variant="destructive"
+                  className="w-full rounded-xl bg-pink-900/50 hover:bg-pink-900/80"
+                  onClick={() => logoutMutation.mutate()}
+                >
+                  Logout
+                </Button>
+              </nav>
+            </SheetContent>
+          </Sheet>
         </div>
       </motion.header>
 
@@ -361,6 +315,24 @@ export default function HomePage() {
         </div>
       </motion.div>
 
+      {/* Floating Chat Button */}
+      <motion.div
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="fixed bottom-24 right-6 z-50"
+      >
+        <TooltipGuide
+          id="sex-ai-chat"
+          title="New! Intimate AI Chat"
+          description="Get personalized advice and answers about intimate topics in a private, safe environment. Click the floating button to start chatting."
+          position="left"
+          step={1}
+          totalSteps={3}
+        >
+          <SexAiChat />
+        </TooltipGuide>
+      </motion.div>
+
       {/* Modals */}
       <LogSessionModal
         isOpen={isSessionModalOpen}
@@ -368,7 +340,6 @@ export default function HomePage() {
         onSubmit={(data) => sessionMutation.mutate(data)}
         isPending={sessionMutation.isPending}
       />
-      <SexAiChat />
     </div>
   );
 }
@@ -382,7 +353,6 @@ const themeStyles = {
     accent: "text-pink-600",
     button: "from-pink-600 to-purple-600",
     border: "border-slate-200/50",
-    greeting: "Ready to level up? 🌟",
     pattern: "opacity-5"
   },
   solo: {
@@ -393,7 +363,6 @@ const themeStyles = {
     accent: "text-emerald-400",
     button: "from-emerald-500 to-emerald-600",
     border: "border-emerald-400/20",
-    greeting: "SYSTEMS ONLINE. INITIATING SESSION... 🤖",
     pattern: "opacity-10"
   },
   competitive: {
@@ -404,7 +373,6 @@ const themeStyles = {
     accent: "text-pink-400",
     button: "from-pink-500 to-purple-500",
     border: "border-pink-400/20",
-    greeting: "Ready to dominate? Let's go! 🔥",
     pattern: "opacity-10"
   },
   hardcore: {
@@ -415,7 +383,6 @@ const themeStyles = {
     accent: "text-pink-500",
     button: "from-pink-600 to-purple-700",
     border: "border-pink-500/20",
-    greeting: "Embrace the power within... 😈",
     pattern: "opacity-15"
   }
 };
