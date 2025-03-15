@@ -25,6 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { GoonRoom } from "@/components/GoonRoom";
 import { TooltipGuide } from "@/components/TooltipGuide";
+import FriendsLeaderboard from "@/components/FriendsLeaderboard";
 
 const themeStyles = {
   default: {
@@ -369,14 +370,18 @@ export default function SocialPage() {
                     </TabsContent>
 
                     <TabsContent value="achievements">
-                      <Card className={`${style.cardBg} backdrop-blur ${style.border} transition-all duration-300 hover:shadow-lg`}>
-                        <CardHeader>
-                          <CardTitle className={`${style.text}`}>Social Achievements</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <SocialAchievements />
-                        </CardContent>
-                      </Card>
+                      <div className="space-y-6">
+                        <Card className={`${style.cardBg} backdrop-blur ${style.border} transition-all duration-300 hover:shadow-lg`}>
+                          <CardHeader>
+                            <CardTitle className={`${style.text}`}>Social Achievements</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <SocialAchievements />
+                          </CardContent>
+                        </Card>
+
+                        <FriendsLeaderboard />
+                      </div>
                     </TabsContent>
                   </motion.div>
                 </AnimatePresence>
