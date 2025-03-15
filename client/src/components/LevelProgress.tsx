@@ -16,13 +16,15 @@ interface LevelProgressProps {
 export default function LevelProgress({ user }: LevelProgressProps) {
   const [showLevelUp, setShowLevelUp] = useState(false);
 
+  const [prevLevel, setPrevLevel] = useState(user.level);
+
   useEffect(() => {
-    const shouldLevelUp = user.xpPoints >= LEVEL_THRESHOLDS[user.level + 1]?.xp;
-    if (shouldLevelUp) {
+    if (user.level > prevLevel) {
       setShowLevelUp(true);
-      setTimeout(() => setShowLevelUp(false), 2000);
+      setPrevLevel(user.level);
+      setTimeout(() => setShowLevelUp(false), 3000);
     }
-  }, [user.xpPoints, user.level]);
+  }, [user.level, prevLevel]);
 
   const levelInfo = calculateLevel(user.xpPoints);
   const nextTitle = LEVEL_THRESHOLDS[(user.level + 1) as keyof typeof LEVEL_THRESHOLDS]?.title || "Max Level";
@@ -41,16 +43,27 @@ export default function LevelProgress({ user }: LevelProgressProps) {
       <AnimatePresence>
         {showLevelUp && (
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 1.2, opacity: 0 }}
-            className="absolute inset-0 flex items-center justify-center z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
           >
-            <div className="relative">
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ 
+                scale: [0.5, 1.2, 1],
+                opacity: 1
+              }}
+              transition={{
+                duration: 0.8,
+                ease: "easeOut"
+              }}
+              className="relative flex flex-col items-center"
+            >
               <motion.div
                 animate={{
-                  scale: [1, 1.2, 1],
-                  rotate: [0, 360],
+                  scale: [1, 1.5, 1],
+                  rotate: [0, 180, 360],
                 }}
                 transition={{
                   duration: 2,
@@ -58,18 +71,39 @@ export default function LevelProgress({ user }: LevelProgressProps) {
                   times: [0, 0.5, 1],
                   repeat: Infinity,
                 }}
-                className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 rounded-full blur-xl opacity-50"
+                className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 rounded-full blur-3xl opacity-30"
               />
               <motion.div
-                className="relative bg-black/90 text-white px-8 py-4 rounded-xl border border-pink-500/50 backdrop-blur-xl"
-                initial={{ y: 20 }}
+                className="relative p-8 bg-black/90 rounded-2xl border-2 border-pink-500/50 backdrop-blur-xl"
+                initial={{ y: 50 }}
                 animate={{ y: 0 }}
+                transition={{ delay: 0.2 }}
               >
-                <div className="text-center space-y-2">
-                  <Sparkles className="h-8 w-8 text-yellow-500 mx-auto" />
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
+                <div className="text-center space-y-4">
+                  <motion.div
+                    animate={{ 
+                      scale: [1, 1.2, 1],
+                      rotate: [0, 5, -5, 0]
+                    }}
+                    transition={{ 
+                      duration: 0.5,
+                      repeat: Infinity
+                    }}
+                  >
+                    <Sparkles className="h-16 w-16 text-yellow-500 mx-auto" />
+                  </motion.div>
+                  <motion.h2
+                    animate={{ 
+                      scale: [1, 1.1, 1],
+                    }}
+                    transition={{ 
+                      duration: 1,
+                      repeat: Infinity
+                    }}
+                    className="text-4xl font-bold bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 bg-clip-text text-transparent"
+                  >
                     Level Up!
-                  </h2>
+                  </motion.h2>
                   <p className="text-lg">
                     You've reached level {levelInfo.currentLevel}
                   </p>
