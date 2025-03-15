@@ -13,17 +13,22 @@ interface LevelProgressProps {
 }
 
 export default function LevelProgress({ user }: LevelProgressProps) {
-  const currentThreshold = LEVEL_THRESHOLDS[user.level as keyof typeof LEVEL_THRESHOLDS]?.xp || 0;
-  const nextThreshold = LEVEL_THRESHOLDS[(user.level + 1) as keyof typeof LEVEL_THRESHOLDS]?.xp || currentThreshold;
-  const levelInfo = {
-    progress: user.xpPoints - currentThreshold,
-    total: nextThreshold - currentThreshold,
-    nextLevelXP: nextThreshold
+  const calculateProgress = () => {
+    const currentThreshold = LEVEL_THRESHOLDS[user.level]?.xp || 0;
+    const nextThreshold = LEVEL_THRESHOLDS[user.level + 1]?.xp || currentThreshold;
+    const progress = user.xpPoints - currentThreshold;
+    const total = nextThreshold - currentThreshold;
+    return {
+      progress,
+      total,
+      nextLevelXP: nextThreshold,
+      percentage: Math.min(100, (progress / total) * 100)
+    };
   };
-  const nextTitle = LEVEL_THRESHOLDS[(user.level + 1) as keyof typeof LEVEL_THRESHOLDS]?.title || "Max Level";
-  const progress = (levelInfo.progress / levelInfo.total) * 100;
 
-  const showLevelUp = user.xpPoints >= nextThreshold; // Add condition to show animation
+  const levelInfo = calculateProgress();
+  const nextTitle = LEVEL_THRESHOLDS[user.level + 1]?.title || "Max Level";
+  const showLevelUp = user.xpPoints >= LEVEL_THRESHOLDS[user.level + 1]?.xp;
 
 
   return (
@@ -35,44 +40,85 @@ export default function LevelProgress({ user }: LevelProgressProps) {
       <AnimatePresence>
         {showLevelUp && (
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 1.2, opacity: 0 }}
-            className="absolute inset-0 flex items-center justify-center z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 flex items-center justify-center z-50 bg-black/60 backdrop-blur-sm"
           >
-            <div className="relative">
+            <motion.div
+              initial={{ scale: 0.5, y: 50 }}
+              animate={{ 
+                scale: 1,
+                y: 0,
+                transition: { type: "spring", bounce: 0.35 }
+              }}
+              exit={{ scale: 0.8, y: 50 }}
+              className="relative"
+            >
               <motion.div
                 animate={{
                   scale: [1, 1.2, 1],
-                  rotate: [0, 360],
                 }}
                 transition={{
-                  duration: 2,
-                  ease: "easeInOut",
-                  times: [0, 0.5, 1],
+                  duration: 1.5,
                   repeat: Infinity,
                 }}
-                className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 rounded-full blur-xl opacity-50"
+                className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 rounded-3xl blur-2xl opacity-30"
               />
-              <motion.div
-                className="relative bg-black/90 text-white px-8 py-4 rounded-xl border border-pink-500/50 backdrop-blur-xl"
-                initial={{ y: 20 }}
-                animate={{ y: 0 }}
+              <motion.div 
+                className="relative bg-gradient-to-b from-zinc-900 to-black px-12 py-8 rounded-3xl border border-pink-500/30"
+                initial={{ rotateX: -30 }}
+                animate={{ rotateX: 0 }}
               >
-                <div className="text-center space-y-2">
-                  <Sparkles className="h-8 w-8 text-yellow-500 mx-auto" />
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
+                <div className="text-center space-y-4">
+                  <motion.div
+                    animate={{
+                      y: [0, -10, 0],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  >
+                    <Sparkles className="h-12 w-12 text-yellow-400 mx-auto" />
+                  </motion.div>
+                  <motion.h2 
+                    className="text-4xl font-bold bg-gradient-to-r from-pink-500 via-purple-400 to-pink-500 bg-clip-text text-transparent"
+                    animate={{
+                      scale: [1, 1.1, 1],
+                    }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                    }}
+                  >
                     Level Up!
-                  </h2>
-                  <p className="text-lg">
-                    You've reached level {user.level}
-                  </p>
-                  <p className="text-sm text-pink-400">
-                    New Title: {LEVEL_THRESHOLDS[user.level]?.title}
-                  </p>
+                  </motion.h2>
+                  <div className="space-y-2">
+                    <p className="text-2xl font-medium text-white">
+                      Level {user.level}
+                    </p>
+                    <p className="text-lg text-pink-400 font-medium">
+                      {LEVEL_THRESHOLDS[user.level]?.title}
+                    </p>
+                  </div>
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.3 }}
+                    className="pt-4"
+                  >
+                    <Button 
+                      onClick={() => window.location.reload()}
+                      className="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-8 py-2 rounded-full hover:brightness-110"
+                    >
+                      Continue
+                    </Button>
+                  </motion.div>
                 </div>
               </motion.div>
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
