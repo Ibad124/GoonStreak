@@ -25,8 +25,11 @@ export default function LevelProgress({ user }: LevelProgressProps) {
   }, [user.xpPoints, user.level]);
 
   const levelInfo = calculateLevel(user.xpPoints);
-  const nextTitle = LEVEL_THRESHOLDS[(levelInfo.currentLevel + 1) as keyof typeof LEVEL_THRESHOLDS]?.title || "Max Level";
-  const progress = (levelInfo.progress / levelInfo.total) * 100;
+  const nextTitle = LEVEL_THRESHOLDS[(user.level + 1) as keyof typeof LEVEL_THRESHOLDS]?.title || "Max Level";
+  const currentThreshold = LEVEL_THRESHOLDS[user.level]?.points || 0;
+  const nextThreshold = LEVEL_THRESHOLDS[user.level + 1]?.points || currentThreshold;
+  const progress = ((user.xpPoints - currentThreshold) / (nextThreshold - currentThreshold)) * 100;
+  const percentage = Math.min(100, Math.max(0, progress));
 
 
   return (
@@ -129,9 +132,9 @@ export default function LevelProgress({ user }: LevelProgressProps) {
                 <div className="relative h-4 bg-black/20 rounded-full overflow-hidden backdrop-blur">
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-pink-300 via-purple-300 to-pink-300"
-                    style={{ width: `${progress}%` }}
+                    style={{ width: `${percentage}%` }}
                     initial={{ width: 0 }}
-                    animate={{ width: `${progress}%` }}
+                    animate={{ width: `${percentage}%` }}
                     transition={{ duration: 1, ease: "easeOut" }}
                   />
                   <motion.div
