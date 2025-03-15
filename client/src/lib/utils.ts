@@ -8,29 +8,28 @@ export function cn(...inputs: ClassValue[]) {
 
 export function calculateLevel(xpPoints: number) {
   let currentLevel = 1;
-  let currentThreshold = LEVEL_THRESHOLDS[1];
+  let nextLevelXP = 0;
 
   // Find the current level based on XP points
   for (const [level, threshold] of Object.entries(LEVEL_THRESHOLDS)) {
     if (xpPoints >= threshold.points) {
       currentLevel = parseInt(level);
-      currentThreshold = threshold;
     } else {
+      nextLevelXP = threshold.points;
       break;
     }
   }
 
-  const nextLevel = currentLevel + 1;
-  const nextThreshold = LEVEL_THRESHOLDS[nextLevel as keyof typeof LEVEL_THRESHOLDS];
+  const currentThreshold = LEVEL_THRESHOLDS[currentLevel];
+  const nextThreshold = LEVEL_THRESHOLDS[currentLevel + 1];
 
   return {
     currentLevel,
     currentTitle: currentThreshold.title,
     currentEmoji: currentThreshold.emoji,
-    currentXP: currentThreshold.points,
-    nextLevelXP: nextThreshold ? nextThreshold.points : currentThreshold.points,
+    nextLevelXP: nextThreshold?.points || currentThreshold.points,
     progress: xpPoints - currentThreshold.points,
-    total: nextThreshold ? nextThreshold.points - currentThreshold.points : 0,
+    total: (nextThreshold?.points || currentThreshold.points) - currentThreshold.points,
   };
 }
 
