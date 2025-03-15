@@ -33,18 +33,24 @@ export function SexAiChat() {
   const sendMessageMutation = useMutation({
     mutationFn: async (content: string) => {
       try {
-        const res = await apiRequest("POST", "/api/chat/sex-ai", { message: content });
-        if (!res.ok) {
-          const errorText = await res.text();
-          try {
-            const errorJson = JSON.parse(errorText);
-            throw new Error(errorJson.error || errorJson.details || "Failed to send message");
-          } catch (e) {
-            throw new Error(errorText || "Failed to send message");
-          }
+        const response = await fetch('/api/chat/sex-ai', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message: content }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.text();
+          console.error('Error response:', errorData);
+          throw new Error(errorData);
         }
-        return await res.json();
+
+        const data = await response.json();
+        return data;
       } catch (error) {
+        console.error('Chat error:', error);
         throw error;
       }
     },
@@ -65,7 +71,7 @@ export function SexAiChat() {
         description: error.message || "Please try again",
         variant: "destructive",
       });
-    },
+    }
   });
 
   const handleSend = () => {
