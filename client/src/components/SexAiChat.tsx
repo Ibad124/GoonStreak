@@ -35,7 +35,7 @@ export function SexAiChat() {
       const res = await apiRequest("POST", "/api/chat/sex-ai", { message: content });
       if (!res.ok) {
         const error = await res.text();
-        throw new Error(error);
+        throw new Error(error || "Failed to send message");
       }
       return res.json();
     },

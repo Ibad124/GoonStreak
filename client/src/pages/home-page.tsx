@@ -463,6 +463,7 @@ export default function HomePage() {
         onSubmit={(data) => sessionMutation.mutate(data)}
         isPending={sessionMutation.isPending}
       />
+      <SexAiChat />
     </div>
   );
 }
