@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Star, Crown, Trophy, ChevronUp, Sparkles } from "lucide-react";
@@ -15,14 +15,15 @@ interface LevelProgressProps {
 
 export default function LevelProgress({ user }: LevelProgressProps) {
   const [showLevelUp, setShowLevelUp] = useState(false);
+  const prevLevelRef = useRef<number>(1);
 
   useEffect(() => {
-    const levelInfo = calculateLevel(user.xpPoints);
-    const shouldLevelUp = user.xpPoints >= LEVEL_THRESHOLDS[levelInfo.currentLevel + 1]?.points;
-    if (shouldLevelUp) {
+    const currentLevelInfo = calculateLevel(user.xpPoints);
+    if (prevLevelRef.current < currentLevelInfo.currentLevel) {
       setShowLevelUp(true);
-      setTimeout(() => setShowLevelUp(false), 3000); // Increased duration for animation
+      setTimeout(() => setShowLevelUp(false), 3000);
     }
+    prevLevelRef.current = currentLevelInfo.currentLevel;
   }, [user.xpPoints]);
 
   const levelInfo = calculateLevel(user.xpPoints);
@@ -162,6 +163,7 @@ export default function LevelProgress({ user }: LevelProgressProps) {
           </motion.div>
         )}
       </AnimatePresence>
+
       <Card className="overflow-hidden bg-gradient-to-br from-purple-500 to-pink-600 text-white">
         <div className="relative">
           <motion.div
