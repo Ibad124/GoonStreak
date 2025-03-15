@@ -123,7 +123,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className={`min-h-screen pb-24 relative overflow-hidden ${style.background}`}>
+    <div className={`min-h-screen pb-24 relative overflow-hidden bg-gradient-to-br ${style.background}`}>
       {/* Background Pattern */}
       <div className="absolute inset-0 pointer-events-none">
         <div className={`absolute inset-0 ${style.pattern} bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoNDUpIj48cGF0aCBkPSJNLTEwIDMwbDIwLTIwTTAgNDBsMjAtMjBNMTAgNTBsMjAtMjAiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4xIiBzdHJva2Utd2lkdGg9IjIiLz48L3BhdHRlcm4+PC9kZWZzPjxwYXRoIGZpbGw9InVybCgjYSkiIGQ9Ik0wIDBoMjAwdjIwMEgweiIvPjwvc3ZnPg==')]`} />
@@ -373,32 +373,18 @@ export default function HomePage() {
               </CardContent>
             </Card>
 
-            {/* Floating AI Chat Button */}
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="fixed bottom-24 right-4 z-50"
-            >
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button
-                    className={`rounded-full w-14 h-14 shadow-lg ${style.button} hover:brightness-110 transition-all duration-300`}
-                    size="icon"
-                  >
-                    <Heart className="w-6 h-6 text-white" />
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[500px]">
-                  <DialogHeader>
-                    <DialogTitle className={`text-xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
-                      <Heart className={`${style.accent}`} />
-                      Intimate AI Chat
-                    </DialogTitle>
-                  </DialogHeader>
-                  <SexAiChat />
-                </DialogContent>
-              </Dialog>
-            </motion.div>
+            {/* Sex AI Chat */}
+            <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
+              <CardHeader>
+                <CardTitle className={`text-xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
+                  <Heart className={`${style.accent}`} />
+                  Intimate AI Chat
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <SexAiChat />
+              </CardContent>
+            </Card>
 
 
             {/* Active Friends Section */}
@@ -483,7 +469,7 @@ export default function HomePage() {
 
 const themeStyles = {
   default: {
-    background: "bg-gradient-to-br from-blue-50 via-indigo-50 to-violet-50",
+    background: "from-blue-50 via-indigo-50 to-violet-50",
     headerBg: "bg-white/80",
     cardBg: "bg-white/90",
     text: "text-slate-900",
