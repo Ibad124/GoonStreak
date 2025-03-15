@@ -31,7 +31,7 @@ export default function AdultContent() {
     setIsLoading(true);
     setLoadError(false);
     if (iframeRef.current) {
-      iframeRef.current.src = currentSite?.url || "";
+      iframeRef.current.src = currentSite?.url;
     }
   }, [currentSite?.url]);
 
@@ -136,12 +136,12 @@ export default function AdultContent() {
             <iframe
               ref={iframeRef}
               src={currentSite?.url}
-              className="w-full h-full border-0"
+              style={{ width: '100%', height: '100%', border: 'none' }}
               onLoad={handleIframeLoad}
               onError={handleIframeError}
               title="Adult Content"
-              sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-presentation"
-              referrerPolicy="no-referrer"
+              sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation"
+              allow="fullscreen"
               loading="eager"
               importance="high"
             />
