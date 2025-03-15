@@ -152,11 +152,59 @@ export const STREAK_CONFIG = {
   MILESTONE_ACHIEVEMENTS: {
     3: "Bronze Streak",
     7: "Silver Streak",
-    14: "Gold Streak", 
+    14: "Gold Streak",
     30: "Diamond Streak",
     60: "Legendary Streak",
   }
 } as const;
+
+// New table for AI suggestions
+export const aiSuggestions = pgTable("ai_suggestions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  content: text("content").notNull(),
+  category: text("category").notNull(), // e.g., 'habit', 'motivation', 'productivity'
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  context: text("context").notNull(), // JSON string of data used to generate suggestion
+  model: text("model").notNull(), // The AI model used
+  rating: integer("rating"), // User rating of suggestion effectiveness
+});
+
+// Table for tracking user interaction with suggestions
+export const suggestionInteractions = pgTable("suggestion_interactions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  suggestionId: integer("suggestion_id").notNull(),
+  interactionType: text("interaction_type").notNull(), // 'view', 'implement', 'dismiss'
+  timestamp: timestamp("timestamp").notNull().defaultNow(),
+  feedback: text("feedback"), // Optional user feedback
+});
+
+// Table for tracking growth metrics
+export const growthMetrics = pgTable("growth_metrics", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  metricType: text("metric_type").notNull(), // e.g., 'focus_duration', 'consistency_score'
+  value: integer("value").notNull(),
+  timestamp: timestamp("timestamp").notNull().defaultNow(),
+  note: text("note"),
+});
+
+// New insert schemas
+export const insertAiSuggestionSchema = createInsertSchema(aiSuggestions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertSuggestionInteractionSchema = createInsertSchema(suggestionInteractions).omit({
+  id: true,
+  timestamp: true,
+});
+
+export const insertGrowthMetricSchema = createInsertSchema(growthMetrics).omit({
+  id: true,
+  timestamp: true,
+});
 
 // Schemas and types
 export const insertUserSchema = createInsertSchema(users);
@@ -169,3 +217,11 @@ export type RoomParticipant = typeof roomParticipants.$inferSelect;
 export type RoomMessage = typeof roomMessages.$inferSelect;
 export type RoomEvent = z.infer<typeof roomEventSchema>;
 export type CreateRoom = z.infer<typeof createRoomSchema>;
+
+// Add new types
+export type AiSuggestion = typeof aiSuggestions.$inferSelect;
+export type InsertAiSuggestion = z.infer<typeof insertAiSuggestionSchema>;
+export type SuggestionInteraction = typeof suggestionInteractions.$inferSelect;
+export type InsertSuggestionInteraction = z.infer<typeof insertSuggestionInteractionSchema>;
+export type GrowthMetric = typeof growthMetrics.$inferSelect;
+export type InsertGrowthMetric = z.infer<typeof insertGrowthMetricSchema>;

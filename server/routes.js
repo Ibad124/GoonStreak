@@ -1,6 +1,7 @@
 import { createServer } from "http";
 import { setupAuth } from "./auth.js";
 import { storage } from "./storage.js";
+import { aiSuggestionService } from "./services/ai-suggestions.js";
 
 export async function registerRoutes(app) {
   setupAuth(app);
@@ -360,6 +361,45 @@ export async function registerRoutes(app) {
   };
 
   await initializeDefaultChallenges();
+
+  // AI Suggestion Routes
+  app.get("/api/suggestions", requireAuth, async (req, res) => {
+    try {
+      const suggestions = await aiSuggestionService.getUserSuggestions(req.user.id);
+      res.json(suggestions);
+    } catch (error) {
+      console.error("Error fetching suggestions:", error);
+      res.status(500).json({ error: "Failed to fetch suggestions" });
+    }
+  });
+
+  app.post("/api/suggestions/generate", requireAuth, async (req, res) => {
+    try {
+      const suggestion = await aiSuggestionService.generateSuggestion(req.user.id);
+      res.json(suggestion);
+    } catch (error) {
+      console.error("Error generating suggestion:", error);
+      res.status(500).json({ error: "Failed to generate suggestion" });
+    }
+  });
+
+  app.post("/api/suggestions/:id/rate", requireAuth, async (req, res) => {
+    try {
+      const { rating } = req.body;
+      if (typeof rating !== "number" || rating < 1 || rating > 5) {
+        return res.status(400).json({ error: "Invalid rating" });
+      }
+
+      const suggestion = await aiSuggestionService.rateSuggestion(
+        parseInt(req.params.id),
+        rating
+      );
+      res.json(suggestion);
+    } catch (error) {
+      console.error("Error rating suggestion:", error);
+      res.status(500).json({ error: "Failed to rate suggestion" });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;

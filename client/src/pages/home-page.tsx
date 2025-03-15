@@ -22,7 +22,8 @@ import {
   Calendar,
   Settings,
   Loader2,
-  Plus
+  Plus,
+  Brain
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -32,6 +33,7 @@ import LogSessionModal from "@/components/LogSessionModal";
 import Challenges from "@/components/Challenges";
 import SessionCalendar from "@/components/SessionCalendar";
 import ActiveFriends from "@/components/ActiveFriends";
+import { AiSuggestions } from "@/components/AiSuggestions";
 
 interface Stats {
   user: {
@@ -354,6 +356,19 @@ export default function HomePage() {
 
           {/* Right Column */}
           <div className="lg:col-span-4 space-y-4 md:space-y-6">
+            {/* AI-Powered Growth Suggestions */}
+            <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
+              <CardHeader>
+                <CardTitle className={`text-xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
+                  <Brain className={`${style.accent}`} />
+                  Growth Insights
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AiSuggestions />
+              </CardContent>
+            </Card>
+
             {/* Active Friends Section */}
             <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
               <CardHeader>
