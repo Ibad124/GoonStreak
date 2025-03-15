@@ -3,20 +3,19 @@ import { Progress } from "@/components/ui/progress";
 import { Star, Crown, Trophy, ChevronUp } from "lucide-react";
 import { motion } from "framer-motion";
 import { LEVEL_THRESHOLDS } from "@shared/schema";
+import { calculateLevel } from "@/lib/utils";
 
 interface LevelProgressProps {
   user: {
     xpPoints: number;
     level: number;
-    title: string;
   };
-  nextLevelXP: number;
-  currentLevelXP: number;
 }
 
-export default function LevelProgress({ user, nextLevelXP, currentLevelXP }: LevelProgressProps) {
-  const progress = ((user.xpPoints - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
+export default function LevelProgress({ user }: LevelProgressProps) {
+  const levelInfo = calculateLevel(user.xpPoints);
   const nextTitle = LEVEL_THRESHOLDS[(user.level + 1) as keyof typeof LEVEL_THRESHOLDS]?.title || "Max Level";
+  const progress = (levelInfo.progress / levelInfo.total) * 100;
 
   return (
     <motion.div
@@ -41,10 +40,10 @@ export default function LevelProgress({ user, nextLevelXP, currentLevelXP }: Lev
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-2">
             <Crown className="h-6 w-6 text-yellow-300" />
-            <h2 className="text-xl font-semibold">Level {user.level}</h2>
+            <h2 className="text-xl font-semibold">Level {levelInfo.currentLevel}</h2>
           </div>
           <p className="text-3xl font-bold mb-4">
-            {LEVEL_THRESHOLDS[user.level as keyof typeof LEVEL_THRESHOLDS]?.emoji} {user.title}
+            {levelInfo.currentEmoji} {levelInfo.currentTitle}
           </p>
           <div className="flex items-center gap-2 text-sm text-pink-100">
             <Star className="h-4 w-4" />
@@ -76,8 +75,8 @@ export default function LevelProgress({ user, nextLevelXP, currentLevelXP }: Lev
         </div>
         <div className="space-y-4">
           <div className="flex justify-between text-sm text-zinc-400">
-            <span>{currentLevelXP} XP</span>
-            <span>{nextLevelXP} XP</span>
+            <span>{levelInfo.progress} XP</span>
+            <span>{levelInfo.total} XP</span>
           </div>
           <div className="relative">
             <Progress
@@ -92,7 +91,7 @@ export default function LevelProgress({ user, nextLevelXP, currentLevelXP }: Lev
             </motion.div>
           </div>
           <div className="text-center text-sm text-pink-400 font-medium">
-            {Math.round(nextLevelXP - user.xpPoints)} XP until next level
+            {Math.round(levelInfo.nextLevelXP - user.xpPoints)} XP until next level
           </div>
         </div>
       </Card>
@@ -101,7 +100,7 @@ export default function LevelProgress({ user, nextLevelXP, currentLevelXP }: Lev
       <Card className="p-6 bg-gradient-to-br from-purple-900/80 to-pink-900/80 backdrop-blur border-purple-700/50 text-white">
         <div className="flex items-center gap-3 mb-4">
           <Trophy className="h-5 w-5 text-yellow-500" />
-          <h3 className="font-medium">Level {user.level + 1} Rewards</h3>
+          <h3 className="font-medium">Level {levelInfo.currentLevel + 1} Rewards</h3>
         </div>
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm text-zinc-300">

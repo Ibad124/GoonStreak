@@ -36,7 +36,7 @@ import SessionCalendar from "@/components/SessionCalendar";
 import ActiveFriends from "@/components/ActiveFriends";
 import { AiSuggestions } from "@/components/AiSuggestions";
 import { SexAiChat } from "@/components/SexAiChat";
-import { TooltipGuide } from "@/components/TooltipGuide"; 
+import { TooltipGuide } from "@/components/TooltipGuide";
 // Import TooltipGuide
 
 interface Stats {
@@ -54,6 +54,30 @@ interface Stats {
   achievements?: any[];
   sessions?: any[];
 }
+
+const LevelProgress = ({ user }: { user: Stats['user'] }) => {
+  const { preferences } = useTheme();
+  const style = themeStyles[preferences.goonStyle] || themeStyles.default;
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <h3 className={`text-sm font-medium ${style.text}`}>Level Progress</h3>
+        <span className={`text-sm ${style.accent}`}>
+          {user.xpPoints}/{user.xpPoints + 100} XP
+        </span>
+      </div>
+      <div className="h-2 bg-black/10 rounded-full overflow-hidden">
+        <motion.div
+          className={`h-full bg-gradient-to-r ${style.button}`}
+          initial={{ width: 0 }}
+          animate={{ width: `${(user.xpPoints / (user.xpPoints + 100)) * 100}%` }}
+          transition={{ duration: 1, ease: "easeOut" }}
+        />
+      </div>
+    </div>
+  );
+};
 
 export default function HomePage() {
   const { user, logoutMutation } = useAuth();
@@ -242,53 +266,10 @@ export default function HomePage() {
         className="container mx-auto px-4 pt-24 pb-6"
       >
         <div className={`${style.cardBg} backdrop-blur rounded-2xl p-6 md:p-8 ${style.border} hover:shadow-lg transition-all duration-300`}>
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-start">
             {/* Left Column - Progress */}
-            <div className="md:col-span-8 space-y-6">
-              <div className="flex items-center gap-4">
-                <div className={`p-4 rounded-2xl bg-gradient-to-br ${style.button} shadow-lg relative overflow-hidden group`}>
-                  <Award className="h-8 w-8 md:h-10 md:w-10 text-white relative z-10" />
-                  <motion.div
-                    className="absolute inset-0 bg-white/20"
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: [1, 1.5, 1], opacity: [0, 0.5, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <motion.h2
-                    initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    className={`text-xl md:text-3xl font-bold ${style.text} mb-2`}
-                  >
-                    {style.greeting}
-                  </motion.h2>
-                  <div className="flex items-center gap-2">
-                    <Calendar className={`h-4 w-4 ${style.accent}`} />
-                    <span className={`text-sm ${style.text} opacity-80`}>
-                      Current Streak: {stats.user.currentStreak} days
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Level Progress */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h3 className={`text-sm font-medium ${style.text}`}>Level Progress</h3>
-                  <span className={`text-sm ${style.accent}`}>
-                    {stats.user.xpPoints}/{stats.nextLevelXP} XP
-                  </span>
-                </div>
-                <div className="h-2 bg-black/10 rounded-full overflow-hidden">
-                  <motion.div
-                    className={`h-full bg-gradient-to-r ${style.button}`}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${(stats.user.xpPoints / stats.nextLevelXP) * 100}%` }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                  />
-                </div>
-              </div>
+            <div className="md:col-span-8">
+              <LevelProgress user={stats.user} />
             </div>
 
             {/* Right Column - Quick Stats */}
