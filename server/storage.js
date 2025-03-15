@@ -182,6 +182,25 @@ export class MemStorage {
       endDate: nextWeek,
       isActive: true,
     });
+
+    // Add test rooms
+    this.createRoom({
+      name: "Edging Masters",
+      hostId: 1,
+      isPrivate: false,
+      password: null,
+      videoUrl: "https://example.com/video1",
+      maxParticipants: 10,
+    });
+
+    this.createRoom({
+      name: "Private Session",
+      hostId: 2,
+      isPrivate: true,
+      password: "secret",
+      videoUrl: "https://example.com/video2",
+      maxParticipants: 5,
+    });
   }
 
   async getUser(id) {
@@ -668,6 +687,7 @@ export class MemStorage {
       ...data,
       createdAt: new Date(),
       endedAt: null,
+      participantCount: 0,
     };
     this.rooms.set(room.id, room);
     return room;
@@ -675,6 +695,15 @@ export class MemStorage {
 
   async getRoom(id) {
     return this.rooms.get(id);
+  }
+
+  async updateRoom(id, data) {
+    const room = await this.getRoom(id);
+    if (!room) throw new Error("Room not found");
+
+    const updatedRoom = { ...room, ...data };
+    this.rooms.set(id, updatedRoom);
+    return updatedRoom;
   }
 
   async getActiveRooms() {
@@ -691,6 +720,14 @@ export class MemStorage {
       leftAt: null,
     };
     this.roomParticipants.set(participant.id, participant);
+
+    // Update room participant count
+    const room = await this.getRoom(data.roomId);
+    if (room) {
+      room.participantCount = (room.participantCount || 0) + 1;
+      this.rooms.set(room.id, room);
+    }
+
     return participant;
   }
 
