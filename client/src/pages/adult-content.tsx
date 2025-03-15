@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Maximize2, Minimize2, Loader2 } from "lucide-react";
 
 const sites = [
   { id: "pornhub", name: "Pornhub", url: "https://www.pornhub.com" },
@@ -11,41 +11,81 @@ const sites = [
 
 export default function AdultContent() {
   const [selectedSite, setSelectedSite] = useState("pornhub");
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const currentSite = sites.find(site => site.id === selectedSite);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  };
 
   return (
-    <div>
-      <div className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200">
-        <div className="flex items-center h-14 px-4">
-          <Link href="/" className="flex items-center gap-2">
-            <ChevronLeft className="h-5 w-5 text-gray-700" />
-            <span className="text-xl font-semibold">Adult Content</span>
-          </Link>
-        </div>
+    <div className="h-screen flex flex-col bg-zinc-950">
+      {/* Header */}
+      <div className="h-14 bg-white border-b border-gray-200 flex items-center px-4">
+        <Link href="/" className="flex items-center gap-2">
+          <ChevronLeft className="h-5 w-5 text-gray-700" />
+          <span className="text-xl font-semibold">Adult Content</span>
+        </Link>
       </div>
 
-      <div className="fixed top-14 left-0 right-0 bg-white border-b border-gray-200">
-        <div className="flex">
+      {/* Toolbar */}
+      <div className="bg-zinc-900 text-white flex items-center justify-between px-2 h-10 border-b border-zinc-800">
+        <div className="flex gap-1">
           {sites.map(site => (
             <button
               key={site.id}
-              onClick={() => setSelectedSite(site.id)}
-              className={`flex-1 h-12 text-center focus:outline-none ${
+              onClick={() => {
+                setSelectedSite(site.id);
+                setIsLoading(true);
+              }}
+              className={`px-4 h-8 rounded text-sm transition-colors ${
                 selectedSite === site.id
                   ? 'bg-blue-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
+                  : 'text-zinc-300 hover:bg-zinc-800'
               }`}
             >
               {site.name}
             </button>
           ))}
         </div>
+        <button
+          onClick={toggleFullscreen}
+          className="p-2 hover:bg-zinc-800 rounded transition-colors"
+          title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+        >
+          {isFullscreen ? (
+            <Minimize2 className="h-4 w-4" />
+          ) : (
+            <Maximize2 className="h-4 w-4" />
+          )}
+        </button>
       </div>
 
-      <iframe
-        src={sites.find(site => site.id === selectedSite)?.url}
-        className="fixed top-[104px] left-0 right-0 bottom-0 w-full h-[calc(100vh-104px)]"
-        style={{ border: 'none' }}
-      />
+      {/* Content Viewer */}
+      <div className="flex-1 relative">
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black z-10">
+            <Loader2 className="h-8 w-8 animate-spin text-white" />
+          </div>
+        )}
+        <iframe
+          key={selectedSite}
+          src={currentSite?.url}
+          className="w-full h-full"
+          style={{ border: 'none' }}
+          onLoad={() => setIsLoading(false)}
+          allowFullScreen
+          allow="fullscreen"
+        />
+      </div>
     </div>
   );
 }
