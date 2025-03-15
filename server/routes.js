@@ -62,6 +62,14 @@ export async function registerRoutes(app) {
     let currentStreak = user.currentStreak;
     let todaySessions = user.todaySessions;
 
+    // Calculate XP gained
+    const baseXP = 15; // Base XP for completing a session
+    const durationBonus = Math.floor(duration / 10); // Bonus XP for longer sessions
+    const intensityBonus = intensity * 2; // Bonus XP for higher intensity
+    const streakBonus = currentStreak * 5; // Bonus XP for maintaining streak
+
+    const xpGained = baseXP + durationBonus + intensityBonus + streakBonus;
+
     // Update streak
     if (!lastDate || lastDate.getDate() !== today.getDate()) {
       todaySessions = 0;
@@ -70,11 +78,9 @@ export async function registerRoutes(app) {
     if (!lastDate ||
         (today.getTime() - lastDate.getTime()) > 24 * 60 * 60 * 1000) {
       currentStreak = 1;
-      // Log streak reset
       await logActivity(user.id, "STREAK", "started a new streak");
     } else if (lastDate.getDate() !== today.getDate()) {
       currentStreak += 1;
-      // Log streak increase
       await logActivity(user.id, "STREAK", `reached a ${currentStreak}-day streak! 🔥`);
     }
 
@@ -91,6 +97,7 @@ export async function registerRoutes(app) {
       longestStreak: Math.max(currentStreak, user.longestStreak),
       totalSessions: user.totalSessions + 1,
       todaySessions: todaySessions + 1,
+      xpPoints: user.xpPoints + xpGained,
     });
 
     // Check for completed challenges
@@ -118,15 +125,6 @@ export async function registerRoutes(app) {
       await logActivity(user.id, "ACHIEVEMENT", "earned the Session Master achievement! 🎯");
     }
 
-    // Log completed challenges
-    for (const completion of completedChallenges) {
-      await logActivity(
-        user.id,
-        "CHALLENGE",
-        `completed the "${completion.challenge.title}" challenge! 🎉`
-      );
-    }
-
     // Get updated challenges
     const activeChallenges = await storage.getAllActiveChallenges();
     const challengesWithProgress = await Promise.all(
@@ -144,6 +142,7 @@ export async function registerRoutes(app) {
 
     res.json({
       user: updatedUser,
+      xpGained,
       newAchievements,
       completedChallenges,
       challenges: challengesWithProgress,
@@ -442,9 +441,9 @@ export async function registerRoutes(app) {
       });
     } catch (error) {
       console.error("Error in sex AI chat:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: "Failed to generate response",
-        details: error.message 
+        details: error.message
       });
     }
   });
@@ -452,7 +451,7 @@ export async function registerRoutes(app) {
   const httpServer = createServer(app);
 
   // Initialize WebSocket server with explicit path
-  const wss = new WebSocketServer({ 
+  const wss = new WebSocketServer({
     server: httpServer,
     path: '/ws'
   });

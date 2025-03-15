@@ -105,6 +105,9 @@ export default function HomePage() {
         description: `Great work! You've earned ${data.xpGained} XP!`,
         variant: "default",
       });
+
+      // Add confetti effect on successful session log
+      // You can add confetti library here if needed
     },
     onError: (error) => {
       toast({
