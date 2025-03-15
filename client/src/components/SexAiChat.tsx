@@ -111,10 +111,27 @@ export function SexAiChat() {
             <DialogTrigger asChild>
               <Button
                 size="lg"
-                className="rounded-full w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/30 transition-all duration-300 relative group"
+                className="rounded-full w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg group relative overflow-hidden"
               >
-                <span className="text-2xl group-hover:scale-110 transition-transform duration-300">💭😉</span>
-                <div className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-red-500 animate-pulse" />
+                <motion.div
+                  className="absolute inset-0 bg-white/20"
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: [1, 1.5, 1], opacity: [0, 0.5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+                <Heart className="w-8 h-8 text-white relative z-10" />
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-pink-500/20 to-purple-500/20"
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    rotate: [0, 180, 360],
+                  }}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                />
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px] bg-gradient-to-br from-pink-900 to-purple-900 border-pink-500/30">
