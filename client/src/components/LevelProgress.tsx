@@ -13,7 +13,13 @@ interface LevelProgressProps {
 }
 
 export default function LevelProgress({ user }: LevelProgressProps) {
-  const levelInfo = calculateLevel(user.xpPoints);
+  const currentThreshold = LEVEL_THRESHOLDS[user.level as keyof typeof LEVEL_THRESHOLDS]?.xp || 0;
+  const nextThreshold = LEVEL_THRESHOLDS[(user.level + 1) as keyof typeof LEVEL_THRESHOLDS]?.xp || currentThreshold;
+  const levelInfo = {
+    progress: user.xpPoints - currentThreshold,
+    total: nextThreshold - currentThreshold,
+    nextLevelXP: nextThreshold
+  };
   const nextTitle = LEVEL_THRESHOLDS[(user.level + 1) as keyof typeof LEVEL_THRESHOLDS]?.title || "Max Level";
   const progress = (levelInfo.progress / levelInfo.total) * 100;
 
