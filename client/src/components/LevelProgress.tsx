@@ -14,8 +14,8 @@ interface LevelProgressProps {
 
 export default function LevelProgress({ user }: LevelProgressProps) {
   const levelInfo = calculateLevel(user.xpPoints);
-  const nextTitle = LEVEL_THRESHOLDS[(user.level + 1) as keyof typeof LEVEL_THRESHOLDS]?.title || "Max Level";
-  const progress = (levelInfo.progress / levelInfo.total) * 100;
+  const nextTitle = LEVEL_THRESHOLDS[(levelInfo.currentLevel + 1) as keyof typeof LEVEL_THRESHOLDS]?.title || "Max Level";
+  const progress = Math.min(100, (levelInfo.progress / levelInfo.total) * 100);
 
   return (
     <motion.div
@@ -47,7 +47,7 @@ export default function LevelProgress({ user }: LevelProgressProps) {
           </p>
           <div className="flex items-center gap-2 text-sm text-pink-100">
             <Star className="h-4 w-4" />
-            <span>{user.xpPoints} XP Total</span>
+            <span>{user.xpPoints.toLocaleString()} XP Total</span>
           </div>
         </div>
         <motion.div
@@ -75,8 +75,8 @@ export default function LevelProgress({ user }: LevelProgressProps) {
         </div>
         <div className="space-y-4">
           <div className="flex justify-between text-sm text-zinc-400">
-            <span>{levelInfo.progress} XP</span>
-            <span>{levelInfo.total} XP</span>
+            <span>{levelInfo.currentXP.toLocaleString()} XP</span>
+            <span>{levelInfo.nextLevelXP.toLocaleString()} XP</span>
           </div>
           <div className="relative">
             <Progress
@@ -91,7 +91,7 @@ export default function LevelProgress({ user }: LevelProgressProps) {
             </motion.div>
           </div>
           <div className="text-center text-sm text-pink-400 font-medium">
-            {Math.round(levelInfo.nextLevelXP - user.xpPoints)} XP until next level
+            {(levelInfo.nextLevelXP - user.xpPoints).toLocaleString()} XP until next level
           </div>
         </div>
       </Card>

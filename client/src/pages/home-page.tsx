@@ -234,21 +234,18 @@ export default function HomePage() {
         </div>
       </motion.header>
 
-      {/* Hero Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="container mx-auto px-4 pt-24 pb-6"
-      >
-        <div className={`${style.cardBg} backdrop-blur rounded-2xl p-6 md:p-8 ${style.border} hover:shadow-lg transition-all duration-300`}>
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-start">
-            {/* Left Column - Progress */}
-            <div className="md:col-span-8">
-              <LevelProgress user={stats.user} />
-            </div>
+      {/* Main Content */}
+      <main className="container mx-auto px-4 pt-24">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Level Progress Column */}
+          <div className="lg:col-span-8">
+            <LevelProgress user={stats.user} />
+          </div>
 
-            {/* Right Column - Quick Stats */}
-            <div className="md:col-span-4 grid grid-cols-2 gap-4">
+          {/* Right Column */}
+          <div className="lg:col-span-4 space-y-6">
+            {/* Quick Stats Cards */}
+            <div className="grid grid-cols-2 gap-4">
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 className={`p-4 rounded-xl ${style.cardBg} border ${style.border}`}
@@ -276,64 +273,7 @@ export default function HomePage() {
                 </p>
               </motion.div>
             </div>
-          </div>
-        </div>
-      </motion.div>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 pt-4">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
-          {/* Left Column */}
-          <div className="lg:col-span-8 space-y-4 md:space-y-6">
-            {/* Daily Challenges */}
-            <motion.div
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
-                <CardHeader>
-                  <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
-                    <Target className={`${style.accent}`} />
-                    Daily Challenges
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Challenges challenges={stats?.challenges || []} />
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Achievements */}
-            <motion.div
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              whileHover={{ scale: 1.02 }}
-            >
-              <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
-                <CardHeader>
-                  <CardTitle className={`text-2xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
-                    <Trophy className={`${style.accent}`} />
-                    Achievements
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Achievements
-                    achievements={stats?.achievements || []}
-                    stats={{
-                      currentStreak: stats?.user?.currentStreak || 0,
-                      totalSessions: stats?.user?.totalSessions || 0
-                    }}
-                  />
-                </CardContent>
-              </Card>
-            </motion.div>
-          </div>
-
-          {/* Right Column */}
-          <div className="lg:col-span-4 space-y-4 md:space-y-6">
             {/* Active Friends Section */}
             <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
               <CardHeader>
