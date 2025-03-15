@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { useAuth } from "@/hooks/use-auth";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Lock, Users, Video, Plus, Crown, Shield, Play } from "lucide-react";
-import type { Room } from "@shared/schema";
+import { Lock, Users, Video, Plus, Crown, AlertTriangle } from "lucide-react";
 
 interface GoonRoom {
   id: number;
@@ -33,17 +32,19 @@ export function GoonHub() {
   const [password, setPassword] = useState("");
   const [selectedVideo, setSelectedVideo] = useState("");
 
-  const style = preferences.goonStyle || "default";
+  const style = preferences?.goonStyle || "default";
 
-  // Fetch available videos
-  const { data: videos = [] } = useQuery({
+  // Fetch available videos with error handling
+  const { data: videos = [], isError: isVideosError } = useQuery({
     queryKey: ["/api/content/videos"],
+    retry: false,
   });
 
-  // Fetch active rooms
-  const { data: rooms = [], isLoading: isLoadingRooms } = useQuery<GoonRoom[]>({
+  // Fetch active rooms with error handling
+  const { data: rooms = [], isError: isRoomsError } = useQuery<GoonRoom[]>({
     queryKey: ["/api/rooms/active"],
     refetchInterval: 5000,
+    retry: false,
   });
 
   const createRoomMutation = useMutation({
@@ -73,76 +74,27 @@ export function GoonHub() {
     },
   });
 
-  const handleCreateRoom = async () => {
-    if (!roomName.trim() || !selectedVideo) {
-      toast({
-        title: "Error",
-        description: "Please provide a room name and select a video.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    createRoomMutation.mutate({
-      name: roomName,
-      isPrivate,
-      password: isPrivate ? password : undefined,
-      hostId: user?.id,
-      videoUrl: selectedVideo,
-    });
-  };
-
-  const handleJoinRoom = async (roomId: number) => {
-    try {
-      const res = await apiRequest("POST", `/api/rooms/${roomId}/join`);
-      if (!res.ok) {
-        throw new Error("Failed to join room");
-      }
-
-      toast({
-        title: "Joined Room",
-        description: "Connected to goon room successfully!",
-        variant: "default",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to join room. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const themeStyles = {
-    default: {
-      background: "from-zinc-50 to-blue-50",
-      cardBg: "bg-white/80",
-      text: "text-zinc-900",
-      accent: "text-blue-500",
-      button: "from-blue-500 to-blue-600",
-    },
-    solo: {
-      background: "from-slate-900 to-zinc-900",
-      cardBg: "bg-black/50",
-      text: "text-zinc-100",
-      accent: "text-emerald-500",
-      button: "from-emerald-500 to-emerald-600",
-    },
-    competitive: {
-      background: "from-purple-900 to-pink-900",
-      cardBg: "bg-black/50",
-      text: "text-pink-100",
-      accent: "text-pink-500",
-      button: "from-pink-500 to-purple-500",
-    },
-    hardcore: {
-      background: "from-red-950 to-black",
-      cardBg: "bg-black/50",
-      text: "text-red-100",
-      accent: "text-red-500",
-      button: "from-red-500 to-red-600",
-    },
-  }[style];
+  // Error UI Components
+  if (isVideosError || isRoomsError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <AlertTriangle className="h-12 w-12 text-destructive mb-4" />
+        <h3 className="text-lg font-semibold mb-2">Unable to Load Content</h3>
+        <p className="text-muted-foreground mb-4">
+          There was an error loading the content. Please try again later.
+        </p>
+        <Button 
+          onClick={() => {
+            queryClient.invalidateQueries({ queryKey: ["/api/content/videos"] });
+            queryClient.invalidateQueries({ queryKey: ["/api/rooms/active"] });
+          }}
+          variant="outline"
+        >
+          Retry
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -220,10 +172,27 @@ export function GoonHub() {
 
               <Button
                 className="w-full"
-                onClick={handleCreateRoom}
+                onClick={() => {
+                  if (!roomName.trim() || !selectedVideo) {
+                    toast({
+                      title: "Error",
+                      description: "Please provide a room name and select a video.",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+
+                  createRoomMutation.mutate({
+                    name: roomName,
+                    isPrivate,
+                    password: isPrivate ? password : undefined,
+                    hostId: user?.id,
+                    videoUrl: selectedVideo,
+                  });
+                }}
                 disabled={!roomName.trim() || !selectedVideo || createRoomMutation.isPending}
               >
-                Create Room
+                {createRoomMutation.isPending ? "Creating..." : "Create Room"}
               </Button>
             </div>
           </DialogContent>
@@ -270,11 +239,16 @@ export function GoonHub() {
                     <div className="flex items-center gap-2">
                       <Button
                         className="flex-1"
-                        onClick={() => handleJoinRoom(room.id)}
+                        onClick={() => {
+                          toast({
+                            title: "Coming Soon",
+                            description: "Live video rooms are currently under development.",
+                            variant: "default",
+                          });
+                        }}
                         disabled={room.participantCount >= 10}
                       >
-                        <Play className="h-4 w-4 mr-2" />
-                        Join Room
+                        Join Room (Coming Soon)
                       </Button>
                     </div>
                   </div>
