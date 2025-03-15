@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Loader2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { ChevronLeft, ArrowUpRight } from "lucide-react";
 
 const sites = [
   { id: "pornhub", name: "Pornhub", url: "https://www.pornhub.com" },
@@ -12,14 +11,16 @@ const sites = [
 ];
 
 export default function AdultContent() {
-  const [selectedSite, setSelectedSite] = useState(sites[0].id);
-  const [viewerKey, setViewerKey] = useState(0); // Used to force viewer refresh
-  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("pornhub");
+
+  const handleSiteClick = (url) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur z-50 border-b border-zinc-200/50">
+    <div className="min-h-screen bg-white">
+      {/* Back Button */}
+      <div className="fixed top-0 left-0 right-0 bg-white z-50 border-b border-gray-200">
         <div className="container mx-auto px-4 h-14 flex items-center">
           <Link href="/">
             <Button variant="ghost" size="icon" className="rounded-full">
@@ -28,81 +29,45 @@ export default function AdultContent() {
           </Link>
           <h1 className="text-xl font-semibold ml-2">Adult Content</h1>
         </div>
-      </header>
+      </div>
 
-      {/* Main Content */}
-      <main className="pt-20">
-        {/* Site Selection Tabs */}
-        <div className="bg-white border-b border-zinc-200/50">
-          <div className="container mx-auto px-4">
-            <div className="flex gap-2">
-              {sites.map(site => (
-                <Button
-                  key={site.id}
-                  variant={selectedSite === site.id ? "default" : "ghost"}
-                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-2 h-12"
-                  onClick={() => {
-                    setSelectedSite(site.id);
-                    setViewerKey(prev => prev + 1);
-                    setIsLoading(true);
-                  }}
-                >
-                  {site.name}
-                </Button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Content Viewer */}
-        <div className="container mx-auto px-4 pt-4">
-          <div className="aspect-video w-full bg-black rounded-lg overflow-hidden relative">
-            {isLoading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
-                <Loader2 className="w-8 h-8 animate-spin text-white" />
-              </div>
-            )}
-            <iframe
-              key={viewerKey}
-              src={sites.find(site => site.id === selectedSite)?.url}
-              style={{ width: '100%', height: '100%', border: 'none' }}
-              onLoad={() => setIsLoading(false)}
-              allowFullScreen
-              allow="fullscreen"
-              sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
-              referrerPolicy="no-referrer"
-            />
-          </div>
-        </div>
-      </main>
-
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-4 left-4 right-4 flex justify-center">
-        <motion.div
-          initial={{ y: 100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="bg-white/90 backdrop-blur shadow-lg rounded-full px-6 py-3 flex gap-4"
-        >
+      {/* Site Selection */}
+      <div className="fixed top-14 left-0 right-0 bg-white border-b border-gray-200">
+        <div className="container mx-auto flex overflow-x-auto">
           {sites.map(site => (
-            <motion.button
+            <Button
               key={site.id}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              variant={activeTab === site.id ? "default" : "ghost"}
+              className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-blue-600 px-4 py-2 h-12"
               onClick={() => {
-                setSelectedSite(site.id);
-                setViewerKey(prev => prev + 1);
-                setIsLoading(true);
+                setActiveTab(site.id);
+                handleSiteClick(site.url);
               }}
-              className={`text-sm font-medium transition-colors ${
-                selectedSite === site.id 
-                  ? 'text-primary'
-                  : 'text-zinc-600 hover:text-zinc-900'
-              }`}
             >
               {site.name}
-            </motion.button>
+            </Button>
           ))}
-        </motion.div>
+        </div>
+      </div>
+
+      {/* Content Area */}
+      <div className="pt-28 pb-4 container mx-auto px-4">
+        <div className="bg-white rounded-lg p-4">
+          <p className="text-gray-500 text-center mb-4">Select a site above to get started</p>
+          <div className="grid gap-3">
+            {sites.map(site => (
+              <Button
+                key={site.id}
+                variant="outline"
+                className="w-full h-12 justify-between"
+                onClick={() => handleSiteClick(site.url)}
+              >
+                <span>{site.name}</span>
+                <ArrowUpRight className="h-4 w-4 opacity-50" />
+              </Button>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
