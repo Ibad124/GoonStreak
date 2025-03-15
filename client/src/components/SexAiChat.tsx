@@ -41,10 +41,14 @@ export function SexAiChat() {
           body: JSON.stringify({ message: content }),
         });
 
+        const contentType = response.headers.get("content-type");
         if (!response.ok) {
-          const errorData = await response.text();
-          console.error('Error response:', errorData);
-          throw new Error(errorData);
+          const errorText = await response.text();
+          throw new Error(contentType?.includes("json") ? JSON.parse(errorText).error : errorText);
+        }
+
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Invalid response format from server");
         }
 
         const data = await response.json();
