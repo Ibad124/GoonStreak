@@ -123,7 +123,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className={`min-h-screen pb-24 relative overflow-hidden bg-gradient-to-br ${style.background}`}>
+    <div className={`min-h-screen pb-24 relative overflow-hidden ${style.background}`}>
       {/* Background Pattern */}
       <div className="absolute inset-0 pointer-events-none">
         <div className={`absolute inset-0 ${style.pattern} bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoNDUpIj48cGF0aCBkPSJNLTEwIDMwbDIwLTIwTTAgNDBsMjAtMjBNMTAgNTBsMjAtMjAiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4xIiBzdHJva2Utd2lkdGg9IjIiLz48L3BhdHRlcm4+PC9kZWZzPjxwYXRoIGZpbGw9InVybCgjYSkiIGQ9Ik0wIDBoMjAwdjIwMEgweiIvPjwvc3ZnPg==')]`} />
@@ -483,7 +483,7 @@ export default function HomePage() {
 
 const themeStyles = {
   default: {
-    background: "from-blue-50 via-indigo-50 to-violet-50",
+    background: "bg-gradient-to-br from-blue-50 via-indigo-50 to-violet-50",
     headerBg: "bg-white/80",
     cardBg: "bg-white/90",
     text: "text-slate-900",
