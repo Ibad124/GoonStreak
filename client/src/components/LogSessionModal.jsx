@@ -63,12 +63,7 @@ export default function LogSessionModal({ isOpen, onClose, onSubmit, isPending }
       duration: sessionDuration,
       intensity,
       mood,
-      timestamp: new Date().toISOString(),
-      xpPoints: Math.floor(sessionDuration * (
-        intensity === "high" ? 3 : 
-        intensity === "medium" ? 2 : 
-        1
-      ) + 10) // Base XP + duration-based XP
+      timestamp: new Date().toISOString()
     };
 
     onSubmit(sessionData);

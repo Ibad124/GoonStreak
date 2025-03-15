@@ -4,6 +4,7 @@ import { Star, Crown, Trophy, ChevronUp, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LEVEL_THRESHOLDS } from "@shared/schema";
 import { calculateLevel } from "@/lib/utils";
+import { useState, useEffect } from 'react';
 
 interface LevelProgressProps {
   user: {
@@ -13,11 +14,19 @@ interface LevelProgressProps {
 }
 
 export default function LevelProgress({ user }: LevelProgressProps) {
+  const [showLevelUp, setShowLevelUp] = useState(false);
+
+  useEffect(() => {
+    const shouldLevelUp = user.xpPoints >= LEVEL_THRESHOLDS[user.level + 1]?.xp;
+    if (shouldLevelUp) {
+      setShowLevelUp(true);
+      setTimeout(() => setShowLevelUp(false), 2000);
+    }
+  }, [user.xpPoints, user.level]);
+
   const levelInfo = calculateLevel(user.xpPoints);
   const nextTitle = LEVEL_THRESHOLDS[(levelInfo.currentLevel + 1) as keyof typeof LEVEL_THRESHOLDS]?.title || "Max Level";
   const progress = (levelInfo.progress / levelInfo.total) * 100;
-
-  const showLevelUp = user.xpPoints >= levelInfo.nextLevelXP; 
 
 
   return (
