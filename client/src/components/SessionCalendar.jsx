@@ -32,10 +32,10 @@ export default function SessionCalendar({ sessions = [], currentStreak }) {
           className={`
             w-10 h-10 rounded-xl flex items-center justify-center
             transition-all duration-300 relative group
-            ${isToday ? 'ring-2 ring-primary ring-offset-2' : ''}
+            ${isToday ? 'ring-2 ring-pink-500 ring-offset-2' : ''}
             ${hasSessionOnDay 
-              ? 'bg-gradient-to-br from-primary to-primary/90 text-white shadow-lg hover:shadow-xl' 
-              : 'hover:bg-primary/5'}
+              ? 'bg-gradient-to-br from-pink-500 to-purple-600 text-white shadow-lg hover:shadow-xl' 
+              : 'hover:bg-pink-500/5'}
           `}
           whileHover={!hasSessionOnDay ? { scale: 1.1 } : {}}
           whileTap={!hasSessionOnDay ? { scale: 0.95 } : {}}
@@ -65,7 +65,7 @@ export default function SessionCalendar({ sessions = [], currentStreak }) {
           {/* Pulse effect for session days */}
           {hasSessionOnDay && (
             <motion.div
-              className="absolute inset-0 bg-white/20 rounded-xl"
+              className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-xl"
               initial={false}
               animate={{ 
                 scale: [1, 1.05, 1],
@@ -97,10 +97,10 @@ export default function SessionCalendar({ sessions = [], currentStreak }) {
               variant="secondary" 
               className="
                 w-full py-3 justify-center gap-2
-                bg-gradient-to-r from-orange-500 to-orange-600 
+                bg-gradient-to-r from-pink-500 to-purple-600 
                 text-white border-0 text-sm font-medium
-                shadow-lg shadow-orange-500/20
-                hover:from-orange-600 hover:to-orange-700
+                shadow-lg shadow-pink-500/20
+                hover:from-pink-600 hover:to-purple-700
                 transition-all duration-300
               "
             >
@@ -129,7 +129,7 @@ export default function SessionCalendar({ sessions = [], currentStreak }) {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-card rounded-xl p-4 shadow-lg shadow-primary/5"
+        className="bg-gradient-to-br from-slate-900/50 to-slate-800/50 rounded-xl p-4 shadow-lg backdrop-blur-sm border border-slate-700/50"
       >
         <Calendar
           mode="single"
@@ -142,21 +142,21 @@ export default function SessionCalendar({ sessions = [], currentStreak }) {
             months: "space-y-4",
             month: "space-y-4",
             caption: "flex justify-center pt-1 relative items-center mb-4",
-            caption_label: "text-base font-semibold",
+            caption_label: "text-base font-semibold text-slate-100",
             nav: "space-x-1 flex items-center",
-            nav_button: "h-7 w-7 bg-transparent p-0 hover:bg-primary/5 rounded-lg transition-colors",
+            nav_button: "h-7 w-7 bg-transparent p-0 hover:bg-pink-500/5 rounded-lg transition-colors text-slate-300",
             nav_button_previous: "absolute left-1",
             nav_button_next: "absolute right-1",
             table: "w-full border-collapse",
             head_row: "flex",
-            head_cell: "text-muted-foreground rounded-md w-10 font-medium text-[0.8rem] h-10 flex items-center justify-center",
+            head_cell: "text-slate-400 rounded-md w-10 font-medium text-[0.8rem] h-10 flex items-center justify-center",
             row: "flex w-full mt-2",
-            cell: "relative p-0 text-center text-sm focus-within:relative focus-within:z-20",
+            cell: "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 text-slate-300",
             day: "h-10 w-10 p-0 font-normal",
             day_selected: "bg-transparent",
             day_today: "bg-transparent",
             day_outside: "opacity-50",
-            day_disabled: "text-muted-foreground opacity-50",
+            day_disabled: "text-slate-500 opacity-50",
             day_hidden: "invisible",
           }}
         />

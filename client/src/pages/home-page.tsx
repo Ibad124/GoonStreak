@@ -24,7 +24,7 @@ import {
   Loader2,
   Plus,
   Brain,
-  Heart // Added import for Heart icon
+  Heart
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -35,7 +35,7 @@ import Challenges from "@/components/Challenges";
 import SessionCalendar from "@/components/SessionCalendar";
 import ActiveFriends from "@/components/ActiveFriends";
 import { AiSuggestions } from "@/components/AiSuggestions";
-import { SexAiChat } from "@/components/SexAiChat"; // Added import for SexAiChat component
+import { SexAiChat } from "@/components/SexAiChat";
 
 interface Stats {
   user: {
@@ -129,6 +129,15 @@ export default function HomePage() {
         <div className={`absolute inset-0 ${style.pattern} bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoNDUpIj48cGF0aCBkPSJNLTEwIDMwbDIwLTIwTTAgNDBsMjAtMjBNMTAgNTBsMjAtMjAiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4xIiBzdHJva2Utd2lkdGg9IjIiLz48L3BhdHRlcm4+PC9kZWZzPjxwYXRoIGZpbGw9InVybCgjYSkiIGQ9Ik0wIDBoMjAwdjIwMEgweiIvPjwvc3ZnPg==')]`} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
       </div>
+
+      {/* Sex AI Chat Button */}
+      <motion.div
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="fixed bottom-24 right-6 z-50"
+      >
+        <SexAiChat />
+      </motion.div>
 
       {/* Header */}
       <motion.header
@@ -392,15 +401,6 @@ export default function HomePage() {
         </div>
       </main>
 
-      {/* Sex AI Chat Button */}
-      <motion.div
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="fixed bottom-24 right-6 z-50"
-      >
-        <SexAiChat />
-      </motion.div>
-
       {/* Session Logging Button */}
       <motion.div
         initial={{ y: 100, opacity: 0 }}
@@ -452,12 +452,12 @@ export default function HomePage() {
 
 const themeStyles = {
   default: {
-    background: "from-blue-50 via-indigo-50 to-violet-50",
+    background: "from-pink-50 via-purple-50 to-blue-50",
     headerBg: "bg-white/80",
     cardBg: "bg-white/90",
     text: "text-slate-900",
-    accent: "text-blue-600",
-    button: "from-blue-600 to-indigo-600",
+    accent: "text-pink-600",
+    button: "from-pink-600 to-purple-600",
     border: "border-slate-200/50",
     greeting: "Ready to level up? 🌟",
     pattern: "opacity-5"
@@ -485,13 +485,13 @@ const themeStyles = {
     pattern: "opacity-10"
   },
   hardcore: {
-    background: "from-red-950 via-black to-red-950",
+    background: "from-pink-950 via-black to-purple-950",
     headerBg: "bg-black/40",
     cardBg: "bg-black/40",
-    text: "text-red-50",
-    accent: "text-red-500",
-    button: "from-red-600 to-red-700",
-    border: "border-red-500/20",
+    text: "text-pink-50",
+    accent: "text-pink-500",
+    button: "from-pink-600 to-purple-700",
+    border: "border-pink-500/20",
     greeting: "Embrace the power within... 😈",
     pattern: "opacity-15"
   }
