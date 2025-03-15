@@ -415,8 +415,6 @@ export async function registerRoutes(app) {
         return res.status(400).json({ error: "Invalid message format" });
       }
 
-      res.setHeader('Content-Type', 'application/json');
-
       const completion = await openai.chat.completions.create({
         model: "gpt-4",
         messages: [
@@ -437,7 +435,7 @@ export async function registerRoutes(app) {
         throw new Error("Invalid response from AI service");
       }
 
-      res.json({
+      return res.json({
         message: completion.choices[0].message.content,
         timestamp: new Date().toISOString()
       });
