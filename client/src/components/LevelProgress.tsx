@@ -58,7 +58,7 @@ export default function LevelProgress({ user }: LevelProgressProps) {
                   <div className="flex flex-col">
                     <span className="font-medium">Next: {nextTitle}</span>
                     <span className="text-sm text-pink-200/80">
-                      {LEVEL_THRESHOLDS[user.level + 1]?.description || "Max level reached"}
+                      {LEVEL_THRESHOLDS[user.level + 1]?.title || "Max level reached"}
                     </span>
                   </div>
                 </div>
