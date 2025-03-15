@@ -55,9 +55,16 @@ export default function LevelProgress({ user }: LevelProgressProps) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <ChevronUp className="h-5 w-5 text-pink-300" />
-                  <span className="font-medium">Progress to {nextTitle}</span>
+                  <div className="flex flex-col">
+                    <span className="font-medium">Next: {nextTitle}</span>
+                    <span className="text-sm text-pink-200/80">
+                      {LEVEL_THRESHOLDS[user.level + 1]?.description || "Max level reached"}
+                    </span>
+                  </div>
                 </div>
-                <span className="text-sm text-pink-200">{Math.round(progress)}%</span>
+                <span className="text-sm font-bold bg-white/10 px-3 py-1 rounded-full">
+                  {Math.round(progress)}%
+                </span>
               </div>
 
               <div className="space-y-2">
@@ -65,13 +72,13 @@ export default function LevelProgress({ user }: LevelProgressProps) {
                   <span>{levelInfo.progress} XP</span>
                   <span>{levelInfo.total} XP</span>
                 </div>
-                <div className="relative h-3 bg-black/20 rounded-full overflow-hidden">
+                <div className="relative h-4 bg-black/20 rounded-full overflow-hidden backdrop-blur">
                   <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-pink-300 to-purple-300"
+                    className="absolute inset-0 bg-gradient-to-r from-pink-300 via-purple-300 to-pink-300"
                     style={{ width: `${progress}%` }}
                     initial={{ width: 0 }}
                     animate={{ width: `${progress}%` }}
-                    transition={{ duration: 0.5 }}
+                    transition={{ duration: 1, ease: "easeOut" }}
                   />
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
