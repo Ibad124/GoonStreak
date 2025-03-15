@@ -4,33 +4,40 @@ import {
   useMutation,
   UseMutationResult,
 } from "@tanstack/react-query";
-import { insertUserSchema, User as SelectUser, InsertUser } from "@shared/schema";
-import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 type AuthContextType = {
-  user: SelectUser | null;
+  user: any | null;
   isLoading: boolean;
   error: Error | null;
-  loginMutation: UseMutationResult<SelectUser, Error, LoginData>;
+  loginMutation: UseMutationResult<any, Error, LoginData>;
   logoutMutation: UseMutationResult<void, Error, void>;
-  registerMutation: UseMutationResult<SelectUser, Error, InsertUser>;
+  registerMutation: UseMutationResult<any, Error, RegisterData>;
 };
 
-type LoginData = Pick<InsertUser, "username" | "password">;
+interface LoginData {
+  username: string;
+  password: string;
+}
+
+interface RegisterData extends LoginData {
+  isAnonymous?: boolean;
+  showOnLeaderboard?: boolean;
+}
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+
   const {
     data: user,
     error,
     isLoading,
-  } = useQuery<SelectUser | undefined, Error>({
+  } = useQuery({
     queryKey: ["/api/user"],
-    queryFn: getQueryFn({ on401: "returnNull" }),
-    retry: 1,
+    retry: false,
   });
 
   const loginMutation = useMutation({
@@ -38,13 +45,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await apiRequest("POST", "/api/login", credentials);
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.message || "Login failed");
+        throw new Error(error.message);
       }
-      const data = await res.json();
-      return data.user;
+      return res.json();
     },
-    onSuccess: (user: SelectUser) => {
-      queryClient.setQueryData(["/api/user"], user);
+    onSuccess: (data) => {
+      queryClient.setQueryData(["/api/user"], data.user);
       toast({
         title: "Welcome back!",
         description: "Successfully logged in",
@@ -54,34 +60,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onError: (error: Error) => {
       toast({
         title: "Login failed",
-        description: error.message || "Please check your credentials and try again",
+        description: error.message,
         variant: "destructive",
       });
     },
   });
 
   const registerMutation = useMutation({
-    mutationFn: async (credentials: InsertUser) => {
-      const res = await apiRequest("POST", "/api/register", credentials);
+    mutationFn: async (data: RegisterData) => {
+      const res = await apiRequest("POST", "/api/register", data);
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.message || "Registration failed");
+        throw new Error(error.message);
       }
-      const data = await res.json();
-      return data.user;
+      return res.json();
     },
-    onSuccess: (user: SelectUser) => {
-      queryClient.setQueryData(["/api/user"], user);
+    onSuccess: (data) => {
+      queryClient.setQueryData(["/api/user"], data.user);
       toast({
         title: "Welcome!",
-        description: "Successfully registered",
+        description: "Account created successfully",
         variant: "default",
       });
     },
     onError: (error: Error) => {
       toast({
         title: "Registration failed",
-        description: error.message || "Please try again with different credentials",
+        description: error.message,
         variant: "destructive",
       });
     },
@@ -96,7 +101,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: () => {
       queryClient.setQueryData(["/api/user"], null);
-      queryClient.clear();
       toast({
         title: "Goodbye!",
         description: "Successfully logged out",
@@ -115,7 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        user: user ?? null,
+        user,
         isLoading,
         error,
         loginMutation,
