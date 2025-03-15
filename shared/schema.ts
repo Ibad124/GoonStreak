@@ -51,15 +51,48 @@ export const achievements = pgTable("achievements", {
 
 // Level System Configuration
 export const LEVEL_THRESHOLDS = {
-  1: { points: 0, title: "Novice Streaker" },
-  2: { points: 100, title: "Apprentice Streaker" },
-  3: { points: 300, title: "Intermediate Streaker" },
-  4: { points: 600, title: "Advanced Streaker" },
-  5: { points: 1000, title: "Expert Streaker" },
-  6: { points: 2000, title: "Master Streaker" },
-  7: { points: 5000, title: "Grandmaster Streaker" },
-  8: { points: 10000, title: "Legendary Streaker" }
-};
+  // 🍼 Newbie Levels (0-999 XP)
+  1: { points: 0, title: "Baby Batter Beginner", emoji: "🍼" },
+  2: { points: 100, title: "The Curious Clicker", emoji: "🍼" },
+  3: { points: 250, title: "The Sock Explorer", emoji: "🍼" },
+  4: { points: 500, title: "Palm Pilot Trainee", emoji: "🍼" },
+  5: { points: 999, title: "Tissue Recruit", emoji: "🍼" },
+
+  // 💦 Amateur Levels (1,000 - 4,999 XP)
+  6: { points: 1000, title: "Grip Gladiator", emoji: "💦" },
+  7: { points: 2500, title: "Lotion Apprentice", emoji: "💦" },
+  8: { points: 3000, title: "Forearm Forge", emoji: "💦" },
+  9: { points: 4000, title: "Sticky Strategist", emoji: "💦" },
+  10: { points: 4999, title: "Goon Cadet", emoji: "💦" },
+
+  // 🔥 Intermediate Levels (5,000 - 14,999 XP)
+  11: { points: 5000, title: "The Fap Technician", emoji: "🔥" },
+  12: { points: 7500, title: "Doomscroll Diddler", emoji: "🔥" },
+  13: { points: 10000, title: "Edge Engineer", emoji: "🔥" },
+  14: { points: 12500, title: "Wrist Wizard", emoji: "🔥" },
+  15: { points: 14999, title: "Climax Connoisseur", emoji: "🔥" },
+
+  // 🚀 Advanced Levels (15,000 - 49,999 XP)
+  16: { points: 15000, title: "The Goo Alchemist", emoji: "🚀" },
+  17: { points: 20000, title: "Stroke Samurai", emoji: "🚀" },
+  18: { points: 30000, title: "Goon General", emoji: "🚀" },
+  19: { points: 40000, title: "Nut Professor", emoji: "🚀" },
+  20: { points: 49999, title: "The Chrono-Nutter", emoji: "🚀" },
+
+  // 👑 Elite Levels (50,000 - 99,999 XP)
+  21: { points: 50000, title: "Gooniverse Traveler", emoji: "👑" },
+  22: { points: 60000, title: "Fapstronaut", emoji: "👑" },
+  23: { points: 75000, title: "The Grip Reaper", emoji: "👑" },
+  24: { points: 90000, title: "Master Baiter", emoji: "👑" },
+  25: { points: 99999, title: "Eternal Edge Lord", emoji: "👑" },
+
+  // 🌀 Legendary Levels (100,000+ XP)
+  26: { points: 100000, title: "The Goonfather", emoji: "🌀" },
+  27: { points: 150000, title: "Dopamine Demigod", emoji: "🌀" },
+  28: { points: 250000, title: "Grand Goo-Master", emoji: "🌀" },
+  29: { points: 500000, title: "The Cosmic Coomer", emoji: "🌀" },
+  30: { points: 1000000, title: "Ascended Goon Deity", emoji: "🌀" },
+} as const;
 
 // XP Rewards Configuration
 export const XP_REWARDS = {

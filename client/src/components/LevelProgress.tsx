@@ -43,7 +43,9 @@ export default function LevelProgress({ user, nextLevelXP, currentLevelXP }: Lev
             <Crown className="h-6 w-6 text-yellow-300" />
             <h2 className="text-xl font-semibold">Level {user.level}</h2>
           </div>
-          <p className="text-3xl font-bold mb-4">{user.title}</p>
+          <p className="text-3xl font-bold mb-4">
+            {LEVEL_THRESHOLDS[user.level as keyof typeof LEVEL_THRESHOLDS]?.emoji} {user.title}
+          </p>
           <div className="flex items-center gap-2 text-sm text-pink-100">
             <Star className="h-4 w-4" />
             <span>{user.xpPoints} XP Total</span>
