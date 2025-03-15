@@ -109,7 +109,7 @@ export function SexAiChat() {
                 size="lg"
                 className="rounded-full w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/30 transition-all duration-300 relative group"
               >
-                <Heart className="h-6 w-6 text-white group-hover:scale-110 transition-transform duration-300" />
+                <span className="text-2xl group-hover:scale-110 transition-transform duration-300">💭😉</span>
                 <div className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-red-500 animate-pulse" />
               </Button>
             </DialogTrigger>
