@@ -13,17 +13,11 @@ interface LevelProgressProps {
 }
 
 export default function LevelProgress({ user }: LevelProgressProps) {
-  const currentThreshold = LEVEL_THRESHOLDS[user.level as keyof typeof LEVEL_THRESHOLDS]?.xp || 0;
-  const nextThreshold = LEVEL_THRESHOLDS[(user.level + 1) as keyof typeof LEVEL_THRESHOLDS]?.xp || currentThreshold;
-  const levelInfo = {
-    progress: user.xpPoints - currentThreshold,
-    total: nextThreshold - currentThreshold,
-    nextLevelXP: nextThreshold
-  };
-  const nextTitle = LEVEL_THRESHOLDS[(user.level + 1) as keyof typeof LEVEL_THRESHOLDS]?.title || "Max Level";
+  const levelInfo = calculateLevel(user.xpPoints);
+  const nextTitle = LEVEL_THRESHOLDS[(levelInfo.currentLevel + 1) as keyof typeof LEVEL_THRESHOLDS]?.title || "Max Level";
   const progress = (levelInfo.progress / levelInfo.total) * 100;
 
-  const showLevelUp = user.xpPoints >= nextThreshold; // Add condition to show animation
+  const showLevelUp = user.xpPoints >= levelInfo.nextLevelXP; 
 
 
   return (
@@ -65,10 +59,10 @@ export default function LevelProgress({ user }: LevelProgressProps) {
                     Level Up!
                   </h2>
                   <p className="text-lg">
-                    You've reached level {user.level}
+                    You've reached level {levelInfo.currentLevel}
                   </p>
                   <p className="text-sm text-pink-400">
-                    New Title: {LEVEL_THRESHOLDS[user.level]?.title}
+                    New Title: {LEVEL_THRESHOLDS[levelInfo.currentLevel]?.title}
                   </p>
                 </div>
               </motion.div>
@@ -92,18 +86,16 @@ export default function LevelProgress({ user }: LevelProgressProps) {
           />
 
           <div className="p-6 relative z-10">
-            {/* Current Level Info */}
             <div className="mb-6">
               <div className="flex items-center gap-3 mb-2">
                 <Crown className="h-6 w-6 text-yellow-300" />
-                <h2 className="text-xl font-semibold">Level {user.level}</h2>
+                <h2 className="text-xl font-semibold">Level {levelInfo.currentLevel}</h2>
               </div>
               <p className="text-3xl font-bold mb-4">
-                {/*levelInfo.currentEmoji*/} {LEVEL_THRESHOLDS[user.level]?.title || "Newbie"} {/* Placeholder - needs proper data mapping */}
+                {levelInfo.currentEmoji} {levelInfo.currentTitle}
               </p>
             </div>
 
-            {/* Progress Section */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -111,7 +103,7 @@ export default function LevelProgress({ user }: LevelProgressProps) {
                   <div className="flex flex-col">
                     <span className="font-medium">Next: {nextTitle}</span>
                     <span className="text-sm text-pink-200/80">
-                      {LEVEL_THRESHOLDS[user.level + 1]?.title || "Max level reached"}
+                      {LEVEL_THRESHOLDS[levelInfo.currentLevel + 1]?.title || "Max level reached"}
                     </span>
                   </div>
                 </div>
