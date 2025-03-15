@@ -18,11 +18,11 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground dark">
       <header className="fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-lg z-50 border-b border-border">
         <div className="container mx-auto px-4 h-16 flex items-center">
           <Link href="/">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="text-foreground">
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
@@ -31,7 +31,7 @@ export default function SettingsPage() {
       </header>
 
       <main className="container mx-auto px-4 pt-24 pb-8 space-y-6">
-        <Card className="p-6">
+        <Card className="bg-card text-card-foreground p-6">
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Paintbrush className="h-5 w-5" />
             Appearance
@@ -76,7 +76,7 @@ export default function SettingsPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="bg-card text-card-foreground p-6">
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Bell className="h-5 w-5" />
             Notifications
@@ -111,7 +111,7 @@ export default function SettingsPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="bg-card text-card-foreground p-6">
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Shield className="h-5 w-5" />
             Privacy
