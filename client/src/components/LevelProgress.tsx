@@ -21,7 +21,7 @@ export default function LevelProgress({ user }: LevelProgressProps) {
     const shouldLevelUp = user.xpPoints >= LEVEL_THRESHOLDS[levelInfo.currentLevel + 1]?.points;
     if (shouldLevelUp) {
       setShowLevelUp(true);
-      setTimeout(() => setShowLevelUp(false), 2000);
+      setTimeout(() => setShowLevelUp(false), 3000); // Increased duration for animation
     }
   }, [user.xpPoints]);
 
@@ -38,41 +38,124 @@ export default function LevelProgress({ user }: LevelProgressProps) {
       <AnimatePresence>
         {showLevelUp && (
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 1.2, opacity: 0 }}
-            className="absolute inset-0 flex items-center justify-center z-50"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.2 }}
+            className="fixed inset-0 flex items-center justify-center z-[100] bg-black/50 backdrop-blur-sm"
           >
-            <div className="relative">
+            <div className="relative max-w-lg w-full mx-4">
+              {/* Background Effects */}
               <motion.div
                 animate={{
                   scale: [1, 1.2, 1],
                   rotate: [0, 360],
                 }}
                 transition={{
-                  duration: 2,
+                  duration: 3,
                   ease: "easeInOut",
                   times: [0, 0.5, 1],
                   repeat: Infinity,
                 }}
-                className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 rounded-full blur-xl opacity-50"
+                className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 rounded-3xl blur-xl opacity-50"
               />
+
+              {/* Main Content Card */}
               <motion.div
-                className="relative bg-black/90 text-white px-8 py-4 rounded-xl border border-pink-500/50 backdrop-blur-xl"
+                className="relative bg-black/90 text-white px-8 py-12 rounded-3xl border border-pink-500/50 backdrop-blur-xl"
                 initial={{ y: 20 }}
                 animate={{ y: 0 }}
               >
-                <div className="text-center space-y-2">
-                  <Sparkles className="h-8 w-8 text-yellow-500 mx-auto" />
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
-                    Level Up!
-                  </h2>
-                  <p className="text-lg">
-                    You've reached level {levelInfo.currentLevel}
-                  </p>
-                  <p className="text-sm text-pink-400">
-                    New Title: {LEVEL_THRESHOLDS[levelInfo.currentLevel]?.title}
-                  </p>
+                {/* Particle Effects */}
+                <motion.div
+                  className="absolute inset-0 overflow-hidden"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  {Array.from({ length: 20 }).map((_, i) => (
+                    <motion.div
+                      key={i}
+                      className="absolute w-2 h-2 bg-white rounded-full"
+                      initial={{
+                        x: "50%",
+                        y: "50%",
+                        scale: 0,
+                        opacity: 1,
+                      }}
+                      animate={{
+                        x: `${Math.random() * 100}%`,
+                        y: `${Math.random() * 100}%`,
+                        scale: Math.random() * 2,
+                        opacity: 0,
+                      }}
+                      transition={{
+                        duration: 2,
+                        delay: i * 0.1,
+                        repeat: Infinity,
+                        repeatDelay: 1,
+                      }}
+                    />
+                  ))}
+                </motion.div>
+
+                <div className="text-center space-y-6 relative z-10">
+                  {/* Level Up Icon */}
+                  <motion.div
+                    animate={{ 
+                      scale: [1, 1.2, 1],
+                      rotate: [0, 10, -10, 0],
+                    }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                    }}
+                    className="text-6xl mb-4"
+                  >
+                    {levelInfo.currentEmoji}
+                  </motion.div>
+
+                  {/* Level Up Text */}
+                  <motion.div
+                    initial={{ scale: 0.8 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <h2 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent mb-2">
+                      Level Up!
+                    </h2>
+                    <p className="text-2xl font-semibold mb-4">
+                      Level {levelInfo.currentLevel} Achieved!
+                    </p>
+                    <p className="text-xl text-pink-400 font-medium">
+                      {levelInfo.currentTitle}
+                    </p>
+                  </motion.div>
+
+                  {/* Sparkles */}
+                  <motion.div
+                    className="absolute inset-0 pointer-events-none"
+                    animate={{
+                      scale: [1, 1.1, 1],
+                      opacity: [0.5, 0.8, 0.5],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  >
+                    <div className="absolute top-0 left-0">
+                      <Sparkles className="h-8 w-8 text-yellow-500" />
+                    </div>
+                    <div className="absolute top-0 right-0">
+                      <Sparkles className="h-8 w-8 text-yellow-500" />
+                    </div>
+                    <div className="absolute bottom-0 left-0">
+                      <Sparkles className="h-8 w-8 text-yellow-500" />
+                    </div>
+                    <div className="absolute bottom-0 right-0">
+                      <Sparkles className="h-8 w-8 text-yellow-500" />
+                    </div>
+                  </motion.div>
                 </div>
               </motion.div>
             </div>
