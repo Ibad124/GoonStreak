@@ -20,6 +20,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { formatDistanceToNow } from "date-fns";
 
 interface FriendChallenge {
   id: number;
