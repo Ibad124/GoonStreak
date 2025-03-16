@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useCallback } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +30,17 @@ import UserAvatar2D from "@/components/UserAvatar2D";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import GoonClans from "@/components/GoonClans";
 
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center p-8">
+    <motion.div
+      animate={{ rotate: 360 }}
+      transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+    >
+      <Loader2 className="w-8 h-8 text-purple-400" />
+    </motion.div>
+  </div>
+);
+
 export default function SocialPage() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -39,22 +50,22 @@ export default function SocialPage() {
 
   const { data: friends, isLoading: isLoadingFriends } = useQuery({
     queryKey: ["/api/friends"],
-    refetchInterval: 30000, // Reduced polling frequency
+    refetchInterval: 30000,
   });
 
+  const sendHype = useCallback(async (friendId) => {
+    const res = await apiRequest("POST", `/api/friends/${friendId}/hype`);
+    if (voiceEnabled) {
+      const msg = new SpeechSynthesisUtterance("Nice job! Keep going!");
+      window.speechSynthesis.speak(msg);
+    }
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 2000);
+    return res.json();
+  }, [voiceEnabled]);
+
   const sendHypeMutation = useMutation({
-    mutationFn: async (friendId) => {
-      const res = await apiRequest("POST", `/api/friends/${friendId}/hype`);
-      return res.json();
-    },
-    onSuccess: () => {
-      if (voiceEnabled) {
-        const msg = new SpeechSynthesisUtterance("Nice job! Keep going!");
-        window.speechSynthesis.speak(msg);
-      }
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 2000);
-    },
+    mutationFn: sendHype,
   });
 
   const sendReactionMutation = useMutation({
@@ -79,45 +90,55 @@ export default function SocialPage() {
   if (isLoadingFriends) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-900 via-slate-900 to-pink-900">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-        >
-          <Loader2 className="w-8 h-8 text-purple-400" />
-        </motion.div>
+        <LoadingSpinner />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-slate-900 to-pink-900">
-      {showConfetti && (
-        <div className="fixed inset-0 pointer-events-none z-50">
-          <Lottie
-            animationData={confettiAnimation}
-            loop={false}
-            style={{ width: "100%", height: "100%" }}
-          />
-        </div>
-      )}
+      {/* Confetti Animation */}
+      <AnimatePresence>
+        {showConfetti && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 pointer-events-none z-50"
+          >
+            <Lottie
+              animationData={confettiAnimation}
+              loop={false}
+              style={{ width: "100%", height: "100%" }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
+      {/* Background Pattern */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoNDUpIj48cGF0aCBkPSJNLTEwIDMwbDIwLTIwTTAgNDBsMjAtMjBNMTAgNTBsMjAtMjAiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4xIiBzdHJva2Utd2lkdGg9IjIiLz48L3BhdHRlcm4+PC9kZWZzPjxwYXRoIGZpbGw9InVybCgjYSkiIGQ9Ik0wIDBoMjAwdjIwMEgweiIvPjwvc3ZnPg==')]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"
+        />
       </div>
 
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 bg-black/40 backdrop-blur z-50 border-b border-white/10">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="container mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4">
             <Link href="/">
-              <Button variant="ghost" size="icon" className="rounded-full text-white hover:text-purple-400">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full text-white hover:text-purple-400 transition-colors duration-200"
+              >
                 <ChevronLeft className="h-5 w-5" />
               </Button>
             </Link>
-            <h1 className="text-lg md:text-xl font-semibold text-white">
-              Social Hub
-            </h1>
+            <h1 className="text-xl font-bold text-white">Social Hub</h1>
           </div>
 
           <div className="flex items-center gap-4">
@@ -125,7 +146,9 @@ export default function SocialPage() {
               variant="ghost"
               size="icon"
               onClick={() => setVoiceEnabled(!voiceEnabled)}
-              className={`rounded-full ${voiceEnabled ? 'text-green-400' : 'text-white/50'}`}
+              className={`rounded-full transition-colors duration-200 ${
+                voiceEnabled ? 'text-green-400 bg-green-400/10' : 'text-white/50 hover:text-white/80'
+              }`}
             >
               <Volume2 className="h-5 w-5" />
             </Button>
@@ -135,7 +158,7 @@ export default function SocialPage() {
                 title: "Coming Soon!",
                 description: "Group sessions will be available soon.",
               })}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 gap-2"
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 gap-2 rounded-full px-6"
             >
               <Plus className="h-4 w-4" />
               Create Session
@@ -145,56 +168,63 @@ export default function SocialPage() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 pt-24 pb-24">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <main className="container mx-auto px-6 pt-24 pb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Column */}
-          <div className="lg:col-span-4 space-y-6">
+          <div className="lg:col-span-4 space-y-8">
             <Card className="bg-black/20 border-white/10 backdrop-blur">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-white flex items-center gap-2">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-xl font-bold text-white flex items-center gap-2">
                   <Users className="h-5 w-5 text-purple-400" />
                   Friends
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <Suspense fallback={<div>Loading friends...</div>}>
+                <Suspense fallback={<LoadingSpinner />}>
                   <div className="space-y-4">
-                    {friends?.map((friend) => (
-                      <motion.div
-                        key={friend.id}
-                        layout
-                        className="p-4 bg-black/20 rounded-lg border border-white/10"
-                      >
-                        <div className="flex items-center gap-4">
-                          <UserAvatar2D level={friend.level} mood={friend.mood} />
-                          <div className="flex-1">
-                            <h3 className="text-white font-medium">{friend.username}</h3>
-                            <p className="text-gray-400 text-sm">Level {friend.level}</p>
-                          </div>
-                          <div className="flex flex-col gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 rounded-full bg-purple-500/20 hover:bg-purple-500/40"
-                              onClick={() => sendHypeMutation.mutate(friend.id)}
-                            >
-                              <Zap className="h-4 w-4 text-purple-400" />
-                            </Button>
-                            <div className="flex gap-1">
-                              {["🔥", "💦", "🤣", "👀"].map((reaction) => (
-                                <button
-                                  key={reaction}
-                                  className="text-xs hover:scale-125 transition-transform"
-                                  onClick={() => sendReactionMutation.mutate({ friendId: friend.id, reaction })}
-                                >
-                                  {reaction}
-                                </button>
-                              ))}
+                    <AnimatePresence mode="popLayout">
+                      {friends?.map((friend) => (
+                        <motion.div
+                          key={friend.id}
+                          layout
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          className="p-4 bg-black/20 rounded-xl border border-white/10 hover:bg-black/30 transition-all duration-300"
+                        >
+                          <div className="flex items-center gap-4">
+                            <UserAvatar2D level={friend.level} mood={friend.mood} />
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-white font-bold truncate">{friend.username}</h3>
+                              <p className="text-purple-400 text-sm">Level {friend.level}</p>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                className="h-8 w-8 rounded-full bg-purple-500/20 hover:bg-purple-500/40 flex items-center justify-center transition-colors duration-200"
+                                onClick={() => sendHypeMutation.mutate(friend.id)}
+                              >
+                                <Zap className="h-4 w-4 text-purple-400" />
+                              </motion.button>
+                              <div className="flex gap-1 justify-center">
+                                {["🔥", "💦", "🤣", "👀"].map((reaction) => (
+                                  <motion.button
+                                    key={reaction}
+                                    whileHover={{ scale: 1.2 }}
+                                    whileTap={{ scale: 0.8 }}
+                                    className="text-lg hover:transform hover:translateY(-2px) transition-transform duration-200"
+                                    onClick={() => sendReactionMutation.mutate({ friendId: friend.id, reaction })}
+                                  >
+                                    {reaction}
+                                  </motion.button>
+                                ))}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </motion.div>
-                    ))}
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
                   </div>
                 </Suspense>
               </CardContent>
@@ -202,103 +232,59 @@ export default function SocialPage() {
           </div>
 
           {/* Right Column */}
-          <div className="lg:col-span-8 space-y-6">
+          <div className="lg:col-span-8 space-y-8">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid grid-cols-4 gap-4 bg-black/20 p-1 rounded-xl">
-                <TabsTrigger
-                  value="activity"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white rounded-lg transition-all duration-200"
-                >
-                  <Target className="h-4 w-4 mr-2" />
-                  Activity
-                </TabsTrigger>
-                <TabsTrigger
-                  value="achievements"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white rounded-lg transition-all duration-200"
-                >
-                  <Trophy className="h-4 w-4 mr-2" />
-                  Achievements
-                </TabsTrigger>
-                <TabsTrigger
-                  value="leaderboard"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white rounded-lg transition-all duration-200"
-                >
-                  <Crown className="h-4 w-4 mr-2" />
-                  Leaderboard
-                </TabsTrigger>
-                <TabsTrigger
-                  value="clans"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white rounded-lg transition-all duration-200"
-                >
-                  <Users className="h-4 w-4 mr-2" />
-                  Clans
-                </TabsTrigger>
+              <TabsList className="grid grid-cols-4 gap-4 bg-black/20 p-1.5 rounded-2xl">
+                {[
+                  { value: "activity", icon: Target, label: "Activity" },
+                  { value: "achievements", icon: Trophy, label: "Achievements" },
+                  { value: "leaderboard", icon: Crown, label: "Leaderboard" },
+                  { value: "clans", icon: Users, label: "Clans" }
+                ].map(({ value, icon: Icon, label }) => (
+                  <TabsTrigger
+                    key={value}
+                    value={value}
+                    className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white rounded-xl py-3 transition-all duration-300"
+                  >
+                    <Icon className="h-4 w-4 mr-2" />
+                    {label}
+                  </TabsTrigger>
+                ))}
               </TabsList>
 
-              <div className="mt-6">
-                <TabsContent value="activity">
-                  <Suspense fallback={<div>Loading activity...</div>}>
-                    <Card className="bg-black/20 border-white/10 backdrop-blur">
-                      <CardHeader>
-                        <CardTitle className="text-white flex items-center gap-2">
-                          <Target className="h-5 w-5 text-purple-400" />
-                          Friend Activity
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <FriendActivity onReaction={sendReactionMutation.mutate} />
-                      </CardContent>
-                    </Card>
-                  </Suspense>
-                </TabsContent>
-
-                <TabsContent value="achievements">
-                  <Suspense fallback={<div>Loading achievements...</div>}>
-                    <Card className="bg-black/20 border-white/10 backdrop-blur">
-                      <CardHeader>
-                        <CardTitle className="text-white flex items-center gap-2">
-                          <Star className="h-5 w-5 text-purple-400" />
-                          Social Achievements
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <SocialAchievements />
-                      </CardContent>
-                    </Card>
-                  </Suspense>
-                </TabsContent>
-
-                <TabsContent value="leaderboard">
-                  <Suspense fallback={<div>Loading leaderboard...</div>}>
-                    <Card className="bg-black/20 border-white/10 backdrop-blur">
-                      <CardHeader>
-                        <CardTitle className="text-white flex items-center gap-2">
-                          <Crown className="h-5 w-5 text-purple-400" />
-                          Global Leaderboard
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <FriendsLeaderboard />
-                      </CardContent>
-                    </Card>
-                  </Suspense>
-                </TabsContent>
-
-                <TabsContent value="clans">
-                  <Suspense fallback={<div>Loading clans...</div>}>
-                    <Card className="bg-black/20 border-white/10 backdrop-blur">
-                      <CardHeader>
-                        <CardTitle className="text-white flex items-center gap-2">
-                          <Users className="h-5 w-5 text-purple-400" />
-                          Goon Clans
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <GoonClans />
-                      </CardContent>
-                    </Card>
-                  </Suspense>
-                </TabsContent>
+              <div className="mt-8">
+                <AnimatePresence mode="wait">
+                  {["activity", "achievements", "leaderboard", "clans"].map((tab) => (
+                    <TabsContent key={tab} value={tab}>
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <Card className="bg-black/20 border-white/10 backdrop-blur">
+                            <CardHeader>
+                              <CardTitle className="text-xl font-bold text-white flex items-center gap-2">
+                                {tab === "activity" && <Target className="h-5 w-5 text-purple-400" />}
+                                {tab === "achievements" && <Trophy className="h-5 w-5 text-purple-400" />}
+                                {tab === "leaderboard" && <Crown className="h-5 w-5 text-purple-400" />}
+                                {tab === "clans" && <Users className="h-5 w-5 text-purple-400" />}
+                                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              {tab === "activity" && <FriendActivity onReaction={sendReactionMutation.mutate} />}
+                              {tab === "achievements" && <SocialAchievements />}
+                              {tab === "leaderboard" && <FriendsLeaderboard />}
+                              {tab === "clans" && <GoonClans />}
+                            </CardContent>
+                          </Card>
+                        </motion.div>
+                      </Suspense>
+                    </TabsContent>
+                  ))}
+                </AnimatePresence>
               </div>
             </Tabs>
           </div>
@@ -306,16 +292,23 @@ export default function SocialPage() {
       </main>
 
       {/* Floating Action Button */}
-      <Button
-        onClick={() => toast({
-          title: "Coming Soon!",
-          description: "Chat features will be available soon.",
-        })}
-        className="fixed bottom-6 right-6 h-12 w-12 md:h-14 md:w-14 rounded-full shadow-lg bg-gradient-to-br from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 hover:shadow-xl transition-all duration-300"
-        size="icon"
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
       >
-        <MessageSquare className="h-5 w-5 md:h-6 md:w-6" />
-      </Button>
+        <Button
+          onClick={() => toast({
+            title: "Coming Soon!",
+            description: "Chat features will be available soon.",
+          })}
+          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg bg-gradient-to-br from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 hover:shadow-xl transition-all duration-300"
+          size="icon"
+        >
+          <MessageSquare className="h-6 w-6" />
+        </Button>
+      </motion.div>
     </div>
   );
 }
