@@ -1,13 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import LevelProgress from "@/components/LevelProgress";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Link } from "wouter";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Menu,
   Film,
@@ -25,34 +24,55 @@ import {
   Loader2,
   Plus,
   Brain,
-  Heart
+  Heart,
+  ChevronRight
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import LevelProgress from "@/components/LevelProgress";
 import StreakStats from "@/components/StreakStats";
 import Achievements from "@/components/Achievements";
 import LogSessionModal from "@/components/LogSessionModal";
 import Challenges from "@/components/Challenges";
 import SessionCalendar from "@/components/SessionCalendar";
 import ActiveFriends from "@/components/ActiveFriends";
-import { AiSuggestions } from "@/components/AiSuggestions";
-import { SexAiChat } from "@/components/SexAiChat";
-import { TooltipGuide } from "@/components/TooltipGuide";
+import { calculateLevel } from "@/lib/utils";
 
 interface Stats {
   user: {
-    level: number;
+    id: number;
+    username: string;
     xpPoints: number;
+    level: number;
     currentStreak: number;
     longestStreak: number;
     totalSessions: number;
     todaySessions: number;
+    showOnLeaderboard: boolean;
+    isAnonymous: boolean;
   };
-  nextLevelXP: number;
   rank?: number;
-  challenges?: any[];
-  achievements?: any[];
-  sessions?: any[];
+  challenges?: Array<{
+    id: number;
+    title: string;
+    description: string;
+    progress: number;
+    completed: boolean;
+  }>;
+  achievements?: Array<{
+    id: number;
+    type: string;
+    description: string;
+    earnedAt: string;
+    xpAwarded: number;
+  }>;
+  sessions?: Array<{
+    id: number;
+    timestamp: string;
+    duration: number;
+    intensity: number;
+    mood: number;
+  }>;
 }
 
 export default function HomePage() {
@@ -99,15 +119,11 @@ export default function HomePage() {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
       setIsSessionModalOpen(false);
-
       toast({
         title: "Session Logged Successfully! 🎉",
         description: `Great work! You've earned ${data.xpGained} XP!`,
         variant: "default",
       });
-
-      // Add confetti effect on successful session log
-      // You can add confetti library here if needed
     },
     onError: (error) => {
       toast({
@@ -120,11 +136,18 @@ export default function HomePage() {
 
   if (isLoading || !stats) {
     return (
-      <div className={`flex items-center justify-center min-h-screen bg-gradient-to-br ${style.background}`}>
-        <Loader2 className={`h-8 w-8 animate-spin ${style.accent}`} />
+      <div className={`min-h-screen flex items-center justify-center bg-gradient-to-br ${style.background}`}>
+        <motion.div
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        >
+          <Loader2 className={`h-12 w-12 animate-spin ${style.accent}`} />
+        </motion.div>
       </div>
     );
   }
+
+  const levelInfo = calculateLevel(stats.user.xpPoints);
 
   return (
     <div className={`min-h-screen pb-24 relative overflow-hidden bg-gradient-to-br ${style.background}`}>
@@ -134,24 +157,6 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
       </div>
 
-      {/* Sex AI Chat Button */}
-      <motion.div
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="fixed bottom-24 right-6 z-50"
-      >
-        <TooltipGuide
-          id="sex-ai-chat"
-          title="New! Intimate AI Chat"
-          description="Get personalized advice and answers about intimate topics in a private, safe environment. Click the floating button to start chatting."
-          position="left"
-          step={1}
-          totalSteps={3}
-        >
-          <SexAiChat />
-        </TooltipGuide>
-      </motion.div>
-
       {/* Header */}
       <motion.header
         initial={{ y: -100 }}
@@ -159,69 +164,87 @@ export default function HomePage() {
         className={`fixed top-0 left-0 right-0 ${style.headerBg} backdrop-blur-lg z-50 border-b ${style.border}`}
       >
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center gap-4">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               className="flex items-center gap-2"
             >
-              <Award className={`h-5 w-5 ${style.accent}`} />
-              <span className={`font-bold tracking-tight text-lg md:text-xl truncate bg-gradient-to-r ${style.button} text-transparent bg-clip-text`}>
-                {user?.username}
-              </span>
-            </motion.div>
-            <motion.div
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              className={`${style.text} text-sm md:text-base flex items-center gap-1`}
-            >
-              <Activity className="w-3 h-3" />
-              <span>Level {stats.user.level}</span>
+              <div className={`p-2 rounded-xl bg-gradient-to-br ${style.button} relative overflow-hidden group`}>
+                <Award className="h-5 w-5 text-white relative z-10" />
+                <motion.div
+                  className="absolute inset-0 bg-white/20"
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: [1, 1.5, 1], opacity: [0, 0.5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+              </div>
+              <div className="flex flex-col">
+                <span className={`font-bold tracking-tight text-lg truncate bg-gradient-to-r ${style.button} text-transparent bg-clip-text`}>
+                  {user?.username}
+                </span>
+                <div className={`${style.text} text-sm flex items-center gap-1`}>
+                  <Activity className="w-3 h-3" />
+                  <span>Level {levelInfo.currentLevel}</span>
+                </div>
+              </div>
             </motion.div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <Link href="/leaderboard">
+              <Button
+                variant="ghost"
+                size="icon"
+                className={`rounded-xl bg-white/5 ${style.border} hover:bg-white/10`}
+              >
+                <Trophy className={`h-5 w-5 ${style.text}`} />
+              </Button>
+            </Link>
+
+            <Link href="/social">
+              <Button
+                variant="ghost"
+                size="icon"
+                className={`rounded-xl bg-white/5 ${style.border} hover:bg-white/10`}
+              >
+                <Users className={`h-5 w-5 ${style.text}`} />
+              </Button>
+            </Link>
+
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`rounded-xl bg-white/5 ${style.border} hover:bg-white/10`}
+                >
                   <Menu className={`h-5 w-5 ${style.text}`} />
                 </Button>
               </SheetTrigger>
               <SheetContent className={`bg-gradient-to-br ${style.background} ${style.border}`}>
                 <nav className="space-y-4 mt-8">
-                  <Link href="/social">
-                    <Button
-                      variant="outline"
-                      className={`w-full rounded-xl flex items-center justify-start gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
-                    >
-                      <Users className="h-4 w-4" />
-                      Social Hub
-                    </Button>
-                  </Link>
                   <Link href="/adult-content">
                     <Button
                       variant="outline"
-                      className={`w-full rounded-xl flex items-center justify-start gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
+                      className={`w-full rounded-xl flex items-center justify-between gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
                     >
-                      <Film className="h-4 w-4" />
-                      Adult Content
-                    </Button>
-                  </Link>
-                  <Link href="/leaderboard">
-                    <Button
-                      variant="outline"
-                      className={`w-full rounded-xl flex items-center justify-start gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
-                    >
-                      <Trophy className="h-4 w-4" />
-                      Leaderboard
+                      <div className="flex items-center gap-3">
+                        <Film className="h-4 w-4" />
+                        Adult Content
+                      </div>
+                      <ChevronRight className="h-4 w-4 opacity-50" />
                     </Button>
                   </Link>
                   <Button
                     variant="outline"
-                    className={`w-full rounded-xl flex items-center justify-start gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
+                    className={`w-full rounded-xl flex items-center justify-between gap-3 bg-white/5 ${style.border} ${style.text} hover:bg-white/10`}
                   >
-                    <Settings className="h-4 w-4" />
-                    Settings
+                    <div className="flex items-center gap-3">
+                      <Settings className="h-4 w-4" />
+                      Settings
+                    </div>
+                    <ChevronRight className="h-4 w-4 opacity-50" />
                   </Button>
                   <Button
                     variant="destructive"
@@ -237,57 +260,21 @@ export default function HomePage() {
         </div>
       </motion.header>
 
-      {/* Hero Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="container mx-auto px-4 pt-24 pb-6"
-      >
-        <div className={`${style.cardBg} backdrop-blur rounded-2xl p-6 md:p-8 ${style.border} hover:shadow-lg transition-all duration-300`}>
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-start">
-            {/* Left Column - Progress */}
-            <div className="md:col-span-8">
-              <LevelProgress user={stats.user} />
-            </div>
-
-            {/* Right Column - Quick Stats */}
-            <div className="md:col-span-4 grid grid-cols-2 gap-4">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                className={`p-4 rounded-xl ${style.cardBg} border ${style.border}`}
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <Flame className={`h-4 w-4 ${style.accent}`} />
-                  <span className={`text-sm font-medium ${style.text}`}>Best Streak</span>
-                </div>
-                <p className={`text-2xl font-bold ${style.text}`}>
-                  {stats.user.longestStreak}
-                  <span className="text-sm ml-1">days</span>
-                </p>
-              </motion.div>
-
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                className={`p-4 rounded-xl ${style.cardBg} border ${style.border}`}
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <Trophy className={`h-4 w-4 ${style.accent}`} />
-                  <span className={`text-sm font-medium ${style.text}`}>Rank</span>
-                </div>
-                <p className={`text-2xl font-bold ${style.text}`}>
-                  #{stats.rank || "??"}
-                </p>
-              </motion.div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
       {/* Main Content */}
-      <main className="container mx-auto px-4 pt-4">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
+      <main className="container mx-auto px-4 pt-24">
+        {/* Level Progress Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6"
+        >
+          <LevelProgress user={stats.user} />
+        </motion.div>
+
+        {/* Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column */}
-          <div className="lg:col-span-8 space-y-4 md:space-y-6">
+          <div className="lg:col-span-8 space-y-6">
             {/* Daily Challenges */}
             <motion.div
               initial={{ x: -20, opacity: 0 }}
@@ -336,8 +323,40 @@ export default function HomePage() {
           </div>
 
           {/* Right Column */}
-          <div className="lg:col-span-4 space-y-4 md:space-y-6">
-            {/* Active Friends Section */}
+          <div className="lg:col-span-4 space-y-6">
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 gap-4">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`p-4 rounded-xl ${style.cardBg} border ${style.border} hover:bg-black/30 transition-all duration-300`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <Flame className={`h-4 w-4 ${style.accent}`} />
+                  <span className={`text-sm font-medium ${style.text}`}>Best Streak</span>
+                </div>
+                <p className={`text-2xl font-bold ${style.text}`}>
+                  {stats.user.longestStreak}
+                  <span className="text-sm ml-1">days</span>
+                </p>
+              </motion.div>
+
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`p-4 rounded-xl ${style.cardBg} border ${style.border} hover:bg-black/30 transition-all duration-300`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <Trophy className={`h-4 w-4 ${style.accent}`} />
+                  <span className={`text-sm font-medium ${style.text}`}>Rank</span>
+                </div>
+                <p className={`text-2xl font-bold ${style.text}`}>
+                  #{stats.rank || "??"}
+                </p>
+              </motion.div>
+            </div>
+
+            {/* Active Friends */}
             <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
               <CardHeader>
                 <CardTitle className={`text-xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
@@ -350,7 +369,7 @@ export default function HomePage() {
               </CardContent>
             </Card>
 
-            {/* Calendar Section */}
+            {/* Calendar */}
             <Card className={`overflow-hidden ${style.cardBg} backdrop-blur ${style.border} hover:bg-black/30 transition-all duration-300`}>
               <CardHeader>
                 <CardTitle className={`text-xl font-bold tracking-tight flex items-center gap-2 ${style.text}`}>
@@ -359,68 +378,50 @@ export default function HomePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <TooltipGuide
-                  id="calendar-feature"
-                  title="Track Your Progress"
-                  description="View your activity history and streaks in this beautiful calendar. Days with completed sessions are highlighted!"
-                  position="bottom"
-                  step={3}
-                  totalSteps={3}
-                >
-                  <SessionCalendar
-                    sessions={stats?.sessions || []}
-                    currentStreak={stats?.user?.currentStreak || 0}
-                  />
-                </TooltipGuide>
+                <SessionCalendar
+                  sessions={stats?.sessions || []}
+                  currentStreak={stats?.user?.currentStreak || 0}
+                />
               </CardContent>
             </Card>
           </div>
         </div>
       </main>
 
-      {/* Session Logging Button */}
+      {/* Floating Action Button */}
       <motion.div
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className={`fixed bottom-0 left-0 right-0 p-4 ${style.headerBg} backdrop-blur border-t ${style.border}`}
+        className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 via-black/50 to-transparent"
       >
         <div className="container mx-auto max-w-lg">
-          <TooltipGuide
-            id="session-logging"
-            title="Track Your Progress"
-            description="Log your sessions to earn XP, maintain your streak, and unlock achievements. Regular logging helps you stay motivated!"
-            position="top"
-            step={2}
-            totalSteps={3}
+          <Button
+            className={`
+              w-full h-16 text-lg rounded-2xl
+              bg-gradient-to-r ${style.button} 
+              hover:brightness-110 transition-all duration-300 
+              shadow-lg shadow-current/20 hover:shadow-xl hover:shadow-current/30 
+              font-bold tracking-wide text-white transform hover:scale-[1.02]
+              relative overflow-hidden group
+            `}
+            size="lg"
+            onClick={() => setIsSessionModalOpen(true)}
           >
-            <Button
-              className={`
-                w-full h-16 text-lg rounded-2xl
-                bg-gradient-to-r ${style.button} 
-                hover:brightness-110 transition-all duration-300 
-                shadow-lg shadow-current/20 hover:shadow-xl hover:shadow-current/30 
-                font-bold tracking-wide text-white transform hover:scale-[1.02]
-                relative overflow-hidden group
-              `}
-              size="lg"
-              onClick={() => setIsSessionModalOpen(true)}
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 justify-center relative z-10"
             >
-              <motion.div
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 justify-center relative z-10"
-              >
-                <Sparkles className="h-6 w-6" />
-                <span className="relative">Log Session</span>
-              </motion.div>
-              <motion.div
-                className="absolute inset-0 bg-white/20"
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: [1, 1.5, 1], opacity: [0, 0.5, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
-            </Button>
-          </TooltipGuide>
+              <Sparkles className="h-6 w-6" />
+              <span className="relative">Log Session</span>
+            </motion.div>
+            <motion.div
+              className="absolute inset-0 bg-white/20"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: [1, 1.5, 1], opacity: [0, 0.5, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+          </Button>
         </div>
       </motion.div>
 
@@ -431,7 +432,6 @@ export default function HomePage() {
         onSubmit={(data) => sessionMutation.mutate(data)}
         isPending={sessionMutation.isPending}
       />
-      <SexAiChat />
     </div>
   );
 }
@@ -445,7 +445,6 @@ const themeStyles = {
     accent: "text-pink-600",
     button: "from-pink-600 to-purple-600",
     border: "border-slate-200/50",
-    greeting: "Ready to level up? 🌟",
     pattern: "opacity-5"
   },
   solo: {
@@ -456,7 +455,6 @@ const themeStyles = {
     accent: "text-emerald-400",
     button: "from-emerald-500 to-emerald-600",
     border: "border-emerald-400/20",
-    greeting: "SYSTEMS ONLINE. INITIATING SESSION... 🤖",
     pattern: "opacity-10"
   },
   competitive: {
@@ -467,7 +465,6 @@ const themeStyles = {
     accent: "text-pink-400",
     button: "from-pink-500 to-purple-500",
     border: "border-pink-400/20",
-    greeting: "Ready to dominate? Let's go! 🔥",
     pattern: "opacity-10"
   },
   hardcore: {
@@ -478,7 +475,6 @@ const themeStyles = {
     accent: "text-pink-500",
     button: "from-pink-600 to-purple-700",
     border: "border-pink-500/20",
-    greeting: "Embrace the power within... 😈",
     pattern: "opacity-15"
   }
 };
