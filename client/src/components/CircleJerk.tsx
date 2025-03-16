@@ -25,7 +25,6 @@ import {
   MessageCircle,
   Calendar,
   Clock,
-  ArrowRight,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { formatDistanceToNow } from "date-fns";
