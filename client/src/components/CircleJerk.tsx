@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -57,6 +57,7 @@ export default function CircleJerk() {
 
   const { data: circles, isLoading } = useQuery<Circle[]>({
     queryKey: ["/api/circles"],
+    refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   const createCircleMutation = useMutation({
