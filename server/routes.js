@@ -448,6 +448,101 @@ export async function registerRoutes(app) {
     }
   });
 
+  // Circle Routes
+  app.get("/api/circles", requireAuth, async (req, res) => {
+    try {
+      const userCircles = await storage.getUserCircles(req.user.id);
+      const circlesWithData = await Promise.all(
+        userCircles.map(async (circle) => {
+          const members = await storage.getCircleMembers(circle.id);
+          const activeChallenge = await storage.getActiveCircleChallenge(circle.id);
+
+          return {
+            ...circle,
+            memberCount: members.length,
+            isOwner: circle.ownerId === req.user.id,
+            activeChallenge: activeChallenge ? {
+              title: activeChallenge.title,
+              progress: activeChallenge.progress,
+            } : undefined,
+          };
+        })
+      );
+      res.json(circlesWithData);
+    } catch (error) {
+      console.error("Error fetching circles:", error);
+      res.status(500).json({ error: "Failed to fetch circles" });
+    }
+  });
+
+  app.post("/api/circles", requireAuth, async (req, res) => {
+    try {
+      const { name } = req.body;
+      const circle = await storage.createCircle({
+        name,
+        ownerId: req.user.id,
+      });
+
+      // Log circle creation activity
+      await logActivity(req.user.id, "CIRCLE", `created a new circle: ${name} 🎯`);
+
+      res.status(201).json(circle);
+    } catch (error) {
+      console.error("Error creating circle:", error);
+      res.status(500).json({ error: "Failed to create circle" });
+    }
+  });
+
+  app.post("/api/circles/:circleId/join", requireAuth, async (req, res) => {
+    try {
+      const { circleId } = req.params;
+      await storage.addCircleMember(parseInt(circleId), req.user.id);
+
+      const circle = await storage.getCircle(parseInt(circleId));
+      await logActivity(req.user.id, "CIRCLE", `joined the circle: ${circle.name} 👥`);
+
+      res.sendStatus(200);
+    } catch (error) {
+      console.error("Error joining circle:", error);
+      res.status(500).json({ error: "Failed to join circle" });
+    }
+  });
+
+  app.post("/api/circles/:circleId/challenge", requireAuth, async (req, res) => {
+    try {
+      const { circleId } = req.params;
+      const { title, description, targetValue, endDate } = req.body;
+
+      const challenge = await storage.createCircleChallenge({
+        circleId: parseInt(circleId),
+        creatorId: req.user.id,
+        title,
+        description,
+        targetValue,
+        endDate: new Date(endDate),
+      });
+
+      const circle = await storage.getCircle(parseInt(circleId));
+      await logActivity(req.user.id, "CHALLENGE", `created a new challenge in ${circle.name}: ${title} 🎯`);
+
+      res.status(201).json(challenge);
+    } catch (error) {
+      console.error("Error creating circle challenge:", error);
+      res.status(500).json({ error: "Failed to create circle challenge" });
+    }
+  });
+
+  app.get("/api/circles/:circleId/achievements", requireAuth, async (req, res) => {
+    try {
+      const { circleId } = req.params;
+      const achievements = await storage.getCircleAchievements(parseInt(circleId));
+      res.json(achievements);
+    } catch (error) {
+      console.error("Error fetching circle achievements:", error);
+      res.status(500).json({ error: "Failed to fetch circle achievements" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // Initialize WebSocket server with explicit path
