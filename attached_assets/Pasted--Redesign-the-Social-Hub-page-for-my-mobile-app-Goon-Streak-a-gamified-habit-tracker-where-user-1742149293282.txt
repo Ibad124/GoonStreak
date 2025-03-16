@@ -1,0 +1,29 @@
+*"Redesign the 'Social Hub' page for my mobile app, Goon Streak, a gamified habit tracker where users log and share their masturbation streaks with friends. The app should be highly interactive, visually engaging, and feel like a mix between a habit tracker, social media, and a gaming leaderboard.
+
+🔹 Design & UI Features:
+Smooth, Rounded UI Elements: Use soft shadows, gradient backgrounds, and curved cards to make the UI look premium.
+3D Avatars & Profile Customization: Users should have a fun, customizable avatar (realistic or cartoonish) that reacts when they level up or get streak rewards.
+Confetti & Animated Celebrations: When a user breaks a streak record, trigger an on-screen confetti explosion with a funny message.
+Live Activity Feed: Show real-time updates of when friends log a streak, unlock a milestone, or complete a challenge.
+Friend Reactions: Allow users to send live emoji reactions (🔥💦🤣👀) when a friend logs a streak.
+Friend Streak Battles: Add a "Challenge Mode" where friends compete to maintain streaks for longer.
+🔹 Interactivity & Engagement Features:
+Hype Button: Clicking this sends a motivational meme, voice clip, or funny text to a friend.
+AI-Generated Comments: Use an AI Goon Coach that drops random, sarcastic, or encouraging comments based on streak progress.
+Voice Notifications: Enable custom voice alerts for streak milestones (e.g., "New PR! 3 Hours Strong! 💪") using funny or serious voices.
+Dark Mode Compatibility: Use sleek neon UI elements for dark mode users.
+🔹 Technologies & Code Requirements:
+React Native UI (for mobile app) with Tailwind CSS styling.
+Lottie Animations for confetti effects, streak level-ups, and button interactions.
+Three.js or React-Three-Fiber for 3D avatars & animations.
+WebSockets or Firebase Realtime Database for instant friend updates (activity feed, reactions, and messages).
+TTS (Text-to-Speech) API Integration for voice notifications.
+GIF & Meme API (like Tenor or Giphy) to send funny streak memes to friends.
+Deliver a fully responsive React Native UI with smooth animations, dynamic elements, and optimized performance for iOS & Android."*
+
+🔥 Additional Features for Maximum Engagement:
+Goon Clans: Create groups where users can have team streaks and rank up together.
+Mood-Based Customizations: Users can select a "Vibe Mode" that changes the color scheme and sound effects based on their mood.
+Live Voice Chats: Users can join audio rooms to chat during streak battles.
+AI Edge Trainer: A sarcastic AI bot that challenges users to edge longer and break records.
+Custom Sounds & Themes: Unlockable sound effects and UI themes based on progress.
