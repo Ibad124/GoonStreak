@@ -21,7 +21,7 @@ export default function LevelProgress({ user }: LevelProgressProps) {
     const currentLevelInfo = calculateLevel(user.xpPoints);
     if (prevLevelRef.current < currentLevelInfo.currentLevel) {
       setShowLevelUp(true);
-      setTimeout(() => setShowLevelUp(false), 3000);
+      setTimeout(() => setShowLevelUp(false), 4000); // Increased duration for longer animation
     }
     prevLevelRef.current = currentLevelInfo.currentLevel;
   }, [user.xpPoints]);
@@ -39,124 +39,147 @@ export default function LevelProgress({ user }: LevelProgressProps) {
       <AnimatePresence>
         {showLevelUp && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.2 }}
-            className="fixed inset-0 flex items-center justify-center z-[100] bg-black/50 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 flex items-center justify-center z-[100]"
           >
-            <div className="relative max-w-lg w-full mx-4">
-              {/* Background Effects */}
+            {/* Radial gradient background with blur */}
+            <motion.div 
+              className="absolute inset-0 bg-black/80 backdrop-blur-lg"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            />
+
+            {/* Main content container */}
+            <div className="relative max-w-2xl w-full mx-4">
+              {/* Animated background effects */}
               <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 rounded-3xl opacity-20"
                 animate={{
                   scale: [1, 1.2, 1],
-                  rotate: [0, 360],
+                  rotate: [0, 180, 360],
                 }}
                 transition={{
-                  duration: 3,
-                  ease: "easeInOut",
-                  times: [0, 0.5, 1],
+                  duration: 4,
                   repeat: Infinity,
+                  ease: "linear"
                 }}
-                className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 rounded-3xl blur-xl opacity-50"
               />
 
-              {/* Main Content Card */}
+              {/* Main card content */}
               <motion.div
-                className="relative bg-black/90 text-white px-8 py-12 rounded-3xl border border-pink-500/50 backdrop-blur-xl"
-                initial={{ y: 20 }}
-                animate={{ y: 0 }}
+                className="relative bg-black/40 border border-white/20 rounded-3xl overflow-hidden backdrop-blur-xl"
+                initial={{ scale: 0.8, y: 50 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.8, y: 50 }}
+                transition={{ type: "spring", bounce: 0.4 }}
               >
-                {/* Particle Effects */}
-                <motion.div
-                  className="absolute inset-0 overflow-hidden"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                >
-                  {Array.from({ length: 20 }).map((_, i) => (
+                {/* Particle effects */}
+                <div className="absolute inset-0 overflow-hidden">
+                  {Array.from({ length: 30 }).map((_, i) => (
                     <motion.div
                       key={i}
-                      className="absolute w-2 h-2 bg-white rounded-full"
+                      className="absolute w-1 h-1 bg-white rounded-full"
                       initial={{
-                        x: "50%",
-                        y: "50%",
-                        scale: 0,
                         opacity: 1,
+                        scale: 0,
+                        x: "50%",
+                        y: "50%"
                       }}
                       animate={{
+                        opacity: 0,
+                        scale: Math.random() * 3,
                         x: `${Math.random() * 100}%`,
                         y: `${Math.random() * 100}%`,
-                        scale: Math.random() * 2,
-                        opacity: 0,
                       }}
                       transition={{
                         duration: 2,
                         delay: i * 0.1,
                         repeat: Infinity,
-                        repeatDelay: 1,
+                        repeatType: "reverse"
                       }}
                     />
                   ))}
-                </motion.div>
+                </div>
 
-                <div className="text-center space-y-6 relative z-10">
-                  {/* Level Up Icon */}
+                <div className="relative p-12 text-center">
+                  {/* Level up icon with pulsing effect */}
                   <motion.div
-                    animate={{ 
-                      scale: [1, 1.2, 1],
-                      rotate: [0, 10, -10, 0],
-                    }}
-                    transition={{
-                      duration: 1,
-                      repeat: Infinity,
-                    }}
-                    className="text-6xl mb-4"
-                  >
-                    {levelInfo.currentEmoji}
-                  </motion.div>
-
-                  {/* Level Up Text */}
-                  <motion.div
-                    initial={{ scale: 0.8 }}
-                    animate={{ scale: 1 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <h2 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent mb-2">
-                      Level Up!
-                    </h2>
-                    <p className="text-2xl font-semibold mb-4">
-                      Level {levelInfo.currentLevel} Achieved!
-                    </p>
-                    <p className="text-xl text-pink-400 font-medium">
-                      {levelInfo.currentTitle}
-                    </p>
-                  </motion.div>
-
-                  {/* Sparkles */}
-                  <motion.div
-                    className="absolute inset-0 pointer-events-none"
+                    className="relative inline-block mb-8"
                     animate={{
-                      scale: [1, 1.1, 1],
-                      opacity: [0.5, 0.8, 0.5],
+                      scale: [1, 1.2, 1],
+                      rotate: [0, 5, -5, 0]
                     }}
                     transition={{
                       duration: 2,
                       repeat: Infinity,
-                      ease: "easeInOut",
+                      ease: "easeInOut"
                     }}
                   >
-                    <div className="absolute top-0 left-0">
-                      <Sparkles className="h-8 w-8 text-yellow-500" />
-                    </div>
-                    <div className="absolute top-0 right-0">
-                      <Sparkles className="h-8 w-8 text-yellow-500" />
-                    </div>
-                    <div className="absolute bottom-0 left-0">
-                      <Sparkles className="h-8 w-8 text-yellow-500" />
-                    </div>
-                    <div className="absolute bottom-0 right-0">
-                      <Sparkles className="h-8 w-8 text-yellow-500" />
-                    </div>
+                    {/* Glowing background */}
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 rounded-full blur-2xl"
+                      animate={{
+                        scale: [1, 1.5, 1],
+                        opacity: [0.5, 0.8, 0.5]
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    />
+                    <span className="text-8xl relative z-10">{levelInfo.currentEmoji}</span>
                   </motion.div>
+
+                  {/* Level up text with staggered animation */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <motion.h2
+                      className="text-5xl font-black mb-4 bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500 bg-clip-text text-transparent"
+                      animate={{
+                        scale: [1, 1.1, 1],
+                      }}
+                      transition={{
+                        duration: 0.6,
+                        repeat: Infinity,
+                        repeatType: "reverse"
+                      }}
+                    >
+                      LEVEL UP!
+                    </motion.h2>
+
+                    <motion.div
+                      className="text-3xl font-bold mb-2"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 }}
+                    >
+                      Level {levelInfo.currentLevel} Achieved
+                    </motion.div>
+
+                    <motion.div
+                      className="text-2xl text-pink-400 font-semibold"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.7 }}
+                    >
+                      {levelInfo.currentTitle}
+                    </motion.div>
+                  </motion.div>
+
+                  {/* Decorative elements */}
+                  <div className="absolute inset-0 pointer-events-none">
+                    <Sparkles className="absolute top-4 left-4 h-8 w-8 text-yellow-500" />
+                    <Sparkles className="absolute top-4 right-4 h-8 w-8 text-yellow-500" />
+                    <Sparkles className="absolute bottom-4 left-4 h-8 w-8 text-yellow-500" />
+                    <Sparkles className="absolute bottom-4 right-4 h-8 w-8 text-yellow-500" />
+                  </div>
                 </div>
               </motion.div>
             </div>
@@ -168,15 +191,6 @@ export default function LevelProgress({ user }: LevelProgressProps) {
         <div className="relative">
           <motion.div
             className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoNDUpIj48cGF0aCBkPSJNLTEwIDMwbDIwLTIwTTAgNDBsMjAtMjBNMTAgNTBsMjAtMjAiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLW9wYWNpdHk9Ii4xIiBzdHJva2Utd2lkdGg9IjIiLz48L3BhdHRlcm4+PC9kZWZzPjxwYXRoIGZpbGw9InVybCgjYSkiIGQ9Ik0wIDBoMjAwdjIwMEgweiIvPjwvc3ZnPg==')]"
-            animate={{
-              opacity: [0.1, 0.15, 0.1],
-              scale: [1, 1.1, 1],
-            }}
-            transition={{
-              duration: 5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
           />
 
           <div className="p-6 relative z-10">
