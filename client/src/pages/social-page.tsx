@@ -10,7 +10,7 @@ import FriendsLeaderboard from "@/components/FriendsLeaderboard";
 import CircleJerk from "@/components/CircleJerk";
 
 export default function SocialPage() {
-  const [activeTab, setActiveTab] = useState("circles");
+  const [activeTab, setActiveTab] = useState("activity");
 
   return (
     <div className="min-h-screen pb-24 bg-gradient-to-br from-purple-900 via-slate-900 to-pink-900">
@@ -25,18 +25,18 @@ export default function SocialPage() {
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="grid grid-cols-4 gap-4 bg-black/20 p-1 rounded-xl">
                 <TabsTrigger
-                  value="circles"
-                  className="data-[state=active]:bg-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-200"
-                >
-                  <Circle className="h-4 w-4 mr-2" />
-                  Circles
-                </TabsTrigger>
-                <TabsTrigger
                   value="activity"
                   className="data-[state=active]:bg-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-200"
                 >
                   <Activity className="h-4 w-4 mr-2" />
                   Activity
+                </TabsTrigger>
+                <TabsTrigger
+                  value="circles"
+                  className="data-[state=active]:bg-purple-500 data-[state=active]:text-white rounded-lg transition-all duration-200"
+                >
+                  <Circle className="h-4 w-4 mr-2" />
+                  Circles
                 </TabsTrigger>
                 <TabsTrigger
                   value="challenges"
@@ -54,12 +54,12 @@ export default function SocialPage() {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="circles" className="mt-6">
-                <CircleJerk />
-              </TabsContent>
-
               <TabsContent value="activity" className="mt-6">
                 <FriendActivity />
+              </TabsContent>
+
+              <TabsContent value="circles" className="mt-6">
+                <CircleJerk />
               </TabsContent>
 
               <TabsContent value="challenges" className="mt-6">
